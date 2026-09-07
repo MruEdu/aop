@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aop.vibestatics.com/sitemap.xml
