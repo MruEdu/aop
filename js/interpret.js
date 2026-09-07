@@ -1,40 +1,60 @@
-import { SCALE_ORDER, SCALES } from "./items.js?v=20260907c";
-import { band, bandLabel } from "./scoring.js?v=20260907c";
+import { SCALE_ORDER, SCALES } from "./items.js?v=20260907e";
+import { band, bandLabel } from "./scoring.js?v=20260907e";
 
-const AXIS = {
-  ie: {
-    high: "계획·절차보다 직관과 마감 압박으로 과제에 바로 들어갑니다. 속도는 나지만, 사전 분배가 약해질 수 있습니다.",
-    mid: "돌입과 계획이 섞여 있습니다. 과제 성격에 따라 즉흥과 절차를 오갑니다.",
-    low: "단계별 계획과 표준 절차로 학업을 굴립니다. 실수는 줄지만, 시작이 늦어질 수 있습니다.",
-  },
-  sa: {
-    high: "규칙, 데이터, 도식으로 내용을 구조화하는 쪽입니다. 분석에 힘이 있습니다.",
-    mid: "체계화와 직관을 함께 씁니다. 자료가 복잡할 때 도식화가 도움이 됩니다.",
-    low: "시스템·수치로 읽기보다 다른 경로로 이해합니다. 분석 과제에서는 의도적으로 구조를 그려 보는 연습이 필요합니다.",
-  },
-  wd: {
-    high: "비판, 분량, 실패 앞에서 주체가 쉽게 접히고, 답을 AI에 넘기고 싶어집니다. 과부하 신호를 먼저 읽으십시오.",
-    mid: "가끔 위축되거나 맡기고 싶어집니다. 마감과 피드백 장면을 점검하면 됩니다.",
-    low: "과부하·비판 앞에서도 주체를 비교적 붙듭니다. 소진 여부는 면담에서 함께 보면 됩니다.",
-  },
-  io: {
-    high: "사람·팀을 모아 일을 만들고 영향을 주고 싶은 방향이 분명합니다. 역할 지향입니다.",
-    mid: "관계로 일을 만드는 역할에 어느 정도 끌립니다. 장면마다 다를 수 있습니다.",
-    low: "조직을 움직이는 역할보다 깊이·실행·분석 쪽에 힘이 있을 수 있습니다. 그 방향도 학업 운영의 한 자리입니다.",
-  },
-};
-
-export function interpretAxis(key, score) {
-  return AXIS[key][band(score)];
+function scene(edition) {
+  if (edition === "adult") {
+    return { homework: "일", study: "일", task: "일", studyGa: "일이", nature: "일의 성격" };
+  }
+  if (edition === "school") {
+    return { homework: "숙제·수행평가", study: "공부", task: "숙제", studyGa: "공부가", nature: "숙제 성격" };
+  }
+  return { homework: "과제", study: "학업", task: "과제", studyGa: "학업이", nature: "과제 성격" };
 }
 
-export function comboNote(scores) {
+function eul(word) {
+  const ch = word.charCodeAt(word.length - 1) - 0xac00;
+  if (ch < 0 || ch > 11171) return `${word}를`;
+  return `${word}${ch % 28 ? "을" : "를"}`;
+}
+
+function axisCopy(edition) {
+  const s = scene(edition);
+  return {
+    ie: {
+      high: `계획·절차보다 직관과 마감 압박으로 ${s.homework}에 바로 들어갑니다. 속도는 나지만, 사전 분배가 약해질 수 있습니다.`,
+      mid: `돌입과 계획이 섞여 있습니다. ${s.nature}에 따라 즉흥과 절차를 오갑니다.`,
+      low: `단계별 계획과 표준 절차로 ${eul(s.study)} 굴립니다. 실수는 줄지만, 시작이 늦어질 수 있습니다.`,
+    },
+    sa: {
+      high: "규칙, 데이터, 도식으로 내용을 구조화하는 쪽입니다. 분석에 힘이 있습니다.",
+      mid: "체계화와 직관을 함께 씁니다. 자료가 복잡할 때 도식화가 도움이 됩니다.",
+      low: `시스템·수치로 읽기보다 다른 경로로 이해합니다. 분석이 필요한 ${s.task}에서는 의도적으로 구조를 그려 보는 연습이 필요합니다.`,
+    },
+    wd: {
+      high: "비판, 분량, 실패 앞에서 주체가 쉽게 접히고, 답을 AI에 넘기고 싶어집니다. 과부하 신호를 먼저 보면 됩니다.",
+      mid: "가끔 위축되거나 맡기고 싶어집니다. 마감과 피드백 장면을 점검하면 됩니다.",
+      low: "과부하·비판 앞에서도 주체를 비교적 붙듭니다. 소진 여부는 같이 보면 됩니다.",
+    },
+    io: {
+      high: "사람·팀을 모아 일을 만들고 영향을 주고 싶은 방향이 분명합니다. 역할 지향입니다.",
+      mid: "관계로 일을 만드는 역할에 어느 정도 끌립니다. 장면마다 다를 수 있습니다.",
+      low: `조직을 움직이는 역할보다 깊이·실행·분석 쪽에 힘이 있을 수 있습니다. 그 방향도 ${s.study} 운영의 한 자리입니다.`,
+    },
+  };
+}
+
+export function interpretAxis(key, score, edition) {
+  return axisCopy(edition)[key][band(score)];
+}
+
+export function comboNote(scores, edition) {
   const ie = band(scores.ie);
   const wd = band(scores.wd);
   const sa = band(scores.sa);
   const io = band(scores.io);
+  const s = scene(edition);
   if (ie === "high" && wd === "high") {
-    return "빨리 들어가다 과부하에서 자책하거나 AI로 넘기는 장면이 나올 수 있습니다. 면담에서 마감과 분량을 함께 보면 좋습니다.";
+    return "빨리 들어가다 과부하에서 자책하거나 AI로 넘기는 장면이 나올 수 있습니다. 마감과 분량을 함께 보면 좋습니다.";
   }
   if (ie === "low" && wd === "high") {
     return "절차는 붙들지만 비판·분량에서 주체가 접힐 수 있습니다. 계획과 과부하를 한자리에 두고 보면 좋습니다.";
@@ -43,7 +63,7 @@ export function comboNote(scores) {
     return "빨리 들어가면서도 구조를 잡는 자리입니다. 시작 전에 분량을 조금 나누면 분석의 힘이 실행을 더 받쳐 줍니다.";
   }
   if (sa === "high" && io === "high") {
-    return "구조를 읽고 사람을 움직이는 쪽으로 학업·일이 배치될 수 있습니다.";
+    return `구조를 읽고 사람을 움직이는 쪽으로 ${s.studyGa} 배치될 수 있습니다.`;
   }
   if (ie === "high" && sa === "low") {
     return "돌입은 빠른데 체계 분석은 낮습니다. 실행 뒤에 구조를 한 번 그려 보면 보완이 됩니다.";
@@ -89,18 +109,18 @@ export function summaryInterpret(scores, edition) {
     WD_LINE[wd],
     IO_LINE[io],
   ];
-  const combo = comboNote(scores);
+  const combo = comboNote(scores, edition);
   if (combo) paragraphs.push(combo);
   paragraphs.push(`한 축씩 「${fit}」를 물으면 다음 운영이 분명해집니다.`);
   return { snap, paragraphs };
 }
 
-export function profileLines(scores) {
+export function profileLines(scores, edition) {
   return SCALE_ORDER.map((key) => ({
     key,
     name: SCALES[key].name,
     score: scores[key],
     band: bandLabel(scores[key]),
-    text: interpretAxis(key, scores[key]),
+    text: interpretAxis(key, scores[key], edition),
   }));
 }

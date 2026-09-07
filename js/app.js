@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260907c";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260907c";
+import { DOCS } from "./docs.js?v=20260907e";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260907e";
 import {
   GENDERS,
   ITEMS,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260907c";
-import { store, usingCloud } from "./storage.js?v=20260907c";
+} from "./items.js?v=20260907e";
+import { store, usingCloud } from "./storage.js?v=20260907e";
 
 function esc(s) {
   return String(s ?? "")
@@ -252,7 +252,7 @@ function takeView() {
 }
 
 function resultHtml(session) {
-  const lines = profileLines(session.scores);
+  const lines = profileLines(session.scores, session.edition);
   const preface = resultPreface(session.edition);
   const summary = summaryInterpret(session.scores, session.edition);
   const pct = (n) => `${Math.max(0, Math.min(100, ((n - 1) / 5) * 100))}%`;

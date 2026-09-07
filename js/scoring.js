@@ -1,4 +1,4 @@
-import { ATTENTION_EXPECT, SCALE_ORDER, SCALES } from "./items.js?v=20260907c";
+import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCALES } from "./items.js?v=20260907e";
 
 function reverse6(v) {
   return 7 - v;
@@ -22,7 +22,7 @@ export function scoreAnswers(answers) {
   const attentionOk = Object.entries(ATTENTION_EXPECT).every(
     ([id, expect]) => answers[Number(id)] === expect,
   );
-  const lieOk = !((answers[52] ?? 0) > 3 || (answers[76] ?? 0) > 3);
+  const lieOk = !LIE_IDS.some((id) => (answers[id] ?? 0) > 3);
   return { scores, attentionOk, lieOk, reliable: attentionOk && lieOk };
 }
 

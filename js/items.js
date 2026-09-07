@@ -57,6 +57,7 @@ export const REGIONS = [
   "제주 / 기타",
 ];
 
+// 배열 순서가 화면 1–28번. id는 연구·채점용 원번호.
 export const ITEMS = [
   { id: 15, kind: "scale", text: "여러 이론이나 데이터 사이의 숨겨진 규칙과 논리적 구조를 찾아내는 것을 즐긴다." },
   { id: 17, kind: "scale", text: "시스템이나 알고리즘처럼 작동하는 메커니즘을 뜯어보고 분석하는 것을 좋아한다." },
@@ -89,6 +90,7 @@ export const ITEMS = [
 ];
 
 export const ATTENTION_EXPECT = { 37: 1, 65: 6, 77: 3, 78: 4 };
+export const LIE_IDS = [52, 76];
 
 export const SCALES = {
   ie: { key: "ie", name: "즉흥 실행", items: [29, 35, 25, 27, 30, 36, 26], reverse: [30, 36, 26] },
@@ -98,6 +100,38 @@ export const SCALES = {
 };
 
 export const SCALE_ORDER = ["ie", "sa", "wd", "io"];
+
+export function displayNo(id) {
+  const i = ITEMS.findIndex((it) => it.id === id);
+  if (i < 0) throw new Error("unknown item " + id);
+  return i + 1;
+}
+
+export function displayList(ids) {
+  return [...ids]
+    .map(displayNo)
+    .sort((a, b) => a - b)
+    .join("·");
+}
+
+export function scoringManualLines() {
+  const att = Object.entries(ATTENTION_EXPECT)
+    .map(([id, expect]) => ({ no: displayNo(Number(id)), expect }))
+    .sort((a, b) => a.no - b.no)
+    .map((x) => `${x.no}번=${x.expect}`)
+    .join(", ");
+  const lie = LIE_IDS.map(displayNo)
+    .sort((a, b) => a - b)
+    .map((n) => `${n}번`)
+    .join(" 또는 ");
+  return {
+    means: `각 척도는 화면 번호(1–28) 기준 문항평균(1–6점)입니다. 즉흥 실행만 계획 문항(${displayList(SCALES.ie.reverse)})을 역채점합니다. 고점이 즉흥·돌입 쪽입니다.`,
+    keys: `즉흥 실행 ${displayList(SCALES.ie.items)}, 체계 분석 ${displayList(SCALES.sa.items)}, 위임·위축 ${displayList(SCALES.wd.items)}, 영향 지향 ${displayList(SCALES.io.items)}.`,
+    bands: "대략 2.5 미만 낮음, 2.5–4.0 보통, 4.0 초과 높음입니다. 이 구간은 예비이며, 규준은 후속입니다.",
+    saNote: `${displayNo(33)}번(관례를 깨기)이 약간 벗어나 있으므로, 요인 이름은 체계 분석으로 둡니다.`,
+    flags: `주의 문항(${att}) 또는 허위(${lie}이 4점 이상)에 걸리면 표시가 붙습니다.`,
+  };
+}
 
 const SCHOOL_TEXT = {
   15: "여러 내용이나 자료 사이의 숨겨진 규칙과 논리적 구조를 찾아내는 것을 즐긴다.",
@@ -120,7 +154,7 @@ const SCHOOL_TEXT = {
   58: "사람들의 마음을 움직이고 소통하며 사이를 조율하는 역할에 큰 매력을 느낀다.",
   60: "모둠 활동이나 발표를 이끌고 사람들을 모아 목표를 향해 실행해 나가는 역할을 하고 싶다.",
   62: "지적이나 피드백을 받으면 쉽게 위축되거나 공부할 마음이 크게 꺾인다.",
-  67: "공부할 양이 너무 많아지면 어디서부터 손대야 할지 몰라 무기력해진다.",
+  67: "공부할 양이 너무 많아지면 압도당해 어디서부터 손대야 할지 몰라 무기력해진다.",
   69: "실수를 하거나 점수가 떨어지면 내 능력 자체에 대한 의심과 자책에 오래 빠진다.",
 };
 
