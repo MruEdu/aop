@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260907e";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260907e";
+import { DOCS } from "./docs.js?v=20260907f";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260907f";
 import {
   GENDERS,
   ITEMS,
@@ -8,6 +8,7 @@ import {
   REGIONS,
   SCALE_ORDER,
   SCALES,
+  TEST_NAME,
   editionLabel,
   gradeLabel,
   gradesFor,
@@ -15,8 +16,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260907e";
-import { store, usingCloud } from "./storage.js?v=20260907e";
+} from "./items.js?v=20260907f";
+import { store, usingCloud } from "./storage.js?v=20260907f";
 
 function esc(s) {
   return String(s ?? "")
@@ -46,8 +47,8 @@ function layout(inner) {
     <div class="shell">
       <header class="top">
         <a class="brand" href="#/" style="text-decoration:none;color:inherit">
-          학업운영 양식검사
-          <small>대학생용 · 중고등용 · 성인용 · 예비 척도</small>
+          ${TEST_NAME}
+          <small>대학생용 · 중고등용 · 성인용</small>
         </a>
         <nav class="nav">
           ${navLink("#/take", "검사 하기", r)}
@@ -61,7 +62,7 @@ function layout(inner) {
       ${inner}
       <footer class="footer">
         <p>© 2026 바이브스타틱스(VibeStatics) · 개발 현용찬(교육학 박사). All rights reserved.</p>
-        <p>대학생용·중고등용·성인용 학업운영 양식검사(예비). 문항·채점·해석의 무단 복제·배포를 금합니다.${cloudNote}</p>
+        <p>대학생용·중고등용·성인용 ${TEST_NAME}. 문항·채점·해석의 무단 복제·배포를 금합니다.${cloudNote}</p>
       </footer>
     </div>`;
 }
@@ -102,7 +103,7 @@ function developerNote() {
         <li><b>매력성</b> 그 과정이 끌려서, 다음에 또 하고 싶은가</li>
       </ul>
       <p>무엇을 할지 분명할 때(<b>명확성</b>) 이 셋이 살아납니다. 분명한 내용을 효율적으로 익히는 일이 학습이며, 그것이 학습공학입니다.</p>
-      <p>대학에서 수년간 강의해 온 현장과 학습상담 경험을 바탕으로, 지금 학업·업무 방식을 확인하고 이 방향으로 운영을 돕기 위해 이 예비 척도를 개발하였습니다.</p>
+      <p>대학에서 수년간 강의해 온 현장과 학습상담 경험을 바탕으로, 지금 학업·업무 방식을 확인하고 이 방향으로 운영을 돕기 위해 이 검사를 개발하였습니다.</p>
       <p class="dev-src">교육공학에서는 타일러의 목표 명확성, 가네의 학습 조건, 라이겔루스의 효과성·효율성·매력성을 이렇게 읽어 왔습니다. 네 축은 그 가치를 지금 학업·업무 운영으로 옮긴 프로파일입니다.</p>
       <div class="dev-who">
         <strong>현용찬</strong>
@@ -134,11 +135,11 @@ function editionCards(longCopy) {
 function home() {
   return `
     <main class="hero">
-      <div class="credit">대학생용 · 중고등용 · 성인용 · 개발 현용찬 · 예비 척도</div>
+      <div class="credit">대학생용 · 중고등용 · 성인용 · 개발 현용찬</div>
       <h1>여러분의 학업·업무 방식을<br>확인해 보세요</h1>
       <p class="lede">
         공부든 일이든, 하려던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 하고 싶어지는 것(매력성). 무엇을 할지 분명할 때 이 셋이 살아납니다.
-        이 검사는 지금 방식을 확인하고, 그 방향으로 운영을 돕기 위한 예비 척도입니다.
+        이 검사는 지금 방식을 확인하고, 그 방향으로 운영을 돕습니다.
       </p>
       <div class="banner note">
         맞다·틀리다가 없습니다. 지금 시기에 가까운 쪽을 고르면 됩니다.
@@ -199,9 +200,9 @@ function takeView() {
   const when = ed === "adult" ? "시기가 바뀌면" : "학기가 바뀌면";
   if (t.step === 0) {
     return `<main><h1>${who} 검사 시작</h1>${steps(0)}<div class="card">
-      <p>교육학 박사 현용찬이 개발한 <strong>${who} 학업운영 양식검사</strong>입니다. 지금 방식을 확인하고, 더 효율적인 운영에 도움을 드리고자 하는 예비 척도입니다.</p>
+      <p>교육학 박사 현용찬이 개발한 <strong>${who} ${TEST_NAME}</strong>입니다. 지금 방식을 확인하고, 더 효율적인 운영에 도움을 드리고자 합니다.</p>
       <p>공부든 일이든, 하려던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 하고 싶어지는 것(매력성)이 좋습니다. 무엇을 할지 분명할 때 이 셋이 살아납니다. 결과는 네 축 프로파일로 바로 보여 드리며, ${when} 다시 확인하실 수 있습니다.</p>
-      <p>학번·전화·이메일은 받지 않습니다. 문의할 때는 결과번호가 필요합니다. 응답은 연구·상담을 위한 예비 자료로 보관됩니다. 계속하면 이 안내에 동의하는 것입니다.</p>
+      <p>학번·전화·이메일은 받지 않습니다. 문의할 때는 결과번호가 필요합니다. 응답은 연구·상담을 위한 자료로 보관됩니다. 계속하면 이 안내에 동의하는 것입니다.</p>
       <div class="actions"><button class="btn" data-act="consent">동의하고 계속</button></div>
     </div></main>`;
   }

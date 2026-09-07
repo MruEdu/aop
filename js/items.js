@@ -1,5 +1,6 @@
-export const CONSENT_VERSION = "2026-09-07-v1";
+export const CONSENT_VERSION = "2026-09-07-v2";
 export const PUBLIC_CODE = "AOP-OPEN";
+export const TEST_NAME = "학업·업무 방식검사";
 
 export const LIKERT = [
   { value: 1, label: "전혀 그렇지 않다" },
@@ -127,7 +128,7 @@ export function scoringManualLines() {
   return {
     means: `각 척도는 화면 번호(1–28) 기준 문항평균(1–6점)입니다. 즉흥 실행만 계획 문항(${displayList(SCALES.ie.reverse)})을 역채점합니다. 고점이 즉흥·돌입 쪽입니다.`,
     keys: `즉흥 실행 ${displayList(SCALES.ie.items)}, 체계 분석 ${displayList(SCALES.sa.items)}, 위임·위축 ${displayList(SCALES.wd.items)}, 영향 지향 ${displayList(SCALES.io.items)}.`,
-    bands: "대략 2.5 미만 낮음, 2.5–4.0 보통, 4.0 초과 높음입니다. 이 구간은 예비이며, 규준은 후속입니다.",
+    bands: "대략 2.5 미만 낮음, 2.5–4.0 보통, 4.0 초과 높음입니다. 이 구간은 참고용이며, 규준은 후속입니다.",
     saNote: `${displayNo(33)}번(관례를 깨기)이 약간 벗어나 있으므로, 요인 이름은 체계 분석으로 둡니다.`,
     flags: `주의 문항(${att}) 또는 허위(${lie}이 4점 이상)에 걸리면 표시가 붙습니다.`,
   };

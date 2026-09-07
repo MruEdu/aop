@@ -1,4 +1,4 @@
--- 학업운영 양식검사 · Supabase
+-- 학업·업무 방식검사 · Supabase
 -- 1) SQL Editor에서 실행
 -- 2) Authentication에서 관리자 계정 1개 생성
 -- 3) .env에 URL, anon key

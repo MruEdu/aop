@@ -1,4 +1,4 @@
-import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCALES } from "./items.js?v=20260907e";
+import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCALES } from "./items.js?v=20260907f";
 
 function reverse6(v) {
   return 7 - v;

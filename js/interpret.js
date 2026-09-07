@@ -1,5 +1,5 @@
-import { SCALE_ORDER, SCALES } from "./items.js?v=20260907e";
-import { band, bandLabel } from "./scoring.js?v=20260907e";
+import { SCALE_ORDER, SCALES } from "./items.js?v=20260907f";
+import { band, bandLabel } from "./scoring.js?v=20260907f";
 
 function scene(edition) {
   if (edition === "adult") {
