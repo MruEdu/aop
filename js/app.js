@@ -121,12 +121,12 @@ function editionCards(longCopy) {
       </div>
       <div class="card">
         <h2 style="margin-top:0">중고등용</h2>
-        <p>${longCopy ? "같은 네 축입니다. 숙제·수행평가·모둠 등 학교 장면에 맞게 단어를 바꾼 판입니다." : "숙제·수행평가·모둠 장면."}</p>
+        <p>${longCopy ? "숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 28문항에 답합니다." : "숙제·수행평가·모둠 장면."}</p>
         <a class="btn" href="#/take/school">${longCopy ? "중고등용 검사 시작" : "중고등용 시작"}</a>
       </div>
       <div class="card">
         <h2 style="margin-top:0">성인용</h2>
-        <p>${longCopy ? "같은 네 축입니다. 업무·보고·팀 등 일의 장면에 맞게 말을 바꾼 판입니다. 학습과 일의 운영은 같은 원리입니다." : "업무·보고·팀 장면."}</p>
+        <p>${longCopy ? "업무·보고·팀 등 일의 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 28문항에 답합니다." : "업무·보고·팀 장면."}</p>
         <a class="btn" href="#/take/adult">${longCopy ? "성인용 검사 시작" : "성인용 시작"}</a>
       </div>
     </div>`;
@@ -186,7 +186,7 @@ function takeView() {
   syncTakeEdition(ed);
   if (!ed) {
     return `<main><h1>검사 하기</h1>
-      <p class="lede">대학생·중고등학생·성인, 지금 해당하는 쪽을 고르면 됩니다. 결과는 같은 네 가지로 보며, 질문만 학교·대학·일의 말로 적혀 있습니다.</p>
+      <p class="lede">대학생·중고등학생·성인, 지금 해당하는 쪽을 고르면 됩니다.</p>
       ${editionCards(false)}
       ${developerNote()}
     </main>`;
