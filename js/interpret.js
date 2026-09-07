@@ -1,5 +1,5 @@
-import { SCALE_ORDER, SCALES } from "./items.js";
-import { band, bandLabel } from "./scoring.js";
+import { SCALE_ORDER, SCALES } from "./items.js?v=20260907c";
+import { band, bandLabel } from "./scoring.js?v=20260907c";
 
 const AXIS = {
   ie: {

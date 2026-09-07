@@ -1,4 +1,4 @@
-import { ATTENTION_EXPECT, SCALE_ORDER, SCALES } from "./items.js";
+import { ATTENTION_EXPECT, SCALE_ORDER, SCALES } from "./items.js?v=20260907c";
 
 function reverse6(v) {
   return 7 - v;

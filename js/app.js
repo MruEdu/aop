@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js";
+import { DOCS } from "./docs.js?v=20260907c";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260907c";
 import {
   GENDERS,
   ITEMS,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js";
-import { store, usingCloud } from "./storage.js";
+} from "./items.js?v=20260907c";
+import { store, usingCloud } from "./storage.js?v=20260907c";
 
 function esc(s) {
   return String(s ?? "")
