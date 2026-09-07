@@ -17,7 +17,7 @@ import {
   trackLabel,
   tracksFor,
 } from "./items.js?v=20260907f";
-import { store, usingCloud } from "./storage.js?v=20260907f";
+import { store, usingCloud } from "./storage.js?v=20260907k";
 
 function esc(s) {
   return String(s ?? "")
