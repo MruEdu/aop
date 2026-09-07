@@ -1,5 +1,5 @@
 import { DOCS } from "./docs.js";
-import { comboNote, profileLines } from "./interpret.js";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js";
 import {
   GENDERS,
   ITEMS,
@@ -103,7 +103,7 @@ function developerNote() {
       </ul>
       <p>무엇을 할지 분명할 때(<b>명확성</b>) 이 셋이 살아납니다. 분명한 내용을 효율적으로 익히는 일이 학습이며, 그것이 학습공학입니다.</p>
       <p>대학에서 수년간 강의해 온 현장과 학습상담 경험을 바탕으로, 지금 학업·업무 방식을 확인하고 이 방향으로 운영을 돕기 위해 이 예비 척도를 개발하였습니다.</p>
-      <p class="dev-src">교육공학에서는 타일러의 목표 명확성, 가네의 학습 조건, 라이겔루스의 효과성·효율성·매력성을 이렇게 읽어 왔습니다. 이 검사는 그 이론의 점수가 아닙니다.</p>
+      <p class="dev-src">교육공학에서는 타일러의 목표 명확성, 가네의 학습 조건, 라이겔루스의 효과성·효율성·매력성을 이렇게 읽어 왔습니다. 네 축은 그 가치를 지금 학업·업무 운영으로 옮긴 프로파일입니다.</p>
       <div class="dev-who">
         <strong>현용찬</strong>
         <span>교육학 박사 · 제주대·남서울대 출강 · 바이브스타틱스 대표 · 전) 연우심리연구소 지부장</span>
@@ -253,7 +253,8 @@ function takeView() {
 
 function resultHtml(session) {
   const lines = profileLines(session.scores);
-  const combo = comboNote(session.scores);
+  const preface = resultPreface(session.edition);
+  const summary = summaryInterpret(session.scores, session.edition);
   const pct = (n) => `${Math.max(0, Math.min(100, ((n - 1) / 5) * 100))}%`;
   const bars = SCALE_ORDER.map((k) => `
     <div class="bar-row">
@@ -266,15 +267,24 @@ function resultHtml(session) {
     <p>${esc(line.text)}</p></div>`).join("");
   const warn = session.reliable
     ? ""
-    : `<div class="banner warn">이 결과는 신뢰롭지 않습니다. 주의·허위 문항 기준에 맞지 않습니다. 아래 해석은 참고용입니다. 상담 결정이나 연구 본분석에는 쓰지 말고, 가능하면 다시 치십시오.</div>`;
+    : `<div class="banner warn">주의·허위 문항에 걸린 결과입니다. 아래 해석은 그대로 보여 드리며, 한 번 더 실시하시면 상담·연구에 쓰기 좋습니다.</div>`;
+  const summaryBody = summary.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
   return `
     ${warn}
     <p>${esc(session.displayName)} · ${esc(editionLabel(session.edition))} · ${esc(session.grade)} · ${esc(session.major)}</p>
+    <div class="card">
+      <h2 style="margin-top:0">이 결과의 읽기</h2>
+      <p>${esc(preface)}</p>
+    </div>
     <div class="card"><div class="bars">${bars}</div>
-      <p class="progress" style="margin-top:12px">문항평균(1–6점). 막대는 비교용이며 총점은 합산하지 않습니다.</p>
+      <p class="progress" style="margin-top:12px">문항평균(1–6점). 막대는 비교용이며, 네 축을 따로 읽습니다.</p>
     </div>
     ${cards}
-    ${combo ? `<div class="card"><h2 style="margin-top:0">축 조합</h2><p>${esc(combo)}</p></div>` : ""}
+    <div class="card">
+      <h2 style="margin-top:0">종합 해석</h2>
+      <p class="progress">${esc(summary.snap)}</p>
+      ${summaryBody}
+    </div>
     <div class="card">
       <p>문의·재열람용 결과번호</p>
       <div class="result-no">${esc(session.resultNo)}</div>
@@ -282,6 +292,7 @@ function resultHtml(session) {
       <div class="actions">
         <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">번호 복사</button>
         <button class="btn ghost" data-act="print">인쇄</button>
+        <a class="btn ghost" href="#/guide">해석요강 보기</a>
       </div>
     </div>`;
 }
