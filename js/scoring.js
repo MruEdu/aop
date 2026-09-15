@@ -1,8 +1,4 @@
-import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCALES } from "./items.js?v=20260915a";
-
-function reverse6(v) {
-  return 7 - v;
-}
+import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCALES } from "./items.js?v=20260915b";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -15,7 +11,7 @@ export function scoreAnswers(answers) {
     const vals = spec.items.map((id) => {
       const v = answers[id];
       if (v == null) throw new Error("missing item " + id);
-      return spec.reverse.includes(id) ? reverse6(v) : v;
+      return v;
     });
     scores[key] = Math.round(mean(vals) * 100) / 100;
   }

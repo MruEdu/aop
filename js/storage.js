@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, CSV_ITEMS, PUBLIC_CODE } from "./items.js?v=20260915a";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915a";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260915b";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915b";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -51,7 +51,9 @@ function writeSessions(rows) {
 
 function buildSession(input, code) {
   const scored = scoreAnswers(input.answers);
-  const edition = input.edition === "school" || input.edition === "adult" ? input.edition : "univ";
+  const edition = input.edition === "elementary" || input.edition === "school" || input.edition === "adult"
+    ? input.edition
+    : "univ";
   return {
     id: uid(),
     accessCodeId: code.id,
@@ -267,7 +269,8 @@ export const store = {
   },
 
   sessionsToCsv(rows, includeName) {
-    const itemCols = CSV_ITEMS.map((it) => `q${it.id}`);
+    const ids = Array.from({ length: 33 }, (_, i) => i + 1);
+    const itemCols = ids.map((id) => `q${id}`);
     const header = [
       "result_no",
       "created_at",
@@ -309,8 +312,8 @@ export const store = {
         s.scores.sa,
         s.scores.wd,
         s.scores.io,
-        ...CSV_ITEMS.map((it) => {
-          const v = a[it.id] ?? a[String(it.id)];
+        ...ids.map((id) => {
+          const v = a[id] ?? a[String(id)];
           return v == null ? "" : String(v);
         }),
       ];

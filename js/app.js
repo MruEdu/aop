@@ -1,8 +1,7 @@
-import { DOCS } from "./docs.js?v=20260915a";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915a";
+import { DOCS } from "./docs.js?v=20260915b";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915b";
 import {
   GENDERS,
-  LIKERT,
   PUBLIC_CODE,
   REGIONS,
   SCALE_ORDER,
@@ -11,25 +10,15 @@ import {
   editionLabel,
   gradeLabel,
   gradesFor,
-  testItemsFor,
+  itemsFor,
+  likertFor,
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915a";
-import { store, usingCloud } from "./storage.js?v=20260915a";
+} from "./items.js?v=20260915b";
+import { store, usingCloud } from "./storage.js?v=20260915b";
 
-const TOTAL_ITEMS = testItemsFor("univ").length;
-
-function shuffleIds(ids) {
-  const a = [...ids];
-  const buf = new Uint32Array(a.length);
-  crypto.getRandomValues(buf);
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = buf[i] % (i + 1);
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+const TOTAL_ITEMS = itemsFor("univ").length;
 
 function esc(s) {
   return String(s ?? "")
@@ -60,7 +49,7 @@ function layout(inner) {
       <header class="top">
         <a class="brand" href="#/" style="text-decoration:none;color:inherit">
           ${TEST_NAME}
-          <small>대학생용 · 중고등용 · 성인용</small>
+          <small>초등용 · 중고등용 · 대학생용 · 성인용</small>
         </a>
         <nav class="nav">
           ${navLink("#/take", "검사 하기", r)}
@@ -74,7 +63,7 @@ function layout(inner) {
       ${inner}
       <footer class="footer">
         <p>© 2026 바이브스타틱스(VibeStatics) · 개발 현용찬(교육학 박사). All rights reserved.</p>
-        <p>대학생용·중고등용·성인용 ${TEST_NAME}. 문항·채점·해석의 무단 복제·배포를 금합니다.${cloudNote}</p>
+        <p>초등용·중고등용·대학생용·성인용 ${TEST_NAME}. 문항·채점·해석의 무단 복제·배포를 금합니다.${cloudNote}</p>
       </footer>
     </div>`;
 }
@@ -96,7 +85,6 @@ const take = {
   major: "",
   region: "",
   answers: {},
-  itemOrder: [],
   err: "",
   busy: false,
 };
@@ -126,7 +114,13 @@ function developerNote() {
 }
 
 function editionCards(longCopy) {
-  return `<div class="grid three">
+  return `
+    <div class="grid three">
+      <div class="card">
+        <h2 style="margin-top:0">초등용</h2>
+        <p>${longCopy ? `초등학생 눈높이 문항으로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "초등학생 문항."}</p>
+        <a class="btn" href="#/take/elementary">${longCopy ? "초등용 검사 시작" : "초등용 시작"}</a>
+      </div>
       <div class="card">
         <h2 style="margin-top:0">대학생용</h2>
         <p>${longCopy ? `대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "대학 과제·팀·AI 장면."}</p>
@@ -137,6 +131,8 @@ function editionCards(longCopy) {
         <p>${longCopy ? `숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "숙제·수행평가·모둠 장면."}</p>
         <a class="btn" href="#/take/school">${longCopy ? "중고등용 검사 시작" : "중고등용 시작"}</a>
       </div>
+    </div>
+    <div class="grid three" style="margin-top:14px">
       <div class="card">
         <h2 style="margin-top:0">성인용</h2>
         <p>${longCopy ? `업무·보고·팀 등 일의 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "업무·보고·팀 장면."}</p>
@@ -148,7 +144,7 @@ function editionCards(longCopy) {
 function home() {
   return `
     <main class="hero">
-      <div class="credit">대학생용 · 중고등용 · 성인용 · 개발 현용찬</div>
+      <div class="credit">초등용 · 중고등용 · 대학생용 · 성인용 · 개발 현용찬</div>
       <h1>여러분의 학업·업무 방식을<br>확인해 보세요</h1>
       <p class="lede">
         공부든 일이든, 하려던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 하고 싶어지는 것(매력성). 무엇을 할지 분명할 때 이 셋이 살아납니다.
@@ -158,7 +154,7 @@ function home() {
         지금은 누구나 바로 해 보실 수 있습니다. 이후 실시 방법이 바뀌면 다시 공지합니다.
         맞다·틀리다가 없습니다. 지금 시기에 가까운 쪽을 고르면 됩니다.
         결과는 즉흥 실행, 체계 분석, 위임·위축, 영향 지향 네 축으로 바로 보여 드립니다.
-        약 15–20분, 공개 코드는 ${PUBLIC_CODE} 입니다. 문의할 때는 결과번호를 알려 주십시오.
+        약 10–15분, 공개 코드는 ${PUBLIC_CODE} 입니다. 문의할 때는 결과번호를 알려 주십시오.
       </div>
       ${editionCards(true)}
       <div class="card">
@@ -171,6 +167,7 @@ function home() {
 
 function takeEdition() {
   const r = route();
+  if (r.startsWith("/take/elementary")) return "elementary";
   if (r.startsWith("/take/school")) return "school";
   if (r.startsWith("/take/adult")) return "adult";
   if (r.startsWith("/take/univ")) return "univ";
@@ -184,7 +181,6 @@ function syncTakeEdition(ed) {
   take.edition = ed;
   take.step = 0;
   take.answers = {};
-  take.itemOrder = [];
   take.err = "";
   take.displayName = "";
   take.gender = "";
@@ -200,21 +196,20 @@ function takeView() {
   syncTakeEdition(ed);
   if (!ed) {
     return `<main><h1>검사 하기</h1>
-      <p class="lede">대학생·중고등학생·성인, 지금 해당하는 쪽을 고르면 됩니다.</p>
+      <p class="lede">초등학생·중고등학생·대학생·성인, 지금 해당하는 쪽을 고르면 됩니다.</p>
       ${editionCards(false)}
       ${developerNote()}
     </main>`;
   }
   const who = editionLabel(ed);
-  const bank = testItemsFor(ed);
-  const byId = new Map(bank.map((it) => [it.id, it]));
-  const itemList = t.itemOrder.length ? t.itemOrder.map((id) => byId.get(id)).filter(Boolean) : bank;
+  const itemList = itemsFor(ed);
+  const LIKERT = likertFor(ed);
   const grades = gradesFor(ed);
   const tracks = tracksFor(ed);
   const majorName = trackLabel(ed);
   const gLabel = gradeLabel(ed);
   const hint = nowHint(ed);
-  const when = ed === "adult" ? "시기가 바뀌면" : "학기가 바뀌면";
+  const when = ed === "adult" ? "시기가 바뀌면" : ed === "elementary" ? "학년이 바뀌면" : "학기가 바뀌면";
   if (t.step === 0) {
     return `<main><h1>${who} 검사 시작</h1>${steps(0)}<div class="card">
       <p>교육학 박사 현용찬이 개발한 <strong>${who} ${TEST_NAME}</strong>입니다. 지금 방식을 확인하고, 더 효율적인 운영에 도움을 드리고자 합니다.</p>
@@ -249,9 +244,9 @@ function takeView() {
   }
   const filled = itemList.filter((i) => t.answers[i.id] != null).length;
   const pct = Math.round((filled / itemList.length) * 100);
-  const items = itemList.map((item, i) => `
+  const items = itemList.map((item) => `
     <div class="item">
-      <div class="q"><span class="num">${i + 1}.</span>${esc(item.text)}</div>
+      <div class="q"><span class="num">${item.id}.</span>${esc(item.text)}</div>
       <div class="likert">
         ${LIKERT.map((opt) => `
           <button type="button" data-act="ans" data-id="${item.id}" data-v="${opt.value}" class="${t.answers[item.id] === opt.value ? "on" : ""}">
@@ -262,7 +257,7 @@ function takeView() {
   return `<main><h1>${who} 검사 시작</h1>${steps(3)}
     <p class="progress">${filled} / ${itemList.length} · ${hint}</p>
     <div class="meter" aria-hidden="true"><i style="width:${pct}%"></i></div>
-    <p class="legend">1 전혀 그렇지 않다 · 6 매우 그렇다. 지시에 점수를 고르라는 문항이 섞여 있습니다.</p>
+    <p class="legend">${ed === "elementary" ? "1 전혀 아니다 · 6 정말 그렇다" : "1 전혀 그렇지 않다 · 6 매우 그렇다"}</p>
     ${items}
     ${t.err ? `<p class="err">${esc(t.err)}</p>` : ""}
     <div class="actions"><button class="btn" data-act="submit" ${t.busy ? "disabled" : ""}>${t.busy ? "저장 중…" : "제출하고 결과 보기"}</button></div>
@@ -491,7 +486,6 @@ async function onClick(e) {
     } else {
       take.err = "";
       take.step = 3;
-      take.itemOrder = shuffleIds(testItemsFor(take.edition || takeEdition() || "univ").map((it) => it.id));
     }
     await render();
   }
@@ -501,9 +495,7 @@ async function onClick(e) {
   }
   if (act === "submit") {
     const ed = take.edition || takeEdition() || "univ";
-    const bank = testItemsFor(ed);
-    const byId = new Map(bank.map((it) => [it.id, it]));
-    const itemList = take.itemOrder.length ? take.itemOrder.map((id) => byId.get(id)).filter(Boolean) : bank;
+    const itemList = itemsFor(ed);
     if (itemList.some((i) => take.answers[i.id] == null)) {
       take.err = "모든 문항에 답해 주십시오.";
       await render();
