@@ -242,3 +242,19 @@ a.btn { text-decoration: none; }
 @media (max-width: 640px) {
   .likert { grid-template-columns: repeat(3, 1fr); }
 }
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  body { background: #fff !important; }
+  .shell { max-width: none; padding: 0 !important; }
+  .nav { display: none !important; }
+  .actions, .btn { display: none !important; }
+  a { color: #000 !important; text-decoration: none !important; }
+  .card, .item { break-inside: avoid; page-break-inside: avoid; }
+  .banner.note { display: none !important; }
+  .footer { font-size: 10px; }
+}
