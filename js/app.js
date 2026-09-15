@@ -91,6 +91,30 @@ function options(list, selected) {
   ).join("");
 }
 
+const SCHOOL_LEVELS = ["중학교", "고등학교"];
+const SCHOOL_YEARS = ["1학년", "2학년", "3학년"];
+const HIGH_SCHOOL_TYPES = ["전문계고", "일반/인문계고", "특목·자사고"];
+const UNIV_LEVELS = ["학부", "대학원"];
+const UNIV_YEARS = ["1학년", "2학년", "3학년", "4학년"];
+const GRAD_LEVELS = ["석사 과정", "박사 과정"];
+const ADULT_ROLE_TYPES = ["일반", "전문직"];
+
+function buildDisplayGrade(ed, t) {
+  if (ed === "school") {
+    if (t.schoolLevel === "중학교" && t.schoolYear) return `중학교 ${t.schoolYear}`;
+    if (t.schoolLevel === "고등학교" && t.schoolYear && t.highSchoolType) {
+      return `고등학교 ${t.schoolYear}(${t.highSchoolType})`;
+    }
+    return "";
+  }
+  if (ed === "univ") {
+    if (t.univLevel === "학부" && t.univYear) return `대학(학부) ${t.univYear}`;
+    if (t.univLevel === "대학원" && t.gradLevel) return `대학원 ${t.gradLevel}`;
+    return "";
+  }
+  return String(t.grade || "");
+}
+
 const take = {
   step: 0,
   edition: "",
@@ -99,6 +123,15 @@ const take = {
   displayName: "",
   gender: "",
   grade: "",
+  // v2.0 파일럿용 세분화 인구통계(분석용 전용 컬럼으로 저장)
+  regionProvince: "",
+  schoolLevel: "",
+  schoolYear: "",
+  highSchoolType: "",
+  univLevel: "",
+  univYear: "",
+  gradLevel: "",
+  adultRoleType: "일반",
   major: "",
   region: "",
   answers: {},
@@ -202,6 +235,14 @@ function syncTakeEdition(ed) {
   take.displayName = "";
   take.gender = "";
   take.grade = "";
+  take.regionProvince = "";
+  take.schoolLevel = "";
+  take.schoolYear = "";
+  take.highSchoolType = "";
+  take.univLevel = "";
+  take.univYear = "";
+  take.gradLevel = "";
+  take.adultRoleType = "일반";
   take.major = "";
   take.region = "";
   take.busy = false;
@@ -252,9 +293,37 @@ function takeView() {
       <input id="name" value="${esc(t.displayName)}" /></div>
       <div class="grid two">
         <div class="row"><label for="gender">성별</label><select id="gender">${options(GENDERS, t.gender)}</select></div>
-        <div class="row"><label for="grade">${esc(gLabel)}</label><select id="grade">${options(grades, t.grade)}</select></div>
+        ${
+          ed === "school"
+            ? `<div class="row"><label for="schoolLevel">학교</label><select id="schoolLevel">${options(SCHOOL_LEVELS, t.schoolLevel)}</select></div>
+               ${
+                 t.schoolLevel
+                   ? `<div class="row"><label for="schoolYear">학년</label><select id="schoolYear">${options(SCHOOL_YEARS, t.schoolYear)}</select></div>`
+                   : ""
+               }
+               ${
+                 t.schoolLevel === "고등학교"
+                   ? `<div class="row"><label for="highSchoolType">구분</label><select id="highSchoolType">${options(HIGH_SCHOOL_TYPES, t.highSchoolType)}</select></div>`
+                   : ""
+               }`
+            : ed === "univ"
+              ? `<div class="row"><label for="univLevel">학력</label><select id="univLevel">${options(UNIV_LEVELS, t.univLevel)}</select></div>
+                 ${
+                   t.univLevel === "학부"
+                     ? `<div class="row"><label for="univYear">학년</label><select id="univYear">${options(UNIV_YEARS, t.univYear)}</select></div>`
+                     : t.univLevel === "대학원"
+                       ? `<div class="row"><label for="gradLevel">과정</label><select id="gradLevel">${options(GRAD_LEVELS, t.gradLevel)}</select></div>`
+                       : ""
+                 }`
+              : `<div class="row"><label for="grade">${esc(gLabel)}</label><select id="grade">${options(grades, t.grade)}</select></div>`
+        }
+        ${
+          ed === "adult"
+            ? `<div class="row"><label for="adultRoleType">직업 구분</label><select id="adultRoleType">${options(ADULT_ROLE_TYPES, t.adultRoleType)}</select></div>`
+            : ""
+        }
         <div class="row"><label for="major">${esc(majorName)}</label><select id="major">${options(tracks, t.major)}</select></div>
-        <div class="row"><label for="region">주 생활 지역</label><select id="region">${options(REGIONS, t.region)}</select></div>
+        <div class="row"><label for="region">주 생활 지역(시·도)</label><select id="region">${options(REGIONS, t.region)}</select></div>
       </div>
       <div class="actions"><button class="btn" data-act="to-items">문항으로</button></div>
     </div></main>`;
@@ -464,8 +533,26 @@ function onChange(e) {
   const el = e.target;
   if (el.id === "gender") take.gender = el.value;
   if (el.id === "grade") take.grade = el.value;
+  if (el.id === "schoolLevel") {
+    take.schoolLevel = el.value;
+    take.schoolYear = "";
+    take.highSchoolType = "";
+  }
+  if (el.id === "schoolYear") take.schoolYear = el.value;
+  if (el.id === "highSchoolType") take.highSchoolType = el.value;
+  if (el.id === "univLevel") {
+    take.univLevel = el.value;
+    take.univYear = "";
+    take.gradLevel = "";
+  }
+  if (el.id === "univYear") take.univYear = el.value;
+  if (el.id === "gradLevel") take.gradLevel = el.value;
+  if (el.id === "adultRoleType") take.adultRoleType = el.value;
   if (el.id === "major") take.major = el.value;
-  if (el.id === "region") take.region = el.value;
+  if (el.id === "region") {
+    take.region = el.value;
+    take.regionProvince = el.value;
+  }
 }
 
 async function onClick(e) {
@@ -503,7 +590,14 @@ async function onClick(e) {
     if (gr) take.grade = gr.value;
     if (m) take.major = m.value;
     if (rg) take.region = rg.value;
-    if (!take.displayName.trim() || !take.gender || !take.grade || !take.major || !take.region) {
+    take.regionProvince = take.region;
+
+    const ed = take.edition || takeEdition() || "univ";
+    const displayGrade = buildDisplayGrade(ed, take);
+    if (displayGrade) take.grade = displayGrade;
+
+    const missing = !take.displayName.trim() || !take.gender || !take.grade || !take.major || !take.region;
+    if (missing) {
       take.err = "표시 이름과 인구통계를 모두 입력해 주십시오.";
     } else {
       take.err = "";
@@ -534,6 +628,14 @@ async function onClick(e) {
         grade: take.grade,
         major: take.major,
         region: take.region,
+        regionProvince: take.regionProvince,
+        schoolLevel: take.schoolLevel,
+        schoolYear: take.schoolYear,
+        highSchoolType: take.highSchoolType,
+        univLevel: take.univLevel,
+        univYear: take.univYear,
+        gradLevel: take.gradLevel,
+        adultRoleType: take.adultRoleType,
         answers: take.answers,
       });
       take.busy = false;
