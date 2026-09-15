@@ -25,6 +25,35 @@ function devMode() {
   return new URLSearchParams(location.search).get("mode") === "dev";
 }
 
+function expertUnlocked() {
+  return devMode() || sessionStorage.getItem("aop.expert") === "1";
+}
+
+const expertGate = {
+  code: "",
+  err: "",
+  next: "",
+  busy: false,
+};
+
+function expertGateView() {
+  return `<main>
+    <h1>전문가 자료</h1>
+    <div class="card">
+      <p class="lede">이 페이지는 EXP- 코드(공동 연구/전문가 코드) 보유자만 볼 수 있습니다.</p>
+      <div class="row">
+        <label for="expcode">EXP- 코드</label>
+        <input id="expcode" value="${esc(expertGate.code)}" placeholder="EXP-XXXXXX" />
+      </div>
+      ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+      <div class="actions">
+        <button class="btn" data-act="expert-unlock" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "코드 확인"}</button>
+        <a class="btn ghost" href="#/">홈으로</a>
+      </div>
+    </div>
+  </main>`;
+}
+
 function maintenanceView() {
   return `<main>
     <h1>학업 방식 검사 v2.0 (AOP) 시스템 고도화 작업 안내</h1>
@@ -433,6 +462,11 @@ async function render() {
     root.innerHTML = layout(maintenanceView());
     return;
   }
+  if ((r.startsWith("/guide") || r.startsWith("/expert")) && !expertUnlocked()) {
+    expertGate.next = r;
+    root.innerHTML = layout(expertGateView());
+    return;
+  }
   let inner = "";
   if (r === "/" || r === "") inner = home();
   else if (r.startsWith("/take")) inner = takeView();
@@ -537,6 +571,7 @@ function onInput(e) {
   const el = e.target;
   if (el.id === "code") take.code = el.value;
   if (el.id === "name") take.displayName = el.value;
+  if (el.id === "expcode") expertGate.code = el.value;
   if (el.id === "elabel") admin.label = el.value;
   if (el.id === "q") {
     admin.q = el.value;
@@ -573,6 +608,31 @@ async function onClick(e) {
   const btn = e.target.closest("[data-act]");
   if (!btn) return;
   const act = btn.dataset.act;
+  if (act === "expert-unlock") {
+    const exp = document.getElementById("expcode");
+    if (exp) expertGate.code = exp.value;
+    expertGate.err = "";
+    expertGate.busy = true;
+    await render();
+    try {
+      const found = await store.findActiveCode(expertGate.code);
+      if (!found) expertGate.err = "코드가 없거나 정지되었습니다.";
+      else if (found.kind !== "expert") expertGate.err = "EXP- 코드만 사용할 수 있습니다.";
+      else {
+        sessionStorage.setItem("aop.expert", "1");
+        expertGate.busy = false;
+        const next = expertGate.next || "/expert";
+        expertGate.next = "";
+        location.hash = `#${next}`;
+        return;
+      }
+    } catch (err) {
+      expertGate.err = err.message || "코드를 확인하지 못했습니다.";
+    }
+    expertGate.busy = false;
+    await render();
+    return;
+  }
   if (act === "consent") {
     take.step = 1;
     await render();
