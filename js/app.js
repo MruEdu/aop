@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915k";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915k";
+import { DOCS } from "./docs.js?v=20260915l";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915l";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915k";
-import { store, usingCloud } from "./storage.js?v=20260915k";
+} from "./items.js?v=20260915l";
+import { store, usingCloud } from "./storage.js?v=20260915l";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -35,6 +35,14 @@ const expertGate = {
   code: "",
   email: "",
   password: "",
+  applyName: "",
+  applyOrg: "",
+  applyRole: "",
+  applyEducation: "",
+  applyMajor: "",
+  applyExpertise: "",
+  applyPhone: "",
+  applyNote: "",
   err: "",
   next: "",
   busy: false,
@@ -42,18 +50,36 @@ const expertGate = {
 
 function expertGateView(mode) {
   const contact = `
-    <p class="progress">필요하시면 바이브스타틱스로 연락해 주십시오.</p>
+    <p class="progress">신청 후 승인 방식으로 운영합니다. 필요하시면 바이브스타틱스로 연락해 주십시오.</p>
     <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
-    <p style="margin:0 0 14px">
-      <a class="btn ghost" href="mailto:hyc6999@gmail.com?subject=%5BAOP%5D%20%EC%97%B0%EA%B5%AC%EC%9E%90%2F%EC%A0%84%EB%AC%B8%EA%B0%80%20%EA%B3%84%EC%A0%95%20%EC%9A%94%EC%B2%AD&body=%EC%84%B1%EB%AA%85%2F%EC%86%8C%EC%86%8D%2F%EC%9A%A9%EB%8F%84%20%28%EA%B3%B5%EB%8F%99%20%EC%97%B0%EA%B5%AC%2F%EC%83%81%EB%8B%B4%2F%EC%88%98%EC%97%85%29%EC%99%80%20%EC%97%B0%EB%9D%BD%EC%B2%98%EB%A5%BC%20%EB%B3%B4%EB%82%B4%EC%A3%BC%EC%84%B8%EC%9A%94.">메일 보내기 (hyc6999@gmail.com)</a>
-    </p>
+    <p class="progress">신청 메일을 보낸 뒤, 전화로 한 번 더 연락해 주세요.</p>
   `;
 
   const body = mode === "auth"
     ? `
       <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) 계정으로 로그인한 분에게만 공유합니다.</p>
       ${contact}
-      <p class="progress">계정을 발급받으셨다면 아래로 로그인해 주세요.</p>
+      <div class="card" style="margin:16px 0">
+        <h2 style="margin-top:0">전문가 회원가입 신청</h2>
+        <p class="progress">기본정보를 작성한 뒤 <b>신청 메일 보내기</b>를 누르세요. 승인 후 계정을 발급합니다. (아이디=이메일)</p>
+        <div class="grid two">
+          <div class="row"><label for="apname">성명</label><input id="apname" value="${esc(expertGate.applyName)}" /></div>
+          <div class="row"><label for="aporg">소속(기관/학교/조직)</label><input id="aporg" value="${esc(expertGate.applyOrg)}" /></div>
+          <div class="row"><label for="aprole">역할(연구/상담/수업 등)</label><input id="aprole" value="${esc(expertGate.applyRole)}" /></div>
+          <div class="row"><label for="apphone">연락처</label><input id="apphone" value="${esc(expertGate.applyPhone)}" placeholder="010-0000-0000" /></div>
+          <div class="row"><label for="apemail">이메일(아이디)</label><input id="apemail" value="${esc(expertGate.email)}" placeholder="you@example.com" /></div>
+          <div class="row"><label for="apedu">학력(최종학력/과정)</label><input id="apedu" value="${esc(expertGate.applyEducation)}" placeholder="예: 교육학 박사 / 석사 과정" /></div>
+          <div class="row"><label for="apmajor">전공</label><input id="apmajor" value="${esc(expertGate.applyMajor)}" /></div>
+          <div class="row"><label for="apexp">전문 분야/경험</label><input id="apexp" value="${esc(expertGate.applyExpertise)}" placeholder="예: 학습상담, 교수설계, 데이터 분석" /></div>
+        </div>
+        <div class="row"><label for="apnote">추가 메모(선택)</label><input id="apnote" value="${esc(expertGate.applyNote)}" /></div>
+        ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+        <div class="actions">
+          <button class="btn" data-act="expert-apply" ${expertGate.busy ? "disabled" : ""}>신청 메일 보내기</button>
+        </div>
+      </div>
+
+      <p class="progress">이미 계정을 발급받으셨다면 아래로 로그인해 주세요.</p>
       <div class="row">
         <label for="expem">이메일</label>
         <input id="expem" value="${esc(expertGate.email)}" placeholder="you@example.com" />
@@ -106,6 +132,14 @@ function esc(s) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function mailtoHref(to, subject, body) {
+  const q = new URLSearchParams();
+  if (subject) q.set("subject", subject);
+  if (body) q.set("body", body);
+  const qs = q.toString();
+  return `mailto:${to}${qs ? `?${qs}` : ""}`;
 }
 
 function route() {
@@ -626,6 +660,15 @@ function onInput(e) {
   if (el.id === "expcode") expertGate.code = el.value;
   if (el.id === "expem") expertGate.email = el.value;
   if (el.id === "exppw") expertGate.password = el.value;
+  if (el.id === "apname") expertGate.applyName = el.value;
+  if (el.id === "aporg") expertGate.applyOrg = el.value;
+  if (el.id === "aprole") expertGate.applyRole = el.value;
+  if (el.id === "apphone") expertGate.applyPhone = el.value;
+  if (el.id === "apemail") expertGate.email = el.value;
+  if (el.id === "apedu") expertGate.applyEducation = el.value;
+  if (el.id === "apmajor") expertGate.applyMajor = el.value;
+  if (el.id === "apexp") expertGate.applyExpertise = el.value;
+  if (el.id === "apnote") expertGate.applyNote = el.value;
   if (el.id === "elabel") admin.label = el.value;
   if (el.id === "q") {
     admin.q = el.value;
@@ -662,6 +705,61 @@ async function onClick(e) {
   const btn = e.target.closest("[data-act]");
   if (!btn) return;
   const act = btn.dataset.act;
+  if (act === "expert-apply") {
+    const name = (document.getElementById("apname")?.value || expertGate.applyName || "").trim();
+    const org = (document.getElementById("aporg")?.value || expertGate.applyOrg || "").trim();
+    const role = (document.getElementById("aprole")?.value || expertGate.applyRole || "").trim();
+    const phone = (document.getElementById("apphone")?.value || expertGate.applyPhone || "").trim();
+    const email = (document.getElementById("apemail")?.value || expertGate.email || "").trim();
+    const edu = (document.getElementById("apedu")?.value || expertGate.applyEducation || "").trim();
+    const major = (document.getElementById("apmajor")?.value || expertGate.applyMajor || "").trim();
+    const exp = (document.getElementById("apexp")?.value || expertGate.applyExpertise || "").trim();
+    const note = (document.getElementById("apnote")?.value || expertGate.applyNote || "").trim();
+
+    expertGate.applyName = name;
+    expertGate.applyOrg = org;
+    expertGate.applyRole = role;
+    expertGate.applyPhone = phone;
+    expertGate.email = email;
+    expertGate.applyEducation = edu;
+    expertGate.applyMajor = major;
+    expertGate.applyExpertise = exp;
+    expertGate.applyNote = note;
+
+    if (!email) {
+      expertGate.err = "이메일(아이디)을 입력해 주세요.";
+      await render();
+      return;
+    }
+    if (!name) {
+      expertGate.err = "성명을 입력해 주세요.";
+      await render();
+      return;
+    }
+
+    expertGate.err = "";
+    await render();
+
+    const subject = "[AOP] 연구자/전문가 계정 신청";
+    const body = [
+      "안녕하세요. AOP v2.0 전문가 자료(해석요강/학습자료/개발 배경) 접근 계정을 신청합니다.",
+      "",
+      "- 성명: " + (name || ""),
+      "- 이메일(아이디): " + (email || ""),
+      "- 연락처: " + (phone || ""),
+      "- 소속: " + (org || ""),
+      "- 역할(연구/상담/수업 등): " + (role || ""),
+      "- 학력(최종학력/과정): " + (edu || ""),
+      "- 전공: " + (major || ""),
+      "- 전문 분야/경험: " + (exp || ""),
+      "- 추가 메모: " + (note || ""),
+      "",
+      "메일을 보낸 뒤 010-3105-6999로 전화드리겠습니다.",
+    ].join("\n");
+
+    location.href = mailtoHref("hyc6999@gmail.com", subject, body);
+    return;
+  }
   if (act === "expert-login") {
     const em = document.getElementById("expem");
     const pw = document.getElementById("exppw");

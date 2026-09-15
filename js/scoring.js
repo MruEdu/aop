@@ -5,7 +5,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260915k";
+} from "./items.js?v=20260915l";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
