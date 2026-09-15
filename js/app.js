@@ -2,7 +2,6 @@ import { DOCS } from "./docs.js?v=20260907f";
 import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260907f";
 import {
   GENDERS,
-  ITEMS,
   LIKERT,
   PUBLIC_CODE,
   REGIONS,
@@ -12,12 +11,25 @@ import {
   editionLabel,
   gradeLabel,
   gradesFor,
-  itemsFor,
+  testItemsFor,
   nowHint,
   trackLabel,
   tracksFor,
 } from "./items.js?v=20260907f";
 import { store, usingCloud } from "./storage.js?v=20260907k";
+
+const TOTAL_ITEMS = testItemsFor("univ").length;
+
+function shuffleIds(ids) {
+  const a = [...ids];
+  const buf = new Uint32Array(a.length);
+  crypto.getRandomValues(buf);
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = buf[i] % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 function esc(s) {
   return String(s ?? "")
@@ -84,6 +96,7 @@ const take = {
   major: "",
   region: "",
   answers: {},
+  itemOrder: [],
   err: "",
   busy: false,
 };
@@ -116,17 +129,17 @@ function editionCards(longCopy) {
   return `<div class="grid three">
       <div class="card">
         <h2 style="margin-top:0">대학생용</h2>
-        <p>${longCopy ? "대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 28문항에 답합니다." : "대학 과제·팀·AI 장면."}</p>
+        <p>${longCopy ? `대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "대학 과제·팀·AI 장면."}</p>
         <a class="btn" href="#/take/univ">${longCopy ? "대학생용 검사 시작" : "대학생용 시작"}</a>
       </div>
       <div class="card">
         <h2 style="margin-top:0">중고등용</h2>
-        <p>${longCopy ? "숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 28문항에 답합니다." : "숙제·수행평가·모둠 장면."}</p>
+        <p>${longCopy ? `숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "숙제·수행평가·모둠 장면."}</p>
         <a class="btn" href="#/take/school">${longCopy ? "중고등용 검사 시작" : "중고등용 시작"}</a>
       </div>
       <div class="card">
         <h2 style="margin-top:0">성인용</h2>
-        <p>${longCopy ? "업무·보고·팀 등 일의 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 28문항에 답합니다." : "업무·보고·팀 장면."}</p>
+        <p>${longCopy ? `업무·보고·팀 등 일의 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "업무·보고·팀 장면."}</p>
         <a class="btn" href="#/take/adult">${longCopy ? "성인용 검사 시작" : "성인용 시작"}</a>
       </div>
     </div>`;
@@ -145,7 +158,7 @@ function home() {
         지금은 누구나 바로 해 보실 수 있습니다. 이후 실시 방법이 바뀌면 다시 공지합니다.
         맞다·틀리다가 없습니다. 지금 시기에 가까운 쪽을 고르면 됩니다.
         결과는 즉흥 실행, 체계 분석, 위임·위축, 영향 지향 네 축으로 바로 보여 드립니다.
-        약 10–15분, 공개 코드는 ${PUBLIC_CODE} 입니다. 문의할 때는 결과번호를 알려 주십시오.
+        약 15–20분, 공개 코드는 ${PUBLIC_CODE} 입니다. 문의할 때는 결과번호를 알려 주십시오.
       </div>
       ${editionCards(true)}
       <div class="card">
@@ -171,6 +184,7 @@ function syncTakeEdition(ed) {
   take.edition = ed;
   take.step = 0;
   take.answers = {};
+  take.itemOrder = [];
   take.err = "";
   take.displayName = "";
   take.gender = "";
@@ -192,7 +206,9 @@ function takeView() {
     </main>`;
   }
   const who = editionLabel(ed);
-  const itemList = itemsFor(ed);
+  const bank = testItemsFor(ed);
+  const byId = new Map(bank.map((it) => [it.id, it]));
+  const itemList = t.itemOrder.length ? t.itemOrder.map((id) => byId.get(id)).filter(Boolean) : bank;
   const grades = gradesFor(ed);
   const tracks = tracksFor(ed);
   const majorName = trackLabel(ed);
@@ -475,6 +491,7 @@ async function onClick(e) {
     } else {
       take.err = "";
       take.step = 3;
+      take.itemOrder = shuffleIds(testItemsFor(take.edition || takeEdition() || "univ").map((it) => it.id));
     }
     await render();
   }
@@ -483,7 +500,11 @@ async function onClick(e) {
     await render();
   }
   if (act === "submit") {
-    if (ITEMS.some((i) => take.answers[i.id] == null)) {
+    const ed = take.edition || takeEdition() || "univ";
+    const bank = testItemsFor(ed);
+    const byId = new Map(bank.map((it) => [it.id, it]));
+    const itemList = take.itemOrder.length ? take.itemOrder.map((id) => byId.get(id)).filter(Boolean) : bank;
+    if (itemList.some((i) => take.answers[i.id] == null)) {
       take.err = "모든 문항에 답해 주십시오.";
       await render();
       return;

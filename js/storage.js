@@ -1,4 +1,4 @@
-import { CONSENT_VERSION, ITEMS, PUBLIC_CODE } from "./items.js?v=20260907k";
+import { CONSENT_VERSION, CSV_ITEMS, PUBLIC_CODE } from "./items.js?v=20260907k";
 import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260907k";
 
 const LS_CODES = "aop.codes.v1";
@@ -267,7 +267,7 @@ export const store = {
   },
 
   sessionsToCsv(rows, includeName) {
-    const itemCols = ITEMS.map((it) => `q${it.id}`);
+    const itemCols = CSV_ITEMS.map((it) => `q${it.id}`);
     const header = [
       "result_no",
       "created_at",
@@ -309,7 +309,7 @@ export const store = {
         s.scores.sa,
         s.scores.wd,
         s.scores.io,
-        ...ITEMS.map((it) => {
+        ...CSV_ITEMS.map((it) => {
           const v = a[it.id] ?? a[String(it.id)];
           return v == null ? "" : String(v);
         }),

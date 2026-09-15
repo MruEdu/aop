@@ -90,6 +90,37 @@ export const ITEMS = [
   { id: 78, kind: "attention", text: "이 문항은 확인용입니다. '대체로 그렇다(4점)'를 선택해 주세요." },
 ];
 
+// 개인 패러다임(쿤) 연구 문항: 해석·채점은 기존 네 축만 사용하며, 이 문항들은 CSV/answers에만 저장됩니다.
+export const RESEARCH_ITEMS = [
+  { id: 201, kind: "research", text: "새로운 정보가 내가 믿어온 생각과 충돌하면, 우선은 내 생각을 지키는 쪽으로 해석하려 한다." },
+  { id: 202, kind: "research", text: "잘 설명되지 않는 예외 사례가 반복되면, 내 관점을 바꿔야 할 신호라고 느낀다." },
+  { id: 203, kind: "research", text: "어떤 문제를 볼 때, 내가 당연하다고 믿는 전제를 먼저 점검하려 한다." },
+  { id: 204, kind: "research", text: "나와 관점이 다른 사람을 만나면, 같은 말을 해도 서로 다르게 이해하는 느낌이 든다." },
+  { id: 205, kind: "research", text: "확신이 흔들릴 때, 기존 방식보다 완전히 다른 접근을 시도해 보고 싶어진다." },
+  { id: 206, kind: "research", text: "작은 의문이 쌓이다가 어느 순간 생각이 크게 바뀐 경험이 있다." },
+  { id: 207, kind: "research", text: "내가 속한 사람들(친구·팀·커뮤니티)의 분위기와 기준이 내 관점에 큰 영향을 준다." },
+  { id: 208, kind: "research", text: "어떤 설명이 잘 맞아떨어지면, 다른 설명은 잘 보지 않게 된다." },
+  { id: 209, kind: "research", text: "내가 세상을 보는 틀(패러다임)을 바꾸는 일은, 이전의 나를 부정하는 것처럼 느껴져 어렵다." },
+  { id: 210, kind: "research", text: "모순이나 실패를 '예외'로 넘기기보다, 관점을 점검할 단서로 보려 한다." },
+  { id: 211, kind: "research", text: "같은 경험도 내가 가진 관점에 따라 완전히 다르게 보일 수 있다고 느낀다." },
+  { id: 212, kind: "research", text: "정답을 찾는 것보다, 지금의 관점이 무엇을 놓치게 하는지에 더 관심이 간다." },
+  { id: 213, kind: "research", text: "새로운 관점을 받아들이면, 과거 경험을 다시 해석하게 된다." },
+  { id: 214, kind: "research", text: "처음엔 낯설던 관점이 시간이 지나면 오히려 더 자연스러운 기준이 된다." },
+  { id: 215, kind: "research", text: "내 생각이 바뀌는 과정은 대개 천천히보다는 어느 순간 급격하게 일어난다." },
+  { id: 216, kind: "research", text: "내 관점이 잘 작동할 때는, 그 관점 자체를 의식하지 못한다." },
+  { id: 217, kind: "research", text: "논쟁에서 상대를 설득하기보다, 서로의 전제가 무엇인지 확인하려 한다." },
+  { id: 218, kind: "research", text: "내 관점이 바뀌면, 무엇이 중요한지(우선순위)도 함께 바뀐다." },
+  { id: 219, kind: "research", text: "주변에서 인정받는 관점이면, 나도 더 쉽게 받아들인다." },
+  { id: 220, kind: "research", text: "익숙한 관점을 버릴 때, 불안이나 혼란 같은 '위기'를 먼저 겪는 편이다." },
+  { id: 221, kind: "research", text: "내 관점이 바뀌면, 실제 행동 습관도 함께 바뀐다." },
+  { id: 222, kind: "research", text: "어떤 설명을 이해할 때, 그 설명이 전제하는 '세계관'까지 함께 받아들이는 느낌이 든다." },
+  { id: 223, kind: "research", text: "나는 내 관점을 뒷받침하는 사례를 더 쉽게 떠올리고 모으는 편이다." },
+  { id: 224, kind: "research", text: "나는 내 관점을 반박하는 사례를 일부러 찾아보려 한다." },
+  { id: 225, kind: "research", text: "새로운 집단을 만나거나 환경이 바뀌면, 내 관점도 크게 바뀌는 편이다." },
+];
+
+export const CSV_ITEMS = [...ITEMS, ...RESEARCH_ITEMS];
+
 export const ATTENTION_EXPECT = { 37: 1, 65: 6, 77: 3, 78: 4 };
 export const LIE_IDS = [52, 76];
 
@@ -189,6 +220,10 @@ export function itemsFor(edition) {
   const map = edition === "school" ? SCHOOL_TEXT : edition === "adult" ? ADULT_TEXT : null;
   if (!map) return ITEMS;
   return ITEMS.map((it) => (map[it.id] ? { ...it, text: map[it.id] } : it));
+}
+
+export function testItemsFor(edition) {
+  return [...itemsFor(edition), ...RESEARCH_ITEMS];
 }
 
 export function gradesFor(edition) {
