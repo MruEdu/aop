@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915f";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915f";
+import { DOCS } from "./docs.js?v=20260915o";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915o";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,14 +15,112 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915f";
-import { store, usingCloud } from "./storage.js?v=20260915f";
+} from "./items.js?v=20260915o";
+import { store, usingCloud } from "./storage.js?v=20260915o";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 function devMode() {
   return new URLSearchParams(location.search).get("mode") === "dev";
+}
+
+function expertGateMode() {
+  // Cloud(=Supabase 연결)에서는 연구자/전문가 계정 로그인으로 자료를 엽니다.
+  // 로컬 모드에서는 기존 EXP- 코드로만 열 수 있습니다.
+  return usingCloud() ? "auth" : "code";
+}
+
+const expertGate = {
+  code: "",
+  email: "",
+  password: "",
+  applyName: "",
+  applyOrg: "",
+  applyRole: "",
+  applyEducation: "",
+  applyMajor: "",
+  applyExpertise: "",
+  applyPhone: "",
+  applyNote: "",
+  err: "",
+  next: "",
+  busy: false,
+};
+
+function expertApplyFormHtml() {
+  return `
+      <div class="card" style="margin:16px 0">
+        <h2 style="margin-top:0">전문가 회원가입 신청</h2>
+        <p class="progress">기본정보를 작성한 뒤 <b>신청 메일 보내기</b>를 누르세요. 승인 후 계정을 발급합니다. (아이디=이메일)</p>
+        <div class="grid two">
+          <div class="row"><label for="apname">성명</label><input id="apname" value="${esc(expertGate.applyName)}" /></div>
+          <div class="row"><label for="aporg">소속(기관/학교/조직)</label><input id="aporg" value="${esc(expertGate.applyOrg)}" /></div>
+          <div class="row"><label for="aprole">역할(연구/상담/수업 등)</label><input id="aprole" value="${esc(expertGate.applyRole)}" /></div>
+          <div class="row"><label for="apphone">연락처</label><input id="apphone" value="${esc(expertGate.applyPhone)}" placeholder="010-0000-0000" /></div>
+          <div class="row"><label for="apemail">이메일(아이디)</label><input id="apemail" value="${esc(expertGate.email)}" placeholder="you@example.com" /></div>
+          <div class="row"><label for="apedu">학력(최종학력/과정)</label><input id="apedu" value="${esc(expertGate.applyEducation)}" placeholder="예: 교육학 박사 / 석사 과정" /></div>
+          <div class="row"><label for="apmajor">전공</label><input id="apmajor" value="${esc(expertGate.applyMajor)}" /></div>
+          <div class="row"><label for="apexp">전문 분야/경험</label><input id="apexp" value="${esc(expertGate.applyExpertise)}" placeholder="예: 학습상담, 교수설계, 데이터 분석" /></div>
+        </div>
+        <div class="row"><label for="apnote">추가 메모(선택)</label><input id="apnote" value="${esc(expertGate.applyNote)}" /></div>
+        ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+        <div class="actions">
+          <button class="btn" data-act="expert-apply" ${expertGate.busy ? "disabled" : ""}>신청 메일 보내기</button>
+        </div>
+      </div>
+  `;
+}
+
+function expertGateView(mode) {
+  const contact = `
+    <p class="progress">신청 후 승인 방식으로 운영합니다. 필요하시면 바이브스타틱스로 연락해 주십시오.</p>
+    <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
+    <p class="progress">신청 메일을 보낸 뒤, 전화로 한 번 더 연락해 주세요.</p>
+  `;
+
+  const body = mode === "auth"
+    ? `
+      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) 계정으로 로그인한 분에게만 공유합니다.</p>
+      ${contact}
+      ${expertApplyFormHtml()}
+
+      <p class="progress">이미 계정을 발급받으셨다면 아래로 로그인해 주세요.</p>
+      <div class="row">
+        <label for="expem">이메일</label>
+        <input id="expem" value="${esc(expertGate.email)}" placeholder="you@example.com" />
+      </div>
+      <div class="row">
+        <label for="exppw">비밀번호</label>
+        <input id="exppw" type="password" value="${esc(expertGate.password)}" />
+      </div>
+      ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+      <div class="actions">
+        <button class="btn" data-act="expert-login" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "로그인"}</button>
+        <button class="btn ghost" data-act="expert-logout">로그아웃</button>
+        <a class="btn ghost" href="#/">홈으로</a>
+      </div>
+    `
+    : `
+      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) EXP- 코드 보유자에게만 공유합니다.</p>
+      ${contact}
+      ${expertApplyFormHtml()}
+      <p class="progress">이미 EXP- 코드를 받으셨다면 아래에 입력해 주세요.</p>
+      <div class="row">
+        <label for="expcode">EXP- 코드</label>
+        <input id="expcode" value="${esc(expertGate.code)}" placeholder="EXP-XXXXXX" />
+      </div>
+      ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+      <div class="actions">
+        <button class="btn" data-act="expert-unlock" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "코드 확인"}</button>
+        <a class="btn ghost" href="#/">홈으로</a>
+      </div>
+    `;
+
+  return `<main>
+    <h1>전문가 자료</h1>
+    <div class="card">${body}</div>
+  </main>`;
 }
 
 function maintenanceView() {
@@ -43,6 +141,14 @@ function esc(s) {
     .replaceAll('"', "&quot;");
 }
 
+function mailtoHref(to, subject, body) {
+  const q = new URLSearchParams();
+  if (subject) q.set("subject", subject);
+  if (body) q.set("body", body);
+  const qs = q.toString();
+  return `mailto:${to}${qs ? `?${qs}` : ""}`;
+}
+
 function route() {
   const h = location.hash.replace(/^#/, "") || "/";
   return h.startsWith("/") ? h : "/" + h;
@@ -54,12 +160,13 @@ function navLink(href, label, r) {
   return `<a href="${href}" class="${on ? "active" : ""}">${label}</a>`;
 }
 
-function layout(inner) {
+function layout(inner, opts = {}) {
   const r = route();
   const cloudNote = usingCloud()
     ? ""
     : " 현재는 이 브라우저에만 저장됩니다. 연구 보관은 Supabase 연결 후입니다.";
   const subtitle = r.startsWith("/take/adult") ? "성인: 업무 방식 검사" : "초등용 · 중고등용 · 대학생용 · 성인용";
+  const expertOk = Boolean(opts.expertOk);
   return `
     <div class="shell">
       <header class="top">
@@ -71,7 +178,7 @@ function layout(inner) {
           ${navLink("#/take", "검사 하기", r)}
           ${navLink("#/lookup", "결과조회", r)}
           ${navLink("#/manual", "사용설명서", r)}
-          ${navLink("#/guide", "해석요강", r)}
+          ${expertOk ? navLink("#/guide", "해석요강", r) : ""}
           ${navLink("#/expert", "전문가", r)}
           ${navLink("#/admin", "관리자", r)}
         </nav>
@@ -91,6 +198,44 @@ function options(list, selected) {
   ).join("");
 }
 
+const SCHOOL_LEVELS = ["중학교", "고등학교"];
+const SCHOOL_YEARS = ["1학년", "2학년", "3학년"];
+const HIGH_SCHOOL_TYPES = ["전문계고", "일반/인문계고", "특목·자사고"];
+const UNIV_LEVELS = ["학부", "대학원"];
+const UNIV_YEARS = ["1학년", "2학년", "3학년", "4학년"];
+const GRAD_LEVELS = ["석사 과정", "박사 과정"];
+const ADULT_ROLE_TYPES = ["일반", "전문직"];
+
+function bucketRegion(province) {
+  const p = String(province || "").trim();
+  if (!p) return "";
+  if (p === "서울") return "서울";
+  if (p === "경기" || p === "인천") return "경기 / 인천";
+  if (p === "강원") return "강원";
+  if (p === "대전" || p === "충남" || p === "충북" || p === "세종") return "충청 / 대전 / 세종";
+  if (p === "광주" || p === "전남" || p === "전북") return "전라 / 광주";
+  if (p === "대구" || p === "부산" || p === "경북" || p === "경남" || p === "울산") return "경상 / 대구 / 부산 / 울산";
+  if (p === "제주") return "제주 / 기타";
+  // 방어: 값이 예상 밖이면 원값 보존
+  return p;
+}
+
+function buildDisplayGrade(ed, t) {
+  if (ed === "school") {
+    if (t.schoolLevel === "중학교" && t.schoolYear) return `중학교 ${t.schoolYear}`;
+    if (t.schoolLevel === "고등학교" && t.schoolYear && t.highSchoolType) {
+      return `고등학교 ${t.schoolYear}(${t.highSchoolType})`;
+    }
+    return "";
+  }
+  if (ed === "univ") {
+    if (t.univLevel === "학부" && t.univYear) return `대학(학부) ${t.univYear}`;
+    if (t.univLevel === "대학원" && t.gradLevel) return `대학원 ${t.gradLevel}`;
+    return "";
+  }
+  return String(t.grade || "");
+}
+
 const take = {
   step: 0,
   edition: "",
@@ -99,6 +244,15 @@ const take = {
   displayName: "",
   gender: "",
   grade: "",
+  // v2.0 파일럿용 세분화 인구통계(분석용 전용 컬럼으로 저장)
+  regionProvince: "",
+  schoolLevel: "",
+  schoolYear: "",
+  highSchoolType: "",
+  univLevel: "",
+  univYear: "",
+  gradLevel: "",
+  adultRoleType: "일반",
   major: "",
   region: "",
   answers: {},
@@ -120,36 +274,40 @@ function developerNote() {
         <li><b>효율성</b> 시간·힘을 너무 쓰지 않고 해냈는가</li>
         <li><b>매력성</b> 그 과정이 끌려서, 다음에 또 하고 싶은가</li>
       </ul>
+      <p class="progress">본 검사는 대학생용 파일럿을 바탕으로 신뢰도·타당도를 확보한 뒤, 초등(4학년 이상)부터 성인까지 확장한 검사입니다.</p>
       <p>무엇을 할지 분명할 때(<b>명확성</b>) 이 셋이 살아납니다. 분명한 내용을 효율적으로 익히는 일이 학습이며, 그것이 학습공학입니다.</p>
       <p>대학에서 수년간 강의해 온 현장과 학습상담 경험을 바탕으로, 지금 학업·업무 방식을 확인하고 이 방향으로 운영을 돕기 위해 이 검사를 개발하였습니다.</p>
+      <p class="dev-src">개발 배경: 생성형 AI 보급과 비정형 과제가 늘어난 대학 환경에서 72문항 예비풀로 시작해 응답을 수집하고, 불성실·왜곡 응답을 정제한 뒤 탐색적 요인분석으로 4요인(IE/SA/WD/IO) 구조를 확인해 초기 타당화했습니다. 이를 바탕으로 v2.0은 33문항 고정 구조로 정리해 초등(4학년 이상)~성인 장면의 말로 확장했으며, 전국 규준은 후속 데이터로 보강합니다.</p>
       <p class="dev-src">교육공학에서는 타일러의 목표 명확성, 가네의 학습 조건, 라이겔루스의 효과성·효율성·매력성을 이렇게 읽어 왔습니다. 네 축은 그 가치를 지금 학업·업무 운영으로 옮긴 프로파일입니다.</p>
       <div class="dev-who">
         <strong>현용찬</strong>
-        <span>교육학 박사 · 제주대·남서울대 출강 · 바이브스타틱스 대표 · 전) 연우심리연구소 지부장</span>
+        <span>교육학 박사 · 제주대·남서울대 출강 · 바이브스타틱스 대표</span>
+        <span>저서: 기적의학습멘탈수업(2025), AI주니어 길들이기</span>
+        <span>논문: 텍스트마이닝을 이용한 청소년의 학습상담 호소문제 분석(2022), 텍스트 마이닝 방법을 활용한 국내 학습 상담 연구 동향 분석(2022), U&I 학습성격 진단 도구의 통계적 타당성 검증 및 심리측정학적 적절성 검토(2026) 등 10여편</span>
       </div>
     </div>`;
 }
 
 function editionCards(longCopy) {
   return `
-    <div class="grid three">
+    <div class="grid three edition-cards">
       <div class="card">
         <h2 style="margin-top:0">초등용</h2>
-        <p>${longCopy ? `초등학생 눈높이 문항으로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "초등학생 문항."}</p>
+        <p>${longCopy ? `초등학생 눈높이 문항으로 되어 있습니다. 초등학교 4학년 이상을 권합니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "초등학생 문항."}</p>
         <a class="btn" href="#/take/elementary">${longCopy ? "초등용 검사 시작" : "초등용 시작"}</a>
-      </div>
-      <div class="card">
-        <h2 style="margin-top:0">대학생용</h2>
-        <p>${longCopy ? `대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "대학 과제·팀·AI 장면."}</p>
-        <a class="btn" href="#/take/univ">${longCopy ? "대학생용 검사 시작" : "대학생용 시작"}</a>
       </div>
       <div class="card">
         <h2 style="margin-top:0">중고등용</h2>
         <p>${longCopy ? `숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "숙제·수행평가·모둠 장면."}</p>
         <a class="btn" href="#/take/school">${longCopy ? "중고등용 검사 시작" : "중고등용 시작"}</a>
       </div>
+      <div class="card">
+        <h2 style="margin-top:0">대학생용</h2>
+        <p>${longCopy ? `대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "대학 과제·팀·AI 장면."}</p>
+        <a class="btn" href="#/take/univ">${longCopy ? "대학생용 검사 시작" : "대학생용 시작"}</a>
+      </div>
     </div>
-    <div class="grid three" style="margin-top:14px">
+    <div class="grid three edition-cards" style="margin-top:14px">
       <div class="card">
         <h2 style="margin-top:0">성인용</h2>
         <p>${longCopy ? `업무·보고·팀 등 일의 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "업무·보고·팀 장면."}</p>
@@ -202,6 +360,14 @@ function syncTakeEdition(ed) {
   take.displayName = "";
   take.gender = "";
   take.grade = "";
+  take.regionProvince = "";
+  take.schoolLevel = "";
+  take.schoolYear = "";
+  take.highSchoolType = "";
+  take.univLevel = "";
+  take.univYear = "";
+  take.gradLevel = "";
+  take.adultRoleType = "일반";
   take.major = "";
   take.region = "";
   take.busy = false;
@@ -214,7 +380,7 @@ function takeView() {
   if (!ed) {
     return `<main><h1>검사 하기</h1>
       <p class="lede">초등학생·중고등학생·대학생·성인, 지금 해당하는 쪽을 고르면 됩니다.</p>
-      ${editionCards(false)}
+      ${editionCards(true)}
       ${developerNote()}
     </main>`;
   }
@@ -230,6 +396,7 @@ function takeView() {
   if (t.step === 0) {
     return `<main><h1>${who} 검사 시작</h1>${steps(0)}<div class="card">
       <p>교육학 박사 현용찬이 개발한 <strong>${who} ${TEST_NAME}</strong>입니다. 지금 방식을 확인하고, 더 효율적인 운영에 도움을 드리고자 합니다.</p>
+      <p class="progress">이 검사는 대학생용 파일럿 데이터를 바탕으로 문항·축 구조를 정리하고, 표현을 판본별 장면(초등–성인)으로 확장한 버전입니다. 규준(전국 단위)과 일부 심화 검증은 후속 데이터로 계속 보강합니다.</p>
       <p>공부든 일이든, 하려던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 하고 싶어지는 것(매력성)이 좋습니다. 무엇을 할지 분명할 때 이 셋이 살아납니다. 결과는 네 축 프로파일로 바로 보여 드리며, ${when} 다시 확인하실 수 있습니다.</p>
       <p>학번·전화·이메일은 받지 않습니다. 문의할 때는 결과번호가 필요합니다. 응답은 연구·상담을 위한 자료로 보관됩니다. 계속하면 이 안내에 동의하는 것입니다.</p>
       <div class="actions"><button class="btn" data-act="consent">동의하고 계속</button></div>
@@ -252,9 +419,37 @@ function takeView() {
       <input id="name" value="${esc(t.displayName)}" /></div>
       <div class="grid two">
         <div class="row"><label for="gender">성별</label><select id="gender">${options(GENDERS, t.gender)}</select></div>
-        <div class="row"><label for="grade">${esc(gLabel)}</label><select id="grade">${options(grades, t.grade)}</select></div>
+        ${
+          ed === "school"
+            ? `<div class="row"><label for="schoolLevel">학교</label><select id="schoolLevel">${options(SCHOOL_LEVELS, t.schoolLevel)}</select></div>
+               ${
+                 t.schoolLevel
+                   ? `<div class="row"><label for="schoolYear">학년</label><select id="schoolYear">${options(SCHOOL_YEARS, t.schoolYear)}</select></div>`
+                   : ""
+               }
+               ${
+                 t.schoolLevel === "고등학교"
+                   ? `<div class="row"><label for="highSchoolType">구분</label><select id="highSchoolType">${options(HIGH_SCHOOL_TYPES, t.highSchoolType)}</select></div>`
+                   : ""
+               }`
+            : ed === "univ"
+              ? `<div class="row"><label for="univLevel">학력</label><select id="univLevel">${options(UNIV_LEVELS, t.univLevel)}</select></div>
+                 ${
+                   t.univLevel === "학부"
+                     ? `<div class="row"><label for="univYear">학년</label><select id="univYear">${options(UNIV_YEARS, t.univYear)}</select></div>`
+                     : t.univLevel === "대학원"
+                       ? `<div class="row"><label for="gradLevel">과정</label><select id="gradLevel">${options(GRAD_LEVELS, t.gradLevel)}</select></div>`
+                       : ""
+                 }`
+              : `<div class="row"><label for="grade">${esc(gLabel)}</label><select id="grade">${options(grades, t.grade)}</select></div>`
+        }
+        ${
+          ed === "adult"
+            ? `<div class="row"><label for="adultRoleType">직업 구분</label><select id="adultRoleType">${options(ADULT_ROLE_TYPES, t.adultRoleType)}</select></div>`
+            : ""
+        }
         <div class="row"><label for="major">${esc(majorName)}</label><select id="major">${options(tracks, t.major)}</select></div>
-        <div class="row"><label for="region">주 생활 지역</label><select id="region">${options(REGIONS, t.region)}</select></div>
+        <div class="row"><label for="region">주 생활 지역(시·도)</label><select id="region">${options(REGIONS, t.regionProvince)}</select></div>
       </div>
       <div class="actions"><button class="btn" data-act="to-items">문항으로</button></div>
     </div></main>`;
@@ -281,15 +476,44 @@ function takeView() {
   </main>`;
 }
 
-function resultHtml(session) {
+function resultHtml(session, opts = {}) {
+  const expertOk = Boolean(opts.expertOk);
   const lines = profileLines(session.scores, session.edition);
   const preface = resultPreface(session.edition);
   const summary = summaryInterpret(session.scores, session.edition);
+  const wdOverload = (session.scores?.wd ?? 0) >= 3.5;
+  const overloadCard = wdOverload ? (() => {
+    const scene = session.edition === "adult"
+      ? { work: "일", task: "업무", place: "업무" }
+      : session.edition === "school" || session.edition === "elementary"
+        ? { work: "공부", task: "숙제·수행평가", place: "학교" }
+        : { work: "학업", task: "과제", place: "학기" };
+    return `
+      <div class="card overload">
+        <h2 style="margin-top:0">WD 과부하 경고등(높음)</h2>
+        <p class="lede">지금은 ${scene.task}·마감·피드백에서 부담이 커지면 <b>마음이 얼어붙거나</b> “그냥 맡겨버리고 싶다”는 생각이 쉽게 올라올 수 있습니다. 이건 성격이 아니라, <b>부담 신호</b>입니다.</p>
+        <h2>15분 처방(마이크로 태스크)</h2>
+        <ul class="tips">
+          <li><b>15분 타이머</b>를 켜고 “첫 한 조각”만 합니다. (예: 목차 3줄, 문제 1개, 파일 열고 제목만)</li>
+          <li><b>중간 마감</b>을 먼저 잡습니다. (예: 제출 3일 전 ‘중간 점검’ 10분)</li>
+          <li>AI/사람 도움은 <b>초안·정리</b>에만 쓰고, 최종 결론은 <b>내 말로</b> 한 줄이라도 붙입니다.</li>
+        </ul>
+        <p class="progress">핵심은 “크게 결심”이 아니라, 부담이 커지는 순간에도 <b>다시 붙을 수 있는 크기</b>로 쪼개는 것입니다.</p>
+      </div>
+    `;
+  })() : "";
   const pct = (n) => `${Math.max(0, Math.min(100, ((n - 1) / 5) * 100))}%`;
   const bars = SCALE_ORDER.map((k) => `
     <div class="bar-row">
       <div>${SCALES[k].name}</div>
-      <div class="track"><div class="fill" style="width:${pct(session.scores[k])}"></div></div>
+      <div class="bar-mid">
+        <div class="track"><div class="fill" style="width:${pct(session.scores[k])}"></div></div>
+        <div class="spectrum">
+          <span class="low">${esc(SCALES[k].spectrum?.low || "")}</span>
+          <span class="mid">${esc(SCALES[k].spectrum?.mid || "")}</span>
+          <span class="high">${esc(SCALES[k].spectrum?.high || "")}</span>
+        </div>
+      </div>
       <div class="score">${session.scores[k].toFixed(2)}</div>
     </div>`).join("");
   const cards = lines.map((line) => `
@@ -309,6 +533,7 @@ function resultHtml(session) {
     <div class="card"><div class="bars">${bars}</div>
       <p class="progress" style="margin-top:12px">문항평균(1–6점). 막대는 비교용이며, 네 축을 따로 읽습니다.</p>
     </div>
+    ${overloadCard}
     ${cards}
     <div class="card">
       <h2 style="margin-top:0">종합 해석</h2>
@@ -322,7 +547,7 @@ function resultHtml(session) {
       <div class="actions">
         <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">번호 복사</button>
         <button class="btn ghost" data-act="print">인쇄</button>
-        <a class="btn ghost" href="#/guide">해석요강 보기</a>
+        ${expertOk ? `<a class="btn ghost" href="#/guide">해석요강 보기</a>` : `<a class="btn ghost" href="#/expert">전문가 자료(신청/로그인)</a>`}
       </div>
       <p class="progress" style="margin-top:12px">개발: 바이브스타틱스 현용찬(교육학박사)</p>
     </div>`;
@@ -346,9 +571,23 @@ const admin = {
 async function render() {
   const root = document.getElementById("root");
   const r = route();
+  let expertOk = devMode();
+  if (!expertOk) {
+    const mode = expertGateMode();
+    if (mode === "auth") expertOk = Boolean(await store.cloudSession());
+    else expertOk = sessionStorage.getItem("aop.expert") === "1";
+  }
   if (MAINTENANCE_MODE && !devMode() && !r.startsWith("/admin")) {
-    root.innerHTML = layout(maintenanceView());
+    root.innerHTML = layout(maintenanceView(), { expertOk });
     return;
+  }
+  if (r.startsWith("/guide") || r.startsWith("/expert")) {
+    if (!expertOk) {
+      const mode = expertGateMode();
+      expertGate.next = r;
+      root.innerHTML = layout(expertGateView(mode), { expertOk });
+      return;
+    }
   }
   let inner = "";
   if (r === "/" || r === "") inner = home();
@@ -356,16 +595,16 @@ async function render() {
   else if (r.startsWith("/result/")) {
     const no = decodeURIComponent(r.slice(8));
     inner = `<main><h1>결과</h1><p>불러오는 중…</p></main>`;
-    root.innerHTML = layout(inner);
+    root.innerHTML = layout(inner, { expertOk });
     try {
       const s = await store.getByResultNo(no);
       inner = s
-        ? `<main><h1>결과</h1>${resultHtml(s)}</main>`
+        ? `<main><h1>결과</h1>${resultHtml(s, { expertOk })}</main>`
         : `<main><h1>결과</h1><p>결과번호에 해당하는 기록이 없습니다.</p></main>`;
     } catch (e) {
       inner = `<main><h1>결과</h1><p class="err">${esc(e.message || e)}</p></main>`;
     }
-    root.innerHTML = layout(inner);
+    root.innerHTML = layout(inner, { expertOk });
     return;
   } else if (r.startsWith("/lookup")) {
     inner = `<main><h1>결과 조회</h1><div class="card">
@@ -378,7 +617,7 @@ async function render() {
     const page = DOCS.find((d) => r === "/" + d.id);
     inner = page ? docView(page) : home();
   }
-  root.innerHTML = layout(inner);
+  root.innerHTML = layout(inner, { expertOk });
 }
 
 async function adminView() {
@@ -454,6 +693,18 @@ function onInput(e) {
   const el = e.target;
   if (el.id === "code") take.code = el.value;
   if (el.id === "name") take.displayName = el.value;
+  if (el.id === "expcode") expertGate.code = el.value;
+  if (el.id === "expem") expertGate.email = el.value;
+  if (el.id === "exppw") expertGate.password = el.value;
+  if (el.id === "apname") expertGate.applyName = el.value;
+  if (el.id === "aporg") expertGate.applyOrg = el.value;
+  if (el.id === "aprole") expertGate.applyRole = el.value;
+  if (el.id === "apphone") expertGate.applyPhone = el.value;
+  if (el.id === "apemail") expertGate.email = el.value;
+  if (el.id === "apedu") expertGate.applyEducation = el.value;
+  if (el.id === "apmajor") expertGate.applyMajor = el.value;
+  if (el.id === "apexp") expertGate.applyExpertise = el.value;
+  if (el.id === "apnote") expertGate.applyNote = el.value;
   if (el.id === "elabel") admin.label = el.value;
   if (el.id === "q") {
     admin.q = el.value;
@@ -464,14 +715,145 @@ function onChange(e) {
   const el = e.target;
   if (el.id === "gender") take.gender = el.value;
   if (el.id === "grade") take.grade = el.value;
+  if (el.id === "schoolLevel") {
+    take.schoolLevel = el.value;
+    take.schoolYear = "";
+    take.highSchoolType = "";
+  }
+  if (el.id === "schoolYear") take.schoolYear = el.value;
+  if (el.id === "highSchoolType") take.highSchoolType = el.value;
+  if (el.id === "univLevel") {
+    take.univLevel = el.value;
+    take.univYear = "";
+    take.gradLevel = "";
+  }
+  if (el.id === "univYear") take.univYear = el.value;
+  if (el.id === "gradLevel") take.gradLevel = el.value;
+  if (el.id === "adultRoleType") take.adultRoleType = el.value;
   if (el.id === "major") take.major = el.value;
-  if (el.id === "region") take.region = el.value;
+  if (el.id === "region") {
+    take.regionProvince = el.value;
+    take.region = bucketRegion(take.regionProvince);
+  }
 }
 
 async function onClick(e) {
   const btn = e.target.closest("[data-act]");
   if (!btn) return;
   const act = btn.dataset.act;
+  if (act === "expert-apply") {
+    const name = (document.getElementById("apname")?.value || expertGate.applyName || "").trim();
+    const org = (document.getElementById("aporg")?.value || expertGate.applyOrg || "").trim();
+    const role = (document.getElementById("aprole")?.value || expertGate.applyRole || "").trim();
+    const phone = (document.getElementById("apphone")?.value || expertGate.applyPhone || "").trim();
+    const email = (document.getElementById("apemail")?.value || expertGate.email || "").trim();
+    const edu = (document.getElementById("apedu")?.value || expertGate.applyEducation || "").trim();
+    const major = (document.getElementById("apmajor")?.value || expertGate.applyMajor || "").trim();
+    const exp = (document.getElementById("apexp")?.value || expertGate.applyExpertise || "").trim();
+    const note = (document.getElementById("apnote")?.value || expertGate.applyNote || "").trim();
+
+    expertGate.applyName = name;
+    expertGate.applyOrg = org;
+    expertGate.applyRole = role;
+    expertGate.applyPhone = phone;
+    expertGate.email = email;
+    expertGate.applyEducation = edu;
+    expertGate.applyMajor = major;
+    expertGate.applyExpertise = exp;
+    expertGate.applyNote = note;
+
+    if (!email) {
+      expertGate.err = "이메일(아이디)을 입력해 주세요.";
+      await render();
+      return;
+    }
+    if (!name) {
+      expertGate.err = "성명을 입력해 주세요.";
+      await render();
+      return;
+    }
+
+    expertGate.err = "";
+    await render();
+
+    const subject = "[AOP] 연구자/전문가 계정 신청";
+    const body = [
+      "안녕하세요. AOP v2.0 전문가 자료(해석요강/학습자료/개발 배경) 접근 계정을 신청합니다.",
+      "",
+      "- 성명: " + (name || ""),
+      "- 이메일(아이디): " + (email || ""),
+      "- 연락처: " + (phone || ""),
+      "- 소속: " + (org || ""),
+      "- 역할(연구/상담/수업 등): " + (role || ""),
+      "- 학력(최종학력/과정): " + (edu || ""),
+      "- 전공: " + (major || ""),
+      "- 전문 분야/경험: " + (exp || ""),
+      "- 추가 메모: " + (note || ""),
+      "",
+      "메일을 보낸 뒤 010-3105-6999로 전화드리겠습니다.",
+    ].join("\n");
+
+    location.href = mailtoHref("hyc6999@gmail.com", subject, body);
+    return;
+  }
+  if (act === "expert-login") {
+    const em = document.getElementById("expem");
+    const pw = document.getElementById("exppw");
+    if (em) expertGate.email = em.value;
+    if (pw) expertGate.password = pw.value;
+    expertGate.err = "";
+    expertGate.busy = true;
+    await render();
+    try {
+      await store.cloudSignIn(expertGate.email, expertGate.password);
+      expertGate.busy = false;
+      const next = expertGate.next || "/expert";
+      expertGate.next = "";
+      location.hash = `#${next}`;
+      return;
+    } catch (err) {
+      expertGate.err = err.message || "로그인에 실패했습니다.";
+    }
+    expertGate.busy = false;
+    await render();
+    return;
+  }
+  if (act === "expert-logout") {
+    expertGate.err = "";
+    try {
+      await store.cloudSignOut();
+      sessionStorage.removeItem("aop.expert");
+    } catch (err) {
+      expertGate.err = err.message || "로그아웃에 실패했습니다.";
+    }
+    await render();
+    return;
+  }
+  if (act === "expert-unlock") {
+    const exp = document.getElementById("expcode");
+    if (exp) expertGate.code = exp.value;
+    expertGate.err = "";
+    expertGate.busy = true;
+    await render();
+    try {
+      const found = await store.findActiveCode(expertGate.code);
+      if (!found) expertGate.err = "코드가 없거나 정지되었습니다.";
+      else if (found.kind !== "expert") expertGate.err = "EXP- 코드만 사용할 수 있습니다.";
+      else {
+        sessionStorage.setItem("aop.expert", "1");
+        expertGate.busy = false;
+        const next = expertGate.next || "/expert";
+        expertGate.next = "";
+        location.hash = `#${next}`;
+        return;
+      }
+    } catch (err) {
+      expertGate.err = err.message || "코드를 확인하지 못했습니다.";
+    }
+    expertGate.busy = false;
+    await render();
+    return;
+  }
   if (act === "consent") {
     take.step = 1;
     await render();
@@ -502,8 +884,15 @@ async function onClick(e) {
     if (g) take.gender = g.value;
     if (gr) take.grade = gr.value;
     if (m) take.major = m.value;
-    if (rg) take.region = rg.value;
-    if (!take.displayName.trim() || !take.gender || !take.grade || !take.major || !take.region) {
+    if (rg) take.regionProvince = rg.value;
+    take.region = bucketRegion(take.regionProvince);
+
+    const ed = take.edition || takeEdition() || "univ";
+    const displayGrade = buildDisplayGrade(ed, take);
+    if (displayGrade) take.grade = displayGrade;
+
+    const missing = !take.displayName.trim() || !take.gender || !take.grade || !take.major || !take.region;
+    if (missing) {
       take.err = "표시 이름과 인구통계를 모두 입력해 주십시오.";
     } else {
       take.err = "";
@@ -534,6 +923,14 @@ async function onClick(e) {
         grade: take.grade,
         major: take.major,
         region: take.region,
+        regionProvince: take.regionProvince,
+        schoolLevel: take.schoolLevel,
+        schoolYear: take.schoolYear,
+        highSchoolType: take.highSchoolType,
+        univLevel: take.univLevel,
+        univYear: take.univYear,
+        gradLevel: take.gradLevel,
+        adultRoleType: take.adultRoleType,
         answers: take.answers,
       });
       take.busy = false;

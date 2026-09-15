@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260915f";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915f";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260915o";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915o";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -66,6 +66,14 @@ function buildSession(input, code) {
     grade: input.grade,
     major: input.major,
     region: input.region,
+    regionProvince: input.regionProvince || "",
+    schoolLevel: input.schoolLevel || "",
+    schoolYear: input.schoolYear || "",
+    highSchoolType: input.highSchoolType || "",
+    univLevel: input.univLevel || "",
+    univYear: input.univYear || "",
+    gradLevel: input.gradLevel || "",
+    adultRoleType: input.adultRoleType || "",
     answers: input.answers,
     scores: scored.scores,
     attentionOk: scored.attentionOk,
@@ -121,6 +129,14 @@ export const store = {
           grade: session.grade,
           major: session.major,
           region: session.region,
+          region_province: session.regionProvince || null,
+          school_level: session.schoolLevel || null,
+          school_year: session.schoolYear || null,
+          high_school_type: session.highSchoolType || null,
+          univ_level: session.univLevel || null,
+          univ_year: session.univYear || null,
+          grad_level: session.gradLevel || null,
+          adult_role_type: session.adultRoleType || null,
           answers: session.answers,
           scores: session.scores,
           attention_ok: session.attentionOk,
@@ -158,6 +174,14 @@ export const store = {
         grade: data.grade,
         major: data.major,
         region: data.region,
+        regionProvince: data.region_province ?? "",
+        schoolLevel: data.school_level ?? "",
+        schoolYear: data.school_year ?? "",
+        highSchoolType: data.high_school_type ?? "",
+        univLevel: data.univ_level ?? "",
+        univYear: data.univ_year ?? "",
+        gradLevel: data.grad_level ?? "",
+        adultRoleType: data.adult_role_type ?? "",
         answers: data.answers,
         scores: data.scores,
         attentionOk: data.attention_ok,
@@ -190,6 +214,14 @@ export const store = {
         grade: row.grade,
         major: row.major,
         region: row.region,
+        regionProvince: row.region_province ?? "",
+        schoolLevel: row.school_level ?? "",
+        schoolYear: row.school_year ?? "",
+        highSchoolType: row.high_school_type ?? "",
+        univLevel: row.univ_level ?? "",
+        univYear: row.univ_year ?? "",
+        gradLevel: row.grad_level ?? "",
+        adultRoleType: row.adult_role_type ?? "",
         answers: row.answers,
         scores: row.scores,
         attentionOk: row.attention_ok,
@@ -268,6 +300,21 @@ export const store = {
     if (error) throw error;
   },
 
+  async cloudSignOut() {
+    const sb = await supabase();
+    if (!sb) return;
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+  },
+
+  async cloudSession() {
+    const sb = await supabase();
+    if (!sb) return null;
+    const { data, error } = await sb.auth.getSession();
+    if (error) throw error;
+    return data?.session ?? null;
+  },
+
   sessionsToCsv(rows, includeName) {
     const ids = Array.from({ length: 33 }, (_, i) => i + 1);
     const itemCols = ids.map((id) => `q${id}`);
@@ -282,6 +329,14 @@ export const store = {
       "grade",
       "major",
       "region",
+      "region_province",
+      "school_level",
+      "school_year",
+      "high_school_type",
+      "univ_level",
+      "univ_year",
+      "grad_level",
+      "adult_role_type",
       "attention_ok",
       "lie_ok",
       "reliable",
@@ -305,6 +360,14 @@ export const store = {
         csvCell(s.grade),
         csvCell(s.major),
         csvCell(s.region),
+        csvCell(s.regionProvince),
+        csvCell(s.schoolLevel),
+        csvCell(s.schoolYear),
+        csvCell(s.highSchoolType),
+        csvCell(s.univLevel),
+        csvCell(s.univYear),
+        csvCell(s.gradLevel),
+        csvCell(s.adultRoleType),
         String(s.attentionOk),
         String(s.lieOk),
         String(s.reliable),
