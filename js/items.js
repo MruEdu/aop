@@ -226,8 +226,19 @@ export const UNIV_ITEMS = [
   },
 ];
 
-export const ATTENTION_EXPECT = { 37: 1, 65: 6, 77: 3, 78: 4 };
-export const LIE_IDS = [52, 76];
+// v2.0은 33문항(q1~q33) 구조이므로, 기존(1판) 주의·허위 문항 번호(37/65/77/78, 52/76)는 사용하지 않습니다.
+export const ATTENTION_EXPECT = {};
+export const LIE_IDS = [];
+
+// v2.0 검증: 1~28 채점 문항 내 일관성(절댓값 차이 >= 2면 비일관) 및 극단반응 탐지
+export const CONSISTENCY_PAIRS = [
+  [2, 4], // IE: 빠른 시도/마감 압박
+  [8, 11], // SA: 계획/정리
+  [15, 16], // WD: 과부하/걱정·막막
+  [22, 25], // IO: 리더/영향 역할
+];
+export const CONSISTENCY_DIFF_THRESHOLD = 2;
+export const EXTREME_RESPONSE_COUNT_THRESHOLD = 24; // 1 또는 6이 28문항 중 너무 많으면 비정상 응답으로 간주
 
 export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33];
 

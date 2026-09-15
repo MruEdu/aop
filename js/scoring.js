@@ -1,4 +1,11 @@
-import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCORING_EXCLUDED_IDS, SCALES } from "./items.js?v=20260915d";
+import {
+  CONSISTENCY_DIFF_THRESHOLD,
+  CONSISTENCY_PAIRS,
+  EXTREME_RESPONSE_COUNT_THRESHOLD,
+  SCALE_ORDER,
+  SCORING_EXCLUDED_IDS,
+  SCALES,
+} from "./items.js?v=20260915f";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -16,12 +23,22 @@ export function scoreAnswers(answers) {
     });
     scores[key] = Math.round(mean(vals) * 100) / 100;
   }
-  const attPairs = Object.entries(ATTENTION_EXPECT).map(([id, expect]) => [Number(id), expect]);
-  const attPresent = attPairs.filter(([id]) => answers[id] != null);
-  const attentionOk = attPresent.length === 0 ? true : attPresent.every(([id, expect]) => answers[id] === expect);
+  // v2.0 검증(33문항 체계 내): 일관성 + 극단반응
+  const answeredScored = Array.from({ length: 28 }, (_, i) => i + 1)
+    .map((id) => answers[id])
+    .filter((v) => v != null);
 
-  const liePresent = LIE_IDS.filter((id) => answers[id] != null);
-  const lieOk = liePresent.length === 0 ? true : !liePresent.some((id) => (answers[id] ?? 0) > 3);
+  const attentionOk = CONSISTENCY_PAIRS.every(([a, b]) => {
+    const va = answers[a];
+    const vb = answers[b];
+    if (va == null || vb == null) return true;
+    return Math.abs(va - vb) < CONSISTENCY_DIFF_THRESHOLD;
+  });
+
+  const ones = answeredScored.filter((v) => v === 1).length;
+  const sixes = answeredScored.filter((v) => v === 6).length;
+  const tooExtreme = ones >= EXTREME_RESPONSE_COUNT_THRESHOLD || sixes >= EXTREME_RESPONSE_COUNT_THRESHOLD;
+  const lieOk = !tooExtreme;
   return { scores, attentionOk, lieOk, reliable: attentionOk && lieOk };
 }
 

@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915d";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915d";
+import { DOCS } from "./docs.js?v=20260915f";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915f";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,10 +15,25 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915d";
-import { store, usingCloud } from "./storage.js?v=20260915d";
+} from "./items.js?v=20260915f";
+import { store, usingCloud } from "./storage.js?v=20260915f";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
+const MAINTENANCE_MODE = true;
+
+function devMode() {
+  return new URLSearchParams(location.search).get("mode") === "dev";
+}
+
+function maintenanceView() {
+  return `<main>
+    <h1>학업 방식 검사 v2.0 (AOP) 시스템 고도화 작업 안내</h1>
+    <div class="card">
+      <p class="lede">현재 스키마·문항 인덱스 튜닝 중입니다. 잠시 후 다시 시도해 주세요.</p>
+      <p class="progress" style="margin-top:12px">개발: 바이브스타틱스 현용찬(교육학박사)</p>
+    </div>
+  </main>`;
+}
 
 function esc(s) {
   return String(s ?? "")
@@ -331,6 +346,10 @@ const admin = {
 async function render() {
   const root = document.getElementById("root");
   const r = route();
+  if (MAINTENANCE_MODE && !devMode() && !r.startsWith("/admin")) {
+    root.innerHTML = layout(maintenanceView());
+    return;
+  }
   let inner = "";
   if (r === "/" || r === "") inner = home();
   else if (r.startsWith("/take")) inner = takeView();
