@@ -27,9 +27,6 @@ export function likertFor(edition) {
 export const GENDERS = ["여성", "남성", "기타 / 응답을 원치 않음"];
 export const GRADES = ["1학년", "2학년", "3학년", "4학년(이상)", "대학원(석사 박사과정)", "기타"];
 export const GRADES_ELEMENTARY = [
-  "초등학교 1학년",
-  "초등학교 2학년",
-  "초등학교 3학년",
   "초등학교 4학년",
   "초등학교 5학년",
   "초등학교 6학년",
