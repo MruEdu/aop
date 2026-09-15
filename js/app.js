@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915h";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915h";
+import { DOCS } from "./docs.js?v=20260915i";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915i";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915h";
-import { store, usingCloud } from "./storage.js?v=20260915h";
+} from "./items.js?v=20260915i";
+import { store, usingCloud } from "./storage.js?v=20260915i";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -205,7 +205,7 @@ function developerNote() {
       <p class="progress">본 검사는 대학생용 파일럿을 바탕으로 신뢰도·타당도를 확보한 뒤, 초등(4학년 이상)부터 성인까지 확장한 검사입니다.</p>
       <p>무엇을 할지 분명할 때(<b>명확성</b>) 이 셋이 살아납니다. 분명한 내용을 효율적으로 익히는 일이 학습이며, 그것이 학습공학입니다.</p>
       <p>대학에서 수년간 강의해 온 현장과 학습상담 경험을 바탕으로, 지금 학업·업무 방식을 확인하고 이 방향으로 운영을 돕기 위해 이 검사를 개발하였습니다.</p>
-      <p class="dev-src">개발 배경: 대학생 파일럿에서 문항·채점·해석을 다듬고, 같은 33문항 구조를 초등·중고등·성인 장면의 말로 확장했습니다. 전국 규준은 후속 데이터로 더 정교하게 보강합니다.</p>
+      <p class="dev-src">개발 배경: 생성형 AI 보급과 비정형 과제가 늘어난 대학 환경에서 72문항 예비풀로 시작해 응답을 수집하고, 불성실·왜곡 응답을 정제한 뒤 탐색적 요인분석으로 4요인(IE/SA/WD/IO) 구조를 확인해 초기 타당화했습니다. 이를 바탕으로 v2.0은 33문항 고정 구조로 정리해 초등(4학년 이상)~성인 장면의 말로 확장했으며, 전국 규준은 후속 데이터로 보강합니다.</p>
       <p class="dev-src">교육공학에서는 타일러의 목표 명확성, 가네의 학습 조건, 라이겔루스의 효과성·효율성·매력성을 이렇게 읽어 왔습니다. 네 축은 그 가치를 지금 학업·업무 운영으로 옮긴 프로파일입니다.</p>
       <div class="dev-who">
         <strong>현용찬</strong>
