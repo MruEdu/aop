@@ -253,6 +253,9 @@ a.btn { text-decoration: none; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 .progress { color: var(--muted); font-size: 13px; }
 .doc p { max-width: 46em; }
+.tips { margin: 10px 0 0; padding-left: 18px; }
+.tips li { margin: 0 0 8px; }
+.overload .lede { max-width: 52em; }
 
 @media (max-width: 640px) {
   .likert { grid-template-columns: repeat(3, 1fr); }

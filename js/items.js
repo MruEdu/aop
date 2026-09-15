@@ -297,7 +297,7 @@ export function scoringManualLines() {
   return {
     means: "각 척도는 문항평균(1–6점)입니다. 1–28번 문항으로 네 축을 계산하며, 29–33번(쿤 5문항)은 연구용으로만 저장되고 채점·해석에서 제외됩니다.",
     keys: `즉흥 실행 ${displayList(SCALES.ie.items)}, 체계 분석 ${displayList(SCALES.sa.items)}, 위임·위축 ${displayList(SCALES.wd.items)}, 영향 지향 ${displayList(SCALES.io.items)}.`,
-    bands: "대략 2.5 미만 낮음, 2.5–4.0 보통, 4.0 초과 높음입니다. 이 구간은 참고용이며, 규준은 후속입니다.",
+    bands: "대략 2.5 미만 저점, 2.5–4.0 미만 중앙, 4.0 이상 고점입니다. 이 구간은 참고용이며, 규준은 후속입니다.",
     saNote: "",
     flags: "",
   };

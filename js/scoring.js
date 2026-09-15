@@ -44,7 +44,7 @@ export function scoreAnswers(answers) {
 
 export function band(score) {
   if (score < 2.5) return "low";
-  if (score <= 4) return "mid";
+  if (score < 4) return "mid";
   return "high";
 }
 

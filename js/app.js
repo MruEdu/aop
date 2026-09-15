@@ -481,6 +481,27 @@ function resultHtml(session, opts = {}) {
   const lines = profileLines(session.scores, session.edition);
   const preface = resultPreface(session.edition);
   const summary = summaryInterpret(session.scores, session.edition);
+  const wdOverload = (session.scores?.wd ?? 0) >= 3.5;
+  const overloadCard = wdOverload ? (() => {
+    const scene = session.edition === "adult"
+      ? { work: "일", task: "업무", place: "업무" }
+      : session.edition === "school" || session.edition === "elementary"
+        ? { work: "공부", task: "숙제·수행평가", place: "학교" }
+        : { work: "학업", task: "과제", place: "학기" };
+    return `
+      <div class="card overload">
+        <h2 style="margin-top:0">WD 과부하 경고등(높음)</h2>
+        <p class="lede">지금은 ${scene.task}·마감·피드백에서 부담이 커지면 <b>마음이 얼어붙거나</b> “그냥 맡겨버리고 싶다”는 생각이 쉽게 올라올 수 있습니다. 이건 성격이 아니라, <b>부담 신호</b>입니다.</p>
+        <h2>15분 처방(마이크로 태스크)</h2>
+        <ul class="tips">
+          <li><b>15분 타이머</b>를 켜고 “첫 한 조각”만 합니다. (예: 목차 3줄, 문제 1개, 파일 열고 제목만)</li>
+          <li><b>중간 마감</b>을 먼저 잡습니다. (예: 제출 3일 전 ‘중간 점검’ 10분)</li>
+          <li>AI/사람 도움은 <b>초안·정리</b>에만 쓰고, 최종 결론은 <b>내 말로</b> 한 줄이라도 붙입니다.</li>
+        </ul>
+        <p class="progress">핵심은 “크게 결심”이 아니라, 부담이 커지는 순간에도 <b>다시 붙을 수 있는 크기</b>로 쪼개는 것입니다.</p>
+      </div>
+    `;
+  })() : "";
   const pct = (n) => `${Math.max(0, Math.min(100, ((n - 1) / 5) * 100))}%`;
   const bars = SCALE_ORDER.map((k) => `
     <div class="bar-row">
@@ -512,6 +533,7 @@ function resultHtml(session, opts = {}) {
     <div class="card"><div class="bars">${bars}</div>
       <p class="progress" style="margin-top:12px">문항평균(1–6점). 막대는 비교용이며, 네 축을 따로 읽습니다.</p>
     </div>
+    ${overloadCard}
     ${cards}
     <div class="card">
       <h2 style="margin-top:0">종합 해석</h2>
