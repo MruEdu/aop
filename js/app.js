@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915j";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915j";
+import { DOCS } from "./docs.js?v=20260915k";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915k";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915j";
-import { store, usingCloud } from "./storage.js?v=20260915j";
+} from "./items.js?v=20260915k";
+import { store, usingCloud } from "./storage.js?v=20260915k";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -25,27 +25,53 @@ function devMode() {
   return new URLSearchParams(location.search).get("mode") === "dev";
 }
 
-function expertUnlocked() {
-  return devMode() || sessionStorage.getItem("aop.expert") === "1";
+function expertGateMode() {
+  // Cloud(=Supabase 연결)에서는 연구자/전문가 계정 로그인으로 자료를 엽니다.
+  // 로컬 모드에서는 기존 EXP- 코드로만 열 수 있습니다.
+  return usingCloud() ? "auth" : "code";
 }
 
 const expertGate = {
   code: "",
+  email: "",
+  password: "",
   err: "",
   next: "",
   busy: false,
 };
 
-function expertGateView() {
-  return `<main>
-    <h1>전문가 자료</h1>
-    <div class="card">
+function expertGateView(mode) {
+  const contact = `
+    <p class="progress">필요하시면 바이브스타틱스로 연락해 주십시오.</p>
+    <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
+    <p style="margin:0 0 14px">
+      <a class="btn ghost" href="mailto:hyc6999@gmail.com?subject=%5BAOP%5D%20%EC%97%B0%EA%B5%AC%EC%9E%90%2F%EC%A0%84%EB%AC%B8%EA%B0%80%20%EA%B3%84%EC%A0%95%20%EC%9A%94%EC%B2%AD&body=%EC%84%B1%EB%AA%85%2F%EC%86%8C%EC%86%8D%2F%EC%9A%A9%EB%8F%84%20%28%EA%B3%B5%EB%8F%99%20%EC%97%B0%EA%B5%AC%2F%EC%83%81%EB%8B%B4%2F%EC%88%98%EC%97%85%29%EC%99%80%20%EC%97%B0%EB%9D%BD%EC%B2%98%EB%A5%BC%20%EB%B3%B4%EB%82%B4%EC%A3%BC%EC%84%B8%EC%9A%94.">메일 보내기 (hyc6999@gmail.com)</a>
+    </p>
+  `;
+
+  const body = mode === "auth"
+    ? `
+      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) 계정으로 로그인한 분에게만 공유합니다.</p>
+      ${contact}
+      <p class="progress">계정을 발급받으셨다면 아래로 로그인해 주세요.</p>
+      <div class="row">
+        <label for="expem">이메일</label>
+        <input id="expem" value="${esc(expertGate.email)}" placeholder="you@example.com" />
+      </div>
+      <div class="row">
+        <label for="exppw">비밀번호</label>
+        <input id="exppw" type="password" value="${esc(expertGate.password)}" />
+      </div>
+      ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+      <div class="actions">
+        <button class="btn" data-act="expert-login" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "로그인"}</button>
+        <button class="btn ghost" data-act="expert-logout">로그아웃</button>
+        <a class="btn ghost" href="#/">홈으로</a>
+      </div>
+    `
+    : `
       <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) EXP- 코드 보유자에게만 공유합니다.</p>
-      <p class="progress">필요하시면 바이브스타틱스로 연락해 주십시오.</p>
-      <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
-      <p style="margin:0 0 14px">
-        <a class="btn ghost" href="mailto:hyc6999@gmail.com?subject=%5BAOP%5D%20EXP%20%EC%BD%94%EB%93%9C%20%EC%9A%94%EC%B2%AD&body=%EC%84%B1%EB%AA%85%2F%EC%86%8C%EC%86%8D%2F%EC%9A%A9%EB%8F%84%20%28%EC%97%B0%EA%B5%AC%2F%EC%83%81%EB%8B%B4%2F%EC%88%98%EC%97%85%29%EC%99%80%20%EC%97%B0%EB%9D%BD%EC%B2%98%EB%A5%BC%20%EB%B3%B4%EB%82%B4%EC%A3%BC%EC%84%B8%EC%9A%94.">메일 보내기 (hyc6999@gmail.com)</a>
-      </p>
+      ${contact}
       <p class="progress">이미 EXP- 코드를 받으셨다면 아래에 입력해 주세요.</p>
       <div class="row">
         <label for="expcode">EXP- 코드</label>
@@ -56,7 +82,11 @@ function expertGateView() {
         <button class="btn" data-act="expert-unlock" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "코드 확인"}</button>
         <a class="btn ghost" href="#/">홈으로</a>
       </div>
-    </div>
+    `;
+
+  return `<main>
+    <h1>전문가 자료</h1>
+    <div class="card">${body}</div>
   </main>`;
 }
 
@@ -473,10 +503,21 @@ async function render() {
     root.innerHTML = layout(maintenanceView());
     return;
   }
-  if ((r.startsWith("/guide") || r.startsWith("/expert")) && !expertUnlocked()) {
-    expertGate.next = r;
-    root.innerHTML = layout(expertGateView());
-    return;
+  if (r.startsWith("/guide") || r.startsWith("/expert")) {
+    if (!devMode()) {
+      let ok = false;
+      const mode = expertGateMode();
+      if (mode === "auth") {
+        ok = Boolean(await store.cloudSession());
+      } else {
+        ok = sessionStorage.getItem("aop.expert") === "1";
+      }
+      if (!ok) {
+        expertGate.next = r;
+        root.innerHTML = layout(expertGateView(mode));
+        return;
+      }
+    }
   }
   let inner = "";
   if (r === "/" || r === "") inner = home();
@@ -583,6 +624,8 @@ function onInput(e) {
   if (el.id === "code") take.code = el.value;
   if (el.id === "name") take.displayName = el.value;
   if (el.id === "expcode") expertGate.code = el.value;
+  if (el.id === "expem") expertGate.email = el.value;
+  if (el.id === "exppw") expertGate.password = el.value;
   if (el.id === "elabel") admin.label = el.value;
   if (el.id === "q") {
     admin.q = el.value;
@@ -619,6 +662,39 @@ async function onClick(e) {
   const btn = e.target.closest("[data-act]");
   if (!btn) return;
   const act = btn.dataset.act;
+  if (act === "expert-login") {
+    const em = document.getElementById("expem");
+    const pw = document.getElementById("exppw");
+    if (em) expertGate.email = em.value;
+    if (pw) expertGate.password = pw.value;
+    expertGate.err = "";
+    expertGate.busy = true;
+    await render();
+    try {
+      await store.cloudSignIn(expertGate.email, expertGate.password);
+      expertGate.busy = false;
+      const next = expertGate.next || "/expert";
+      expertGate.next = "";
+      location.hash = `#${next}`;
+      return;
+    } catch (err) {
+      expertGate.err = err.message || "로그인에 실패했습니다.";
+    }
+    expertGate.busy = false;
+    await render();
+    return;
+  }
+  if (act === "expert-logout") {
+    expertGate.err = "";
+    try {
+      await store.cloudSignOut();
+      sessionStorage.removeItem("aop.expert");
+    } catch (err) {
+      expertGate.err = err.message || "로그아웃에 실패했습니다.";
+    }
+    await render();
+    return;
+  }
   if (act === "expert-unlock") {
     const exp = document.getElementById("expcode");
     if (exp) expertGate.code = exp.value;

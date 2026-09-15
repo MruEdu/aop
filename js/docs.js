@@ -1,4 +1,4 @@
-import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260915j";
+import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260915k";
 
 const SCORE = scoringManualLines();
 const TOTAL_ITEMS = itemsFor("univ").length;
@@ -162,10 +162,9 @@ export const DOCS = [
       {
         heading: "전문가 코드",
         body: [
-          "관리자에게 기관·성명을 알리면 EXP- 코드를 받습니다. 학생·내담자에게 그 코드만 알려 주십시오.",
-          "그 코드로 들어온 세션이 해당 전문가 몫입니다. 공개 코드 AOP-OPEN과 섞이지 않습니다.",
-          "코드를 정지하면 이후 입장은 막히고, 이미 친 기록은 남습니다.",
-          "전문가 전용 로그인은 다음 판입니다. 지금은 결과번호와 관리자 목록으로 확인합니다.",
+          "공동 연구자/전문가 자료는 계정 로그인을 통해 공유합니다(수검자는 접근 불가).",
+          "계정이 필요하면 관리자에게 기관·성명·용도를 알려 계정을 발급받으십시오.",
+          "상담·수업용 EXP- 코드는 수검자 데이터를 묶는 ‘입장 코드’입니다. 공개 코드 AOP-OPEN과 섞이지 않습니다.",
         ],
       },
       {

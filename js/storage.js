@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260915j";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915j";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260915k";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915k";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -298,6 +298,21 @@ export const store = {
     if (!sb) throw new Error("클라우드가 연결되지 않았습니다.");
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
+  },
+
+  async cloudSignOut() {
+    const sb = await supabase();
+    if (!sb) return;
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+  },
+
+  async cloudSession() {
+    const sb = await supabase();
+    if (!sb) return null;
+    const { data, error } = await sb.auth.getSession();
+    if (error) throw error;
+    return data?.session ?? null;
   },
 
   sessionsToCsv(rows, includeName) {
