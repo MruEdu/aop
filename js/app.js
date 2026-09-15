@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915u";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915u";
+import { DOCS } from "./docs.js?v=20260915v";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915v";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915u";
-import { store, usingCloud } from "./storage.js?v=20260915u";
+} from "./items.js?v=20260915v";
+import { store, usingCloud } from "./storage.js?v=20260915v";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -29,6 +29,15 @@ function expertGateMode() {
   // Cloud(=Supabase 연결)에서는 연구자/전문가 계정 로그인으로 자료를 엽니다.
   // 로컬 모드에서는 기존 EXP- 코드로만 열 수 있습니다.
   return usingCloud() ? "auth" : "code";
+}
+
+function buildVersion() {
+  // app.js?v=YYYYMMDDx 를 버전으로 사용합니다.
+  try {
+    return new URL(import.meta.url).searchParams.get("v") || "";
+  } catch {
+    return "";
+  }
 }
 
 const expertGate = {
@@ -679,7 +688,13 @@ async function render() {
   if (!expertOk) {
     const mode = expertGateMode();
     if (mode === "auth") expertOk = Boolean(await store.cloudSession());
-    else expertOk = sessionStorage.getItem("aop.expert") === "1";
+    else {
+      const v = buildVersion();
+      const tok = sessionStorage.getItem("aop.expert") || "";
+      // 이전 버전에서 열어둔 상태는 자동 만료(업데이트 후 재해금 필요)
+      if (tok && v && tok !== v) sessionStorage.removeItem("aop.expert");
+      expertOk = Boolean(v) && sessionStorage.getItem("aop.expert") === v;
+    }
   }
   if (MAINTENANCE_MODE && !devMode() && !r.startsWith("/admin")) {
     root.innerHTML = layout(maintenanceView(), { expertOk });
@@ -944,7 +959,7 @@ async function onClick(e) {
       if (!found) expertGate.err = "코드가 없거나 정지되었습니다.";
       else if (found.kind !== "expert") expertGate.err = "EXP- 코드만 사용할 수 있습니다.";
       else {
-        sessionStorage.setItem("aop.expert", "1");
+        sessionStorage.setItem("aop.expert", buildVersion() || "1");
         expertGate.busy = false;
         const next = expertGate.next || "/expert";
         expertGate.next = "";
