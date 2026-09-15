@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915r";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915r";
+import { DOCS } from "./docs.js?v=20260915s";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915s";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915r";
-import { store, usingCloud } from "./storage.js?v=20260915r";
+} from "./items.js?v=20260915s";
+import { store, usingCloud } from "./storage.js?v=20260915s";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -188,7 +188,7 @@ function layout(inner, opts = {}) {
     <div class="shell">
       <header class="top">
         <a class="brand" href="#/" style="text-decoration:none;color:inherit">
-          ${brandMarkSvg()}<span class="brand-text">학업 방식 검사 (AOP)</span>
+          ${brandMarkSvg()}<span class="brand-text">학업 방식 검사 (AOP)</span><span class="ver-badge">v2.0</span>
           <small>${subtitle}</small>
         </a>
         <nav class="nav">

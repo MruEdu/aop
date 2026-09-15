@@ -49,6 +49,19 @@ button, input, select { font: inherit; }
 }
 .brand-text { display: inline-block; }
 .brand-mark { width: 22px; height: 22px; flex: 0 0 22px; }
+.ver-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #e5f0ff;
+  border: 1px solid #c8defd;
+  color: #1f4ea0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
 .brand small { display: block; font-family: "Noto Sans KR", sans-serif; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 3px; }
 .nav { display: flex; gap: 4px; flex-wrap: wrap; font-size: 13px; }
 .nav a {
