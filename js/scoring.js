@@ -1,4 +1,4 @@
-import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCORING_EXCLUDED_IDS, SCALES } from "./items.js?v=20260915c";
+import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCORING_EXCLUDED_IDS, SCALES } from "./items.js?v=20260915d";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -16,10 +16,12 @@ export function scoreAnswers(answers) {
     });
     scores[key] = Math.round(mean(vals) * 100) / 100;
   }
-  const attentionOk = Object.entries(ATTENTION_EXPECT).every(
-    ([id, expect]) => answers[Number(id)] === expect,
-  );
-  const lieOk = !LIE_IDS.some((id) => (answers[id] ?? 0) > 3);
+  const attPairs = Object.entries(ATTENTION_EXPECT).map(([id, expect]) => [Number(id), expect]);
+  const attPresent = attPairs.filter(([id]) => answers[id] != null);
+  const attentionOk = attPresent.length === 0 ? true : attPresent.every(([id, expect]) => answers[id] === expect);
+
+  const liePresent = LIE_IDS.filter((id) => answers[id] != null);
+  const lieOk = liePresent.length === 0 ? true : !liePresent.some((id) => (answers[id] ?? 0) > 3);
   return { scores, attentionOk, lieOk, reliable: attentionOk && lieOk };
 }
 

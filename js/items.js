@@ -1,6 +1,6 @@
 export const CONSENT_VERSION = "2026-09-15-v2.0";
 export const PUBLIC_CODE = "AOP-OPEN";
-export const TEST_NAME = "학업·업무 방식검사";
+export const TEST_NAME = "학업 방식 검사 v2.0";
 
 const LIKERT_DEFAULT = [
   { value: 1, label: "전혀 그렇지 않다" },
@@ -226,8 +226,8 @@ export const UNIV_ITEMS = [
   },
 ];
 
-export const ATTENTION_EXPECT = {};
-export const LIE_IDS = [];
+export const ATTENTION_EXPECT = { 37: 1, 65: 6, 77: 3, 78: 4 };
+export const LIE_IDS = [52, 76];
 
 export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33];
 

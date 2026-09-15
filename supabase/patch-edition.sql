@@ -8,7 +8,7 @@ alter table public.sessions
   drop constraint if exists sessions_edition_check;
 
 alter table public.sessions
-  add constraint sessions_edition_check check (edition in ('univ', 'school', 'adult'));
+  add constraint sessions_edition_check check (edition in ('univ', 'school', 'adult', 'elementary'));
 
 create index if not exists sessions_edition_idx on public.sessions (edition);
 

@@ -21,7 +21,7 @@ create table if not exists public.sessions (
   grade text not null,
   major text not null,
   region text not null,
-  edition text not null default 'univ' check (edition in ('univ', 'school', 'adult')),
+  edition text not null default 'univ' check (edition in ('univ', 'school', 'adult', 'elementary')),
   answers jsonb not null,
   scores jsonb not null,
   attention_ok boolean not null,

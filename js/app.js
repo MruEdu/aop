@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915c";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915c";
+import { DOCS } from "./docs.js?v=20260915d";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915d";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915c";
-import { store, usingCloud } from "./storage.js?v=20260915c";
+} from "./items.js?v=20260915d";
+import { store, usingCloud } from "./storage.js?v=20260915d";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 
@@ -44,12 +44,13 @@ function layout(inner) {
   const cloudNote = usingCloud()
     ? ""
     : " 현재는 이 브라우저에만 저장됩니다. 연구 보관은 Supabase 연결 후입니다.";
+  const subtitle = r.startsWith("/take/adult") ? "성인: 업무 방식 검사" : "초등용 · 중고등용 · 대학생용 · 성인용";
   return `
     <div class="shell">
       <header class="top">
         <a class="brand" href="#/" style="text-decoration:none;color:inherit">
           ${TEST_NAME}
-          <small>초등용 · 중고등용 · 대학생용 · 성인용</small>
+          <small>${subtitle}</small>
         </a>
         <nav class="nav">
           ${navLink("#/take", "검사 하기", r)}
@@ -63,6 +64,7 @@ function layout(inner) {
       ${inner}
       <footer class="footer">
         <p>© 2026 바이브스타틱스(VibeStatics) · 개발 현용찬(교육학 박사). All rights reserved.</p>
+        <p>개발: 바이브스타틱스 현용찬(교육학박사)</p>
         <p>초등용·중고등용·대학생용·성인용 ${TEST_NAME}. 문항·채점·해석의 무단 복제·배포를 금합니다.${cloudNote}</p>
       </footer>
     </div>`;
@@ -307,6 +309,7 @@ function resultHtml(session) {
         <button class="btn ghost" data-act="print">인쇄</button>
         <a class="btn ghost" href="#/guide">해석요강 보기</a>
       </div>
+      <p class="progress" style="margin-top:12px">개발: 바이브스타틱스 현용찬(교육학박사)</p>
     </div>`;
 }
 
