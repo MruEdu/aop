@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915i";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915i";
+import { DOCS } from "./docs.js?v=20260915j";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915j";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915i";
-import { store, usingCloud } from "./storage.js?v=20260915i";
+} from "./items.js?v=20260915j";
+import { store, usingCloud } from "./storage.js?v=20260915j";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -218,10 +218,10 @@ function developerNote() {
 
 function editionCards(longCopy) {
   return `
-    <div class="grid three">
+    <div class="grid three edition-cards">
       <div class="card">
         <h2 style="margin-top:0">초등용</h2>
-        <p>${longCopy ? `초등학생 눈높이 문항으로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "초등학생 문항."}</p>
+        <p>${longCopy ? `초등학생 눈높이 문항으로 되어 있습니다. 초등학교 4학년 이상을 권합니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "초등학생 문항."}</p>
         <a class="btn" href="#/take/elementary">${longCopy ? "초등용 검사 시작" : "초등용 시작"}</a>
       </div>
       <div class="card">
@@ -235,7 +235,7 @@ function editionCards(longCopy) {
         <a class="btn" href="#/take/univ">${longCopy ? "대학생용 검사 시작" : "대학생용 시작"}</a>
       </div>
     </div>
-    <div class="grid three" style="margin-top:14px">
+    <div class="grid three edition-cards" style="margin-top:14px">
       <div class="card">
         <h2 style="margin-top:0">성인용</h2>
         <p>${longCopy ? `업무·보고·팀 등 일의 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "업무·보고·팀 장면."}</p>
