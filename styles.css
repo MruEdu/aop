@@ -215,9 +215,21 @@ a.btn { text-decoration: none; }
 
 .bars { display: grid; gap: 14px; }
 .bar-row { display: grid; grid-template-columns: 110px 1fr 52px; gap: 10px; align-items: center; }
+.bar-mid { display: grid; gap: 6px; }
 .track { height: 12px; background: #ece7de; border-radius: 99px; overflow: hidden; }
 .fill { height: 100%; background: var(--accent); }
 .score { font-variant-numeric: tabular-nums; font-weight: 700; }
+.spectrum {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+.spectrum .low { text-align: left; }
+.spectrum .mid { text-align: center; white-space: nowrap; }
+.spectrum .high { text-align: right; }
 
 .table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .table th, .table td { border-bottom: 1px solid var(--line); text-align: left; padding: 8px 6px; vertical-align: top; }
@@ -241,7 +253,30 @@ a.btn { text-decoration: none; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 .progress { color: var(--muted); font-size: 13px; }
 .doc p { max-width: 46em; }
+.tips { margin: 10px 0 0; padding-left: 18px; }
+.tips li { margin: 0 0 8px; }
+.overload .lede { max-width: 52em; }
 
 @media (max-width: 640px) {
   .likert { grid-template-columns: repeat(3, 1fr); }
+  .bar-row { grid-template-columns: 92px 1fr 52px; }
+  .spectrum { grid-template-columns: 1fr; gap: 2px; }
+  .spectrum .low, .spectrum .mid, .spectrum .high { text-align: left; white-space: normal; }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+@media print {
+  body { background: #fff !important; }
+  .shell { max-width: none; padding: 0 !important; }
+  .nav { display: none !important; }
+  .actions, .btn { display: none !important; }
+  a { color: #000 !important; text-decoration: none !important; }
+  .card, .item { break-inside: avoid; page-break-inside: avoid; }
+  .banner.note { display: none !important; }
+  .footer { font-size: 10px; }
+  .spectrum { font-size: 11px; }
+  .bar-row { grid-template-columns: 96px 1fr 52px; }
 }

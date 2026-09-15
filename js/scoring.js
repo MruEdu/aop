@@ -5,7 +5,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260915m";
+} from "./items.js?v=20260915o";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -44,7 +44,7 @@ export function scoreAnswers(answers) {
 
 export function band(score) {
   if (score < 2.5) return "low";
-  if (score <= 4) return "mid";
+  if (score < 4) return "mid";
   return "high";
 }
 

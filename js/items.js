@@ -250,10 +250,34 @@ export const EXTREME_RESPONSE_COUNT_THRESHOLD = 24; // 1 또는 6이 28문항 �
 export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33];
 
 export const SCALES = {
-  ie: { key: "ie", name: "즉흥 실행", items: [1, 2, 3, 4, 5, 6, 7], reverse: [] },
-  sa: { key: "sa", name: "체계 분석", items: [8, 9, 10, 11, 12, 13, 14], reverse: [] },
-  wd: { key: "wd", name: "위임·위축", items: [15, 16, 17, 18, 19, 20, 21], reverse: [] },
-  io: { key: "io", name: "영향 지향", items: [22, 23, 24, 25, 26, 27, 28], reverse: [] },
+  ie: {
+    key: "ie",
+    name: "즉흥 실행",
+    items: [1, 2, 3, 4, 5, 6, 7],
+    reverse: [],
+    spectrum: { low: "계획 정돈 / 신중", mid: "[ 균형 / 조율 ]", high: "즉흥 실행 / 돌파" },
+  },
+  sa: {
+    key: "sa",
+    name: "체계 분석",
+    items: [8, 9, 10, 11, 12, 13, 14],
+    reverse: [],
+    spectrum: { low: "맥락 감각 / 유연", mid: "[ 균형 / 조율 ]", high: "체계 분석 / 구조" },
+  },
+  wd: {
+    key: "wd",
+    name: "위임·위축",
+    items: [15, 16, 17, 18, 19, 20, 21],
+    reverse: [],
+    spectrum: { low: "주체 안정 / 견딤", mid: "[ 일상 부하 ]", high: "과부하 위축 / 외주" },
+  },
+  io: {
+    key: "io",
+    name: "영향 지향",
+    items: [22, 23, 24, 25, 26, 27, 28],
+    reverse: [],
+    spectrum: { low: "내면 몰입 / 탐구", mid: "[ 상황 협력 ]", high: "영향 주도 / 리드" },
+  },
 };
 
 export const SCALE_ORDER = ["ie", "sa", "wd", "io"];
@@ -273,7 +297,7 @@ export function scoringManualLines() {
   return {
     means: "각 척도는 문항평균(1–6점)입니다. 1–28번 문항으로 네 축을 계산하며, 29–33번(쿤 5문항)은 연구용으로만 저장되고 채점·해석에서 제외됩니다.",
     keys: `즉흥 실행 ${displayList(SCALES.ie.items)}, 체계 분석 ${displayList(SCALES.sa.items)}, 위임·위축 ${displayList(SCALES.wd.items)}, 영향 지향 ${displayList(SCALES.io.items)}.`,
-    bands: "대략 2.5 미만 낮음, 2.5–4.0 보통, 4.0 초과 높음입니다. 이 구간은 참고용이며, 규준은 후속입니다.",
+    bands: "대략 2.5 미만 저점, 2.5–4.0 미만 중앙, 4.0 이상 고점입니다. 이 구간은 참고용이며, 규준은 후속입니다.",
     saNote: "",
     flags: "",
   };
