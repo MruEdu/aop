@@ -160,6 +160,23 @@ function navLink(href, label, r) {
   return `<a href="${href}" class="${on ? "active" : ""}">${label}</a>`;
 }
 
+function brandMarkSvg() {
+  return `
+    <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="aopG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2b6a57" />
+          <stop offset="1" stop-color="#1b3d32" />
+        </linearGradient>
+      </defs>
+      <path d="M12 2.2c4.4 0 8 3.6 8 8 0 5-3.3 9.6-8 11.6-4.7-2-8-6.6-8-11.6 0-4.4 3.6-8 8-8z" fill="url(#aopG)" opacity="0.18"/>
+      <path d="M12 3.6c3.6 0 6.4 2.9 6.4 6.4 0 4.1-2.7 8-6.4 9.7C8.3 18 5.6 14.1 5.6 10c0-3.5 2.8-6.4 6.4-6.4z" fill="none" stroke="url(#aopG)" stroke-width="1.4"/>
+      <path d="M12 6.7l1.9 3.8-3.8-1.9z" fill="url(#aopG)"/>
+      <circle cx="12" cy="10" r="2.1" fill="#fff" stroke="url(#aopG)" stroke-width="1.2"/>
+    </svg>
+  `;
+}
+
 function layout(inner, opts = {}) {
   const r = route();
   const cloudNote = usingCloud()
@@ -171,7 +188,7 @@ function layout(inner, opts = {}) {
     <div class="shell">
       <header class="top">
         <a class="brand" href="#/" style="text-decoration:none;color:inherit">
-          학업 방식 검사 (AOP)
+          ${brandMarkSvg()}<span class="brand-text">학업 방식 검사 (AOP)</span>
           <small>${subtitle}</small>
         </a>
         <nav class="nav">
@@ -288,32 +305,117 @@ function developerNote() {
     </div>`;
 }
 
+function editionMeta(key) {
+  if (key === "elementary") {
+    return {
+      badge: "초등",
+      theme: "elem",
+      icon: `
+        <svg class="eicon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6.5 18.4c3.2-.2 6.8-2.1 8.6-5.1 1.1-1.8 1.4-3.6 1.1-5.5-1.9.1-3.7.7-5.3 1.8-2.9 2-4.7 5.7-4.4 8.8z" fill="currentColor" opacity="0.25"/>
+          <path d="M6.3 18.7c.2-2.8 1.8-5.9 4.4-7.7 1.5-1 3.1-1.6 4.8-1.7-.1 1.6-.6 3.1-1.5 4.6-1.7 2.8-5 4.7-7.7 4.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M4.5 19.5c2.2-.3 4.3-1.4 5.7-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      `,
+    };
+  }
+  if (key === "school") {
+    return {
+      badge: "중고등",
+      theme: "school",
+      icon: `
+        <svg class="eicon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 7.3h10.1a2 2 0 0 1 2 2v8.7a1.7 1.7 0 0 0-1.7-1.7H6a2 2 0 0 1-2-2V9.3a2 2 0 0 1 2-2z" fill="currentColor" opacity="0.18"/>
+          <path d="M6 7.3h10.1a2 2 0 0 1 2 2v8.7a1.7 1.7 0 0 0-1.7-1.7H6a2 2 0 0 1-2-2V9.3a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <path d="M8 10.2h6.8M8 12.6h5.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      `,
+    };
+  }
+  if (key === "univ") {
+    return {
+      badge: "대학생",
+      theme: "univ",
+      icon: `
+        <svg class="eicon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 6.2 3.7 10.3 12 14.4l8.3-4.1L12 6.2z" fill="currentColor" opacity="0.18"/>
+          <path d="M3.7 10.3 12 6.2l8.3 4.1L12 14.4 3.7 10.3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M6.3 12.1v4.2c1.8 1.5 3.9 2.2 5.7 2.2s3.9-.7 5.7-2.2v-4.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      `,
+    };
+  }
+  return {
+    badge: "성인",
+    theme: "adult",
+    icon: `
+      <svg class="eicon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 5.8h10a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7.8a2 2 0 0 1 2-2z" fill="currentColor" opacity="0.16"/>
+        <path d="M7 5.8h10a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7.8a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M8.5 9.4h7M8.5 12.1h6.1M8.5 14.8h5.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    `,
+  };
+}
+
 function editionCards(longCopy) {
+  const cards = [
+    {
+      key: "elementary",
+      title: "초등용",
+      href: "#/take/elementary",
+      desc: longCopy
+        ? `초등학생 눈높이 문항으로 되어 있습니다. 초등학교 4학년 이상을 권합니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
+        : "초등학생 문항.",
+      cta: longCopy ? "초등용 검사 시작" : "초등용 시작",
+    },
+    {
+      key: "school",
+      title: "중고등용",
+      href: "#/take/school",
+      desc: longCopy
+        ? `숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
+        : "숙제·수행평가·모둠 장면.",
+      cta: longCopy ? "중고등용 검사 시작" : "중고등용 시작",
+    },
+    {
+      key: "univ",
+      title: "대학생용",
+      href: "#/take/univ",
+      desc: longCopy
+        ? `대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
+        : "대학 과제·팀·AI 장면.",
+      cta: longCopy ? "대학생용 검사 시작" : "대학생용 시작",
+    },
+    {
+      key: "adult",
+      title: "성인용",
+      href: "#/take/adult",
+      desc: longCopy
+        ? `업무·보고·프로젝트 등 일과 연구 장면의 언어로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
+        : "업무·보고·프로젝트 장면.",
+      cta: longCopy ? "성인용 검사 시작" : "성인용 시작",
+    },
+  ];
+
   return `
-    <div class="grid three edition-cards">
-      <div class="card">
-        <h2 style="margin-top:0">초등용</h2>
-        <p>${longCopy ? `초등학생 눈높이 문항으로 되어 있습니다. 초등학교 4학년 이상을 권합니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "초등학생 문항."}</p>
-        <a class="btn" href="#/take/elementary">${longCopy ? "초등용 검사 시작" : "초등용 시작"}</a>
-      </div>
-      <div class="card">
-        <h2 style="margin-top:0">중고등용</h2>
-        <p>${longCopy ? `숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "숙제·수행평가·모둠 장면."}</p>
-        <a class="btn" href="#/take/school">${longCopy ? "중고등용 검사 시작" : "중고등용 시작"}</a>
-      </div>
-      <div class="card">
-        <h2 style="margin-top:0">대학생용</h2>
-        <p>${longCopy ? `대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "대학 과제·팀·AI 장면."}</p>
-        <a class="btn" href="#/take/univ">${longCopy ? "대학생용 검사 시작" : "대학생용 시작"}</a>
-      </div>
+    <div class="edition-cards">
+      ${cards.map((c) => {
+        const m = editionMeta(c.key);
+        return `
+          <div class="card edition ${m.theme}">
+            <div class="edition-top">
+              <div class="badge">${esc(m.badge)}</div>
+              <div class="icon">${m.icon}</div>
+            </div>
+            <h2 style="margin-top:0">${esc(c.title)}</h2>
+            <p>${esc(c.desc)}</p>
+            <a class="btn" href="${c.href}">${esc(c.cta)}</a>
+          </div>
+        `;
+      }).join("")}
     </div>
-    <div class="grid three edition-cards" style="margin-top:14px">
-      <div class="card">
-        <h2 style="margin-top:0">성인용</h2>
-        <p>${longCopy ? `업무·보고·프로젝트 등 일과 연구 장면의 언어로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "업무·보고·프로젝트 장면."}</p>
-        <a class="btn" href="#/take/adult">${longCopy ? "성인용 검사 시작" : "성인용 시작"}</a>
-      </div>
-    </div>`;
+  `;
 }
 
 function home() {
