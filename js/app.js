@@ -25,6 +25,48 @@ function devMode() {
   return new URLSearchParams(location.search).get("mode") === "dev";
 }
 
+const MIDDLE_YEARS = ["1학년", "2학년", "3학년"];
+const HIGH_YEARS = ["1학년", "2학년", "3학년"];
+const HIGH_TYPES = ["전문계고", "일반/인문계고", "특목·자사고"];
+const UNIV_YEARS = ["1학년", "2학년", "3학년", "4학년"];
+const GRAD_LEVELS = ["석사 과정", "박사 과정"];
+const ADULT_ROLE_TYPES = ["일반", "전문직"];
+
+function buildGrade(ed, t) {
+  if (ed === "school") {
+    if (!t.schoolStage) return "";
+    if (t.schoolStage === "middle") {
+      if (!t.middleYear) return "";
+      return `중학교 ${t.middleYear}`;
+    }
+    if (t.schoolStage === "high") {
+      if (!t.highYear || !t.highType) return "";
+      return `고등학교 ${t.highYear}(${t.highType})`;
+    }
+    return "";
+  }
+  if (ed === "univ") {
+    if (!t.univLevel) return "";
+    if (t.univLevel === "undergrad") {
+      if (!t.univYear) return "";
+      return `대학(학부) ${t.univYear}`;
+    }
+    if (t.univLevel === "grad") {
+      if (!t.gradLevel) return "";
+      return `대학원 ${t.gradLevel}`;
+    }
+    return "";
+  }
+  return String(t.grade || "");
+}
+
+function buildAdultMajor(t) {
+  const base = String(t.major || "");
+  if (!base) return "";
+  if (t.adultRoleType === "전문직") return `${base} (전문직)`;
+  return base;
+}
+
 function maintenanceView() {
   return `<main>
     <h1>학업 방식 검사 v2.0 (AOP) 시스템 고도화 작업 안내</h1>
@@ -99,6 +141,14 @@ const take = {
   displayName: "",
   gender: "",
   grade: "",
+  schoolStage: "",
+  middleYear: "",
+  highType: "",
+  highYear: "",
+  univLevel: "",
+  univYear: "",
+  gradLevel: "",
+  adultRoleType: "일반",
   major: "",
   region: "",
   answers: {},
@@ -202,6 +252,14 @@ function syncTakeEdition(ed) {
   take.displayName = "";
   take.gender = "";
   take.grade = "";
+  take.schoolStage = "";
+  take.middleYear = "";
+  take.highType = "";
+  take.highYear = "";
+  take.univLevel = "";
+  take.univYear = "";
+  take.gradLevel = "";
+  take.adultRoleType = "일반";
   take.major = "";
   take.region = "";
   take.busy = false;
@@ -252,7 +310,37 @@ function takeView() {
       <input id="name" value="${esc(t.displayName)}" /></div>
       <div class="grid two">
         <div class="row"><label for="gender">성별</label><select id="gender">${options(GENDERS, t.gender)}</select></div>
-        <div class="row"><label for="grade">${esc(gLabel)}</label><select id="grade">${options(grades, t.grade)}</select></div>
+        ${
+          ed === "school"
+            ? `<div class="row"><label for="schoolStage">학교</label>
+                <select id="schoolStage">${options(["중학교", "고등학교"], t.schoolStage === "high" ? "고등학교" : t.schoolStage === "middle" ? "중학교" : "")}</select>
+              </div>
+              ${
+                t.schoolStage === "high"
+                  ? `<div class="row"><label for="highType">구분</label><select id="highType">${options(HIGH_TYPES, t.highType)}</select></div>
+                     <div class="row"><label for="highYear">학년</label><select id="highYear">${options(HIGH_YEARS, t.highYear)}</select></div>`
+                  : t.schoolStage === "middle"
+                    ? `<div class="row"><label for="middleYear">학년</label><select id="middleYear">${options(MIDDLE_YEARS, t.middleYear)}</select></div>`
+                    : ""
+              }`
+            : ed === "univ"
+              ? `<div class="row"><label for="univLevel">학력</label>
+                  <select id="univLevel">${options(["학부", "대학원"], t.univLevel === "grad" ? "대학원" : t.univLevel === "undergrad" ? "학부" : "")}</select>
+                </div>
+                ${
+                  t.univLevel === "grad"
+                    ? `<div class="row"><label for="gradLevel">과정</label><select id="gradLevel">${options(GRAD_LEVELS, t.gradLevel)}</select></div>`
+                    : t.univLevel === "undergrad"
+                      ? `<div class="row"><label for="univYear">학년</label><select id="univYear">${options(UNIV_YEARS, t.univYear)}</select></div>`
+                      : ""
+                }`
+              : `<div class="row"><label for="grade">${esc(gLabel)}</label><select id="grade">${options(grades, t.grade)}</select></div>`
+        }
+        ${
+          ed === "adult"
+            ? `<div class="row"><label for="adultRoleType">직업 구분</label><select id="adultRoleType">${options(ADULT_ROLE_TYPES, t.adultRoleType)}</select></div>`
+            : ""
+        }
         <div class="row"><label for="major">${esc(majorName)}</label><select id="major">${options(tracks, t.major)}</select></div>
         <div class="row"><label for="region">주 생활 지역</label><select id="region">${options(REGIONS, t.region)}</select></div>
       </div>
@@ -298,6 +386,29 @@ function resultHtml(session) {
   const warn = session.reliable
     ? ""
     : `<div class="banner warn">주의·허위 문항에 걸린 결과입니다. 아래 해석은 그대로 보여 드리며, 한 번 더 실시하시면 상담·연구에 쓰기 좋습니다.</div>`;
+  const showExpert = session.codeKind === "expert" || devMode();
+  const paradigmIds = [29, 30, 31, 32, 33];
+  const paradigmPairs = paradigmIds
+    .map((id) => {
+      const v = session.answers?.[id] ?? session.answers?.[String(id)];
+      return v == null ? null : { id, v };
+    })
+    .filter(Boolean);
+  const paradigmLine = paradigmPairs.length
+    ? paradigmPairs.map((p) => `q${p.id}=${p.v}`).join(" · ")
+    : "기록 없음";
+  const expertPanel = showExpert
+    ? `<div class="card">
+        <h2 style="margin-top:0">전문가 뷰어</h2>
+        <p class="progress">상담·연구용 지표(일반 수검자 화면에서는 숨김)</p>
+        <ul style="margin:0;padding-left:18px">
+          <li><b>reliable</b>: ${session.reliable ? "true" : "false"} (attention_ok=${session.attentionOk ? "true" : "false"}, lie_ok=${session.lieOk ? "true" : "false"})</li>
+          <li><b>패러다임(29~33) 원점수</b>: ${esc(paradigmLine)}</li>
+          <li><b>access_code</b>: ${esc(session.accessCode)} (kind=${esc(session.codeKind)})</li>
+          <li><b>consent_version</b>: ${esc(session.consentVersion || "")}</li>
+        </ul>
+      </div>`
+    : "";
   const summaryBody = summary.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
   return `
     ${warn}
@@ -315,15 +426,17 @@ function resultHtml(session) {
       <p class="progress">${esc(summary.snap)}</p>
       ${summaryBody}
     </div>
+    ${expertPanel}
     <div class="card">
       <p>문의·재열람용 결과번호</p>
       <div class="result-no">${esc(session.resultNo)}</div>
       <p class="progress">이 번호를 알려 주시면 기록을 찾을 수 있습니다. 이메일은 보내지 않습니다.</p>
       <div class="actions">
         <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">번호 복사</button>
-        <button class="btn ghost" data-act="print">인쇄</button>
+        <button class="btn ghost" data-act="print">PDF 저장</button>
         <a class="btn ghost" href="#/guide">해석요강 보기</a>
       </div>
+      <p class="progress">PDF 저장은 인쇄 창에서 <b>대상: PDF로 저장</b>을 선택하면 됩니다.</p>
       <p class="progress" style="margin-top:12px">개발: 바이브스타틱스 현용찬(교육학박사)</p>
     </div>`;
 }
@@ -464,6 +577,23 @@ function onChange(e) {
   const el = e.target;
   if (el.id === "gender") take.gender = el.value;
   if (el.id === "grade") take.grade = el.value;
+  if (el.id === "schoolStage") {
+    take.schoolStage = el.value === "고등학교" ? "high" : el.value === "중학교" ? "middle" : "";
+    take.middleYear = "";
+    take.highType = "";
+    take.highYear = "";
+  }
+  if (el.id === "middleYear") take.middleYear = el.value;
+  if (el.id === "highType") take.highType = el.value;
+  if (el.id === "highYear") take.highYear = el.value;
+  if (el.id === "univLevel") {
+    take.univLevel = el.value === "대학원" ? "grad" : el.value === "학부" ? "undergrad" : "";
+    take.univYear = "";
+    take.gradLevel = "";
+  }
+  if (el.id === "univYear") take.univYear = el.value;
+  if (el.id === "gradLevel") take.gradLevel = el.value;
+  if (el.id === "adultRoleType") take.adultRoleType = el.value;
   if (el.id === "major") take.major = el.value;
   if (el.id === "region") take.region = el.value;
 }
@@ -503,7 +633,14 @@ async function onClick(e) {
     if (gr) take.grade = gr.value;
     if (m) take.major = m.value;
     if (rg) take.region = rg.value;
-    if (!take.displayName.trim() || !take.gender || !take.grade || !take.major || !take.region) {
+    const ed = take.edition || takeEdition() || "univ";
+    const computedGrade = buildGrade(ed, take);
+    const computedMajor = ed === "adult" ? buildAdultMajor(take) : take.major;
+    if (computedMajor !== take.major) take.major = computedMajor;
+    if (computedGrade) take.grade = computedGrade;
+
+    const missing = !take.displayName.trim() || !take.gender || !take.grade || !take.major || !take.region;
+    if (missing) {
       take.err = "표시 이름과 인구통계를 모두 입력해 주십시오.";
     } else {
       take.err = "";
