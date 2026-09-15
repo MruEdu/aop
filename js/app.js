@@ -485,7 +485,14 @@ function resultHtml(session, opts = {}) {
   const bars = SCALE_ORDER.map((k) => `
     <div class="bar-row">
       <div>${SCALES[k].name}</div>
-      <div class="track"><div class="fill" style="width:${pct(session.scores[k])}"></div></div>
+      <div class="bar-mid">
+        <div class="track"><div class="fill" style="width:${pct(session.scores[k])}"></div></div>
+        <div class="spectrum">
+          <span class="low">${esc(SCALES[k].spectrum?.low || "")}</span>
+          <span class="mid">${esc(SCALES[k].spectrum?.mid || "")}</span>
+          <span class="high">${esc(SCALES[k].spectrum?.high || "")}</span>
+        </div>
+      </div>
       <div class="score">${session.scores[k].toFixed(2)}</div>
     </div>`).join("");
   const cards = lines.map((line) => `
