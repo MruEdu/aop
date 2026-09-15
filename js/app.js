@@ -40,7 +40,13 @@ function expertGateView() {
   return `<main>
     <h1>전문가 자료</h1>
     <div class="card">
-      <p class="lede">이 페이지는 EXP- 코드(공동 연구/전문가 코드) 보유자만 볼 수 있습니다.</p>
+      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) EXP- 코드 보유자에게만 공유합니다.</p>
+      <p class="progress">필요하시면 바이브스타틱스로 연락해 주십시오.</p>
+      <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
+      <p style="margin:0 0 14px">
+        <a class="btn ghost" href="mailto:hyc6999@gmail.com?subject=%5BAOP%5D%20EXP%20%EC%BD%94%EB%93%9C%20%EC%9A%94%EC%B2%AD&body=%EC%84%B1%EB%AA%85%2F%EC%86%8C%EC%86%8D%2F%EC%9A%A9%EB%8F%84%20%28%EC%97%B0%EA%B5%AC%2F%EC%83%81%EB%8B%B4%2F%EC%88%98%EC%97%85%29%EC%99%80%20%EC%97%B0%EB%9D%BD%EC%B2%98%EB%A5%BC%20%EB%B3%B4%EB%82%B4%EC%A3%BC%EC%84%B8%EC%9A%94.">메일 보내기 (hyc6999@gmail.com)</a>
+      </p>
+      <p class="progress">이미 EXP- 코드를 받으셨다면 아래에 입력해 주세요.</p>
       <div class="row">
         <label for="expcode">EXP- 코드</label>
         <input id="expcode" value="${esc(expertGate.code)}" placeholder="EXP-XXXXXX" />
