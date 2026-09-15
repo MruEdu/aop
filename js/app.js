@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915s";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915s";
+import { DOCS } from "./docs.js?v=20260915t";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915t";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915s";
-import { store, usingCloud } from "./storage.js?v=20260915s";
+} from "./items.js?v=20260915t";
+import { store, usingCloud } from "./storage.js?v=20260915t";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -419,6 +419,8 @@ function editionCards(longCopy) {
 }
 
 function home() {
+  const v = new URL(import.meta.url).searchParams.get("v") || "";
+  const shareUrl = `${location.origin}/${v ? `?v=${encodeURIComponent(v)}` : ""}`;
   return `
     <main class="hero">
       <div class="credit">초등용 · 중고등용 · 대학생용 · 성인용 · 개발 현용찬</div>
@@ -432,6 +434,7 @@ function home() {
         맞다·틀리다가 없습니다. 지금 시기에 가까운 쪽을 고르면 됩니다.
         결과는 즉흥 실행, 체계 분석, 위임·위축, 영향 지향 네 축으로 바로 보여 드립니다.
         약 10–15분, 공개 코드는 ${PUBLIC_CODE} 입니다. 문의할 때는 결과번호를 알려 주십시오.
+        <div class="version-line">업그레이드 버전(v2.0) · 배포 버전 ${esc(v || "latest")} · 업데이트가 안 보이면 <b>?v=</b>로 새로 열어 보세요: <span class="mono">${esc(shareUrl)}</span></div>
       </div>
       ${editionCards(true)}
       <div class="card">

@@ -245,6 +245,13 @@ a.btn { text-decoration: none; }
 }
 .banner.warn { background: var(--warn-bg); color: var(--warn); }
 .banner.note { background: var(--soft); color: var(--accent-2); }
+.version-line {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(221, 212, 198, 0.8);
+  color: var(--muted);
+}
+.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
 
 .steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 18px; font-size: 12px; color: var(--muted); }
 .steps span { padding: 4px 8px; border-radius: 999px; background: #efeae1; }
