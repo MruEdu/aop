@@ -171,7 +171,7 @@ function layout(inner, opts = {}) {
     <div class="shell">
       <header class="top">
         <a class="brand" href="#/" style="text-decoration:none;color:inherit">
-          ${TEST_NAME}
+          학업 방식 검사 (AOP)
           <small>${subtitle}</small>
         </a>
         <nav class="nav">
@@ -310,7 +310,7 @@ function editionCards(longCopy) {
     <div class="grid three edition-cards" style="margin-top:14px">
       <div class="card">
         <h2 style="margin-top:0">성인용</h2>
-        <p>${longCopy ? `업무·보고·팀 등 일의 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "업무·보고·팀 장면."}</p>
+        <p>${longCopy ? `업무·보고·프로젝트 등 일과 연구 장면의 언어로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.` : "업무·보고·프로젝트 장면."}</p>
         <a class="btn" href="#/take/adult">${longCopy ? "성인용 검사 시작" : "성인용 시작"}</a>
       </div>
     </div>`;
@@ -320,10 +320,10 @@ function home() {
   return `
     <main class="hero">
       <div class="credit">초등용 · 중고등용 · 대학생용 · 성인용 · 개발 현용찬</div>
-      <h1>여러분의 학업·업무 방식을<br>확인해 보세요</h1>
+      <h1>여러분의 학업 방식을<br>확인해 보세요</h1>
       <p class="lede">
-        공부든 일이든, 하려던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 하고 싶어지는 것(매력성). 무엇을 할지 분명할 때 이 셋이 살아납니다.
-        이 검사는 지금 방식을 확인하고, 그 방향으로 운영을 돕습니다.
+        배움과 탐구에서, 목표했던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 몰입하고 싶어지는 것(매력성). 무엇을 할지 분명할 때 이 셋이 살아납니다.
+        이 검사는 지금 나의 운영 방식을 확인하고, 단단한 성장을 돕습니다.
       </p>
       <div class="banner note">
         지금은 누구나 바로 해 보실 수 있습니다. 이후 실시 방법이 바뀌면 다시 공지합니다.
@@ -397,7 +397,7 @@ function takeView() {
     return `<main><h1>${who} 검사 시작</h1>${steps(0)}<div class="card">
       <p>교육학 박사 현용찬이 개발한 <strong>${who} ${TEST_NAME}</strong>입니다. 지금 방식을 확인하고, 더 효율적인 운영에 도움을 드리고자 합니다.</p>
       <p class="progress">이 검사는 대학생용 파일럿 데이터를 바탕으로 문항·축 구조를 정리하고, 표현을 판본별 장면(초등–성인)으로 확장한 버전입니다. 규준(전국 단위)과 일부 심화 검증은 후속 데이터로 계속 보강합니다.</p>
-      <p>공부든 일이든, 하려던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 하고 싶어지는 것(매력성)이 좋습니다. 무엇을 할지 분명할 때 이 셋이 살아납니다. 결과는 네 축 프로파일로 바로 보여 드리며, ${when} 다시 확인하실 수 있습니다.</p>
+      <p>배움과 탐구에서, 목표했던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 몰입하고 싶어지는 것(매력성)이 좋습니다. 무엇을 할지 분명할 때 이 셋이 살아납니다. 결과는 네 축 프로파일로 바로 보여 드리며, ${when} 다시 확인하실 수 있습니다.</p>
       <p>학번·전화·이메일은 받지 않습니다. 문의할 때는 결과번호가 필요합니다. 응답은 연구·상담을 위한 자료로 보관됩니다. 계속하면 이 안내에 동의하는 것입니다.</p>
       <div class="actions"><button class="btn" data-act="consent">동의하고 계속</button></div>
     </div></main>`;
