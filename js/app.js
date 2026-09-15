@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260915l";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915l";
+import { DOCS } from "./docs.js?v=20260915m";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260915m";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260915l";
-import { store, usingCloud } from "./storage.js?v=20260915l";
+} from "./items.js?v=20260915m";
+import { store, usingCloud } from "./storage.js?v=20260915m";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -48,17 +48,8 @@ const expertGate = {
   busy: false,
 };
 
-function expertGateView(mode) {
-  const contact = `
-    <p class="progress">신청 후 승인 방식으로 운영합니다. 필요하시면 바이브스타틱스로 연락해 주십시오.</p>
-    <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
-    <p class="progress">신청 메일을 보낸 뒤, 전화로 한 번 더 연락해 주세요.</p>
-  `;
-
-  const body = mode === "auth"
-    ? `
-      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) 계정으로 로그인한 분에게만 공유합니다.</p>
-      ${contact}
+function expertApplyFormHtml() {
+  return `
       <div class="card" style="margin:16px 0">
         <h2 style="margin-top:0">전문가 회원가입 신청</h2>
         <p class="progress">기본정보를 작성한 뒤 <b>신청 메일 보내기</b>를 누르세요. 승인 후 계정을 발급합니다. (아이디=이메일)</p>
@@ -78,6 +69,21 @@ function expertGateView(mode) {
           <button class="btn" data-act="expert-apply" ${expertGate.busy ? "disabled" : ""}>신청 메일 보내기</button>
         </div>
       </div>
+  `;
+}
+
+function expertGateView(mode) {
+  const contact = `
+    <p class="progress">신청 후 승인 방식으로 운영합니다. 필요하시면 바이브스타틱스로 연락해 주십시오.</p>
+    <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
+    <p class="progress">신청 메일을 보낸 뒤, 전화로 한 번 더 연락해 주세요.</p>
+  `;
+
+  const body = mode === "auth"
+    ? `
+      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) 계정으로 로그인한 분에게만 공유합니다.</p>
+      ${contact}
+      ${expertApplyFormHtml()}
 
       <p class="progress">이미 계정을 발급받으셨다면 아래로 로그인해 주세요.</p>
       <div class="row">
@@ -98,6 +104,7 @@ function expertGateView(mode) {
     : `
       <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) EXP- 코드 보유자에게만 공유합니다.</p>
       ${contact}
+      ${expertApplyFormHtml()}
       <p class="progress">이미 EXP- 코드를 받으셨다면 아래에 입력해 주세요.</p>
       <div class="row">
         <label for="expcode">EXP- 코드</label>
@@ -153,12 +160,13 @@ function navLink(href, label, r) {
   return `<a href="${href}" class="${on ? "active" : ""}">${label}</a>`;
 }
 
-function layout(inner) {
+function layout(inner, opts = {}) {
   const r = route();
   const cloudNote = usingCloud()
     ? ""
     : " 현재는 이 브라우저에만 저장됩니다. 연구 보관은 Supabase 연결 후입니다.";
   const subtitle = r.startsWith("/take/adult") ? "성인: 업무 방식 검사" : "초등용 · 중고등용 · 대학생용 · 성인용";
+  const expertOk = Boolean(opts.expertOk);
   return `
     <div class="shell">
       <header class="top">
@@ -170,7 +178,7 @@ function layout(inner) {
           ${navLink("#/take", "검사 하기", r)}
           ${navLink("#/lookup", "결과조회", r)}
           ${navLink("#/manual", "사용설명서", r)}
-          ${navLink("#/guide", "해석요강", r)}
+          ${expertOk ? navLink("#/guide", "해석요강", r) : ""}
           ${navLink("#/expert", "전문가", r)}
           ${navLink("#/admin", "관리자", r)}
         </nav>
@@ -275,7 +283,7 @@ function developerNote() {
         <strong>현용찬</strong>
         <span>교육학 박사 · 제주대·남서울대 출강 · 바이브스타틱스 대표</span>
         <span>저서: 기적의학습멘탈수업(2025), AI주니어 길들이기</span>
-        <span>논문: 텍스트마이닝을 이용한 청소년의 학습상담 호소문제 분석(2022), 텍스트 마이닝 방법을 활용한 국내 학습 상담 연구 동향 분석(2022), U&I 학습성격 진단 도구의 통계적 타당성 검증 및 심리측정학적 적절성 검토(2026) 등 10여편(공동 포함 11편)</span>
+        <span>논문: 텍스트마이닝을 이용한 청소년의 학습상담 호소문제 분석(2022), 텍스트 마이닝 방법을 활용한 국내 학습 상담 연구 동향 분석(2022), U&I 학습성격 진단 도구의 통계적 타당성 검증 및 심리측정학적 적절성 검토(2026) 등 10여편</span>
       </div>
     </div>`;
 }
@@ -372,7 +380,7 @@ function takeView() {
   if (!ed) {
     return `<main><h1>검사 하기</h1>
       <p class="lede">초등학생·중고등학생·대학생·성인, 지금 해당하는 쪽을 고르면 됩니다.</p>
-      ${editionCards(false)}
+      ${editionCards(true)}
       ${developerNote()}
     </main>`;
   }
@@ -468,7 +476,8 @@ function takeView() {
   </main>`;
 }
 
-function resultHtml(session) {
+function resultHtml(session, opts = {}) {
+  const expertOk = Boolean(opts.expertOk);
   const lines = profileLines(session.scores, session.edition);
   const preface = resultPreface(session.edition);
   const summary = summaryInterpret(session.scores, session.edition);
@@ -509,7 +518,7 @@ function resultHtml(session) {
       <div class="actions">
         <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">번호 복사</button>
         <button class="btn ghost" data-act="print">인쇄</button>
-        <a class="btn ghost" href="#/guide">해석요강 보기</a>
+        ${expertOk ? `<a class="btn ghost" href="#/guide">해석요강 보기</a>` : `<a class="btn ghost" href="#/expert">전문가 자료(신청/로그인)</a>`}
       </div>
       <p class="progress" style="margin-top:12px">개발: 바이브스타틱스 현용찬(교육학박사)</p>
     </div>`;
@@ -533,24 +542,22 @@ const admin = {
 async function render() {
   const root = document.getElementById("root");
   const r = route();
+  let expertOk = devMode();
+  if (!expertOk) {
+    const mode = expertGateMode();
+    if (mode === "auth") expertOk = Boolean(await store.cloudSession());
+    else expertOk = sessionStorage.getItem("aop.expert") === "1";
+  }
   if (MAINTENANCE_MODE && !devMode() && !r.startsWith("/admin")) {
-    root.innerHTML = layout(maintenanceView());
+    root.innerHTML = layout(maintenanceView(), { expertOk });
     return;
   }
   if (r.startsWith("/guide") || r.startsWith("/expert")) {
-    if (!devMode()) {
-      let ok = false;
+    if (!expertOk) {
       const mode = expertGateMode();
-      if (mode === "auth") {
-        ok = Boolean(await store.cloudSession());
-      } else {
-        ok = sessionStorage.getItem("aop.expert") === "1";
-      }
-      if (!ok) {
-        expertGate.next = r;
-        root.innerHTML = layout(expertGateView(mode));
-        return;
-      }
+      expertGate.next = r;
+      root.innerHTML = layout(expertGateView(mode), { expertOk });
+      return;
     }
   }
   let inner = "";
@@ -559,16 +566,16 @@ async function render() {
   else if (r.startsWith("/result/")) {
     const no = decodeURIComponent(r.slice(8));
     inner = `<main><h1>결과</h1><p>불러오는 중…</p></main>`;
-    root.innerHTML = layout(inner);
+    root.innerHTML = layout(inner, { expertOk });
     try {
       const s = await store.getByResultNo(no);
       inner = s
-        ? `<main><h1>결과</h1>${resultHtml(s)}</main>`
+        ? `<main><h1>결과</h1>${resultHtml(s, { expertOk })}</main>`
         : `<main><h1>결과</h1><p>결과번호에 해당하는 기록이 없습니다.</p></main>`;
     } catch (e) {
       inner = `<main><h1>결과</h1><p class="err">${esc(e.message || e)}</p></main>`;
     }
-    root.innerHTML = layout(inner);
+    root.innerHTML = layout(inner, { expertOk });
     return;
   } else if (r.startsWith("/lookup")) {
     inner = `<main><h1>결과 조회</h1><div class="card">
@@ -581,7 +588,7 @@ async function render() {
     const page = DOCS.find((d) => r === "/" + d.id);
     inner = page ? docView(page) : home();
   }
-  root.innerHTML = layout(inner);
+  root.innerHTML = layout(inner, { expertOk });
 }
 
 async function adminView() {
