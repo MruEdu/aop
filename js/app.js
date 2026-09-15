@@ -99,6 +99,20 @@ const UNIV_YEARS = ["1학년", "2학년", "3학년", "4학년"];
 const GRAD_LEVELS = ["석사 과정", "박사 과정"];
 const ADULT_ROLE_TYPES = ["일반", "전문직"];
 
+function bucketRegion(province) {
+  const p = String(province || "").trim();
+  if (!p) return "";
+  if (p === "서울") return "서울";
+  if (p === "경기" || p === "인천") return "경기 / 인천";
+  if (p === "강원") return "강원";
+  if (p === "대전" || p === "충남" || p === "충북" || p === "세종") return "충청 / 대전 / 세종";
+  if (p === "광주" || p === "전남" || p === "전북") return "전라 / 광주";
+  if (p === "대구" || p === "부산" || p === "경북" || p === "경남" || p === "울산") return "경상 / 대구 / 부산 / 울산";
+  if (p === "제주") return "제주 / 기타";
+  // 방어: 값이 예상 밖이면 원값 보존
+  return p;
+}
+
 function buildDisplayGrade(ed, t) {
   if (ed === "school") {
     if (t.schoolLevel === "중학교" && t.schoolYear) return `중학교 ${t.schoolYear}`;
@@ -323,7 +337,7 @@ function takeView() {
             : ""
         }
         <div class="row"><label for="major">${esc(majorName)}</label><select id="major">${options(tracks, t.major)}</select></div>
-        <div class="row"><label for="region">주 생활 지역(시·도)</label><select id="region">${options(REGIONS, t.region)}</select></div>
+        <div class="row"><label for="region">주 생활 지역(시·도)</label><select id="region">${options(REGIONS, t.regionProvince)}</select></div>
       </div>
       <div class="actions"><button class="btn" data-act="to-items">문항으로</button></div>
     </div></main>`;
@@ -550,8 +564,8 @@ function onChange(e) {
   if (el.id === "adultRoleType") take.adultRoleType = el.value;
   if (el.id === "major") take.major = el.value;
   if (el.id === "region") {
-    take.region = el.value;
     take.regionProvince = el.value;
+    take.region = bucketRegion(take.regionProvince);
   }
 }
 
@@ -589,8 +603,8 @@ async function onClick(e) {
     if (g) take.gender = g.value;
     if (gr) take.grade = gr.value;
     if (m) take.major = m.value;
-    if (rg) take.region = rg.value;
-    take.regionProvince = take.region;
+    if (rg) take.regionProvince = rg.value;
+    take.region = bucketRegion(take.regionProvince);
 
     const ed = take.edition || takeEdition() || "univ";
     const displayGrade = buildDisplayGrade(ed, take);
