@@ -229,6 +229,8 @@ export const UNIV_ITEMS = [
 export const ATTENTION_EXPECT = {};
 export const LIE_IDS = [];
 
+export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33];
+
 export const SCALES = {
   ie: { key: "ie", name: "즉흥 실행", items: [1, 2, 3, 4, 5, 6, 7], reverse: [] },
   sa: { key: "sa", name: "체계 분석", items: [8, 9, 10, 11, 12, 13, 14], reverse: [] },

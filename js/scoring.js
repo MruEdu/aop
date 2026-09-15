@@ -1,4 +1,4 @@
-import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCALES } from "./items.js?v=20260915b";
+import { ATTENTION_EXPECT, LIE_IDS, SCALE_ORDER, SCORING_EXCLUDED_IDS, SCALES } from "./items.js?v=20260915c";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -8,7 +8,8 @@ export function scoreAnswers(answers) {
   const scores = {};
   for (const key of SCALE_ORDER) {
     const spec = SCALES[key];
-    const vals = spec.items.map((id) => {
+    const ids = spec.items.filter((id) => !SCORING_EXCLUDED_IDS.includes(id));
+    const vals = ids.map((id) => {
       const v = answers[id];
       if (v == null) throw new Error("missing item " + id);
       return v;
