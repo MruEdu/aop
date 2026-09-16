@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916u";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916u";
+import { DOCS } from "./docs.js?v=20260916v";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916v";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916u";
-import { store, usingCloud } from "./storage.js?v=20260916u";
-import { scoreAnswers } from "./scoring.js?v=20260916u";
+} from "./items.js?v=20260916v";
+import { store, usingCloud } from "./storage.js?v=20260916v";
+import { scoreAnswers } from "./scoring.js?v=20260916v";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -719,6 +719,7 @@ function resultHtml(session, opts = {}) {
       <div class="card">
         <h2 style="margin-top:0">국면 체크(현재 단계)</h2>
         <p class="progress">29–33번은 채점에서 제외되며, 쿤(Paradigm) 변화 모델을 참고해 “지금 ${scene.work}의 변화 단계”를 돌아보기 위한 성찰 질문입니다.</p>
+        <p class="progress">쿤은 변화가 “익숙한 규칙이 잘 굴러감 → 예외가 쌓임 → 전환기 → 새 시도 → 새 정착”처럼 이어질 수 있다고 보았습니다.</p>
         <p>${lead}</p>
         ${qHtml}
       </div>
