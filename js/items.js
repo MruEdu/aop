@@ -167,7 +167,7 @@ export const ELEMENTARY_ITEMS = [
   },
   // [6] 점검 문항 - 5문항 (채점 제외)
   { id: 34, axis: "CHECK", check_type: "attention", text: "시스템 점검용입니다. 3번을 선택해 주세요." },
-  { id: 35, axis: "CHECK", check_type: "attention", text: "시스템 점검용입니다. 4번을 선택해 주세요." },
+  { id: 35, axis: "CHECK", check_type: "attention", text: "시스템 점검용입니다. 5번을 선택해 주세요." },
   { id: 36, axis: "CHECK", check_type: "lie", text: "나는 단 한 번도 거짓말한 적이 없다." },
   { id: 37, axis: "CHECK", check_type: "lie", text: "나는 숙제를 한 번도 미룬 적이 없다." },
   { id: 38, axis: "CHECK", check_type: "attention", text: "시스템 점검용입니다. 1번을 선택해 주세요." },
@@ -248,7 +248,7 @@ export const UNIV_ITEMS = [
     id: 35,
     axis: "CHECK",
     check_type: "attention",
-    text: "시스템 점검용 문항입니다. 4번을 선택해 주세요.",
+    text: "시스템 점검용 문항입니다. 5번을 선택해 주세요.",
   },
   {
     id: 36,
@@ -271,7 +271,7 @@ export const UNIV_ITEMS = [
 ];
 
 // v2.0+에서는 점검 문항을 별도 번호로 둡니다. (기존 1판의 주의·허위 문항 번호 37/65/77/78, 52/76과는 무관)
-export const ATTENTION_EXPECT = { 34: 3, 35: 4, 38: 1 };
+export const ATTENTION_EXPECT = { 34: 3, 35: 5, 38: 1 };
 export const LIE_IDS = [36, 37];
 export const LIE_HIGH_THRESHOLD = 5; // 5~6은 '비현실적 미화' 가능성으로 표시
 

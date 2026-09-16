@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916y";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916y";
+import { DOCS } from "./docs.js?v=20260916z";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916z";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916y";
-import { store, usingCloud } from "./storage.js?v=20260916y";
-import { scoreAnswers } from "./scoring.js?v=20260916y";
+} from "./items.js?v=20260916z";
+import { store, usingCloud } from "./storage.js?v=20260916z";
+import { scoreAnswers } from "./scoring.js?v=20260916z";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -596,6 +596,7 @@ function resultHtml(session, opts = {}) {
     attentionOk: session.attentionOk,
     lieOk: session.lieOk,
     reliable: session.reliable,
+    reliabilityTier: null,
   };
   // 기존 완료 세션도 최신 로직으로 신뢰도를 재계산해 표시(저장값은 유지)
   try {
@@ -605,6 +606,7 @@ function resultHtml(session, opts = {}) {
         attentionOk: rescored.attentionOk,
         lieOk: rescored.lieOk,
         reliable: rescored.reliable,
+        reliabilityTier: rescored.reliabilityTier,
       };
     }
   } catch {
@@ -651,6 +653,9 @@ function resultHtml(session, opts = {}) {
   const cards = lines.map((line) => `
     <div class="card"><h2 style="margin-top:0">${esc(line.name)} · ${esc(line.band)} (${line.score.toFixed(2)})</h2>
     <p>${esc(line.text)}</p></div>`).join("");
+  const trust = reliability.reliable
+    ? `<div class="banner ok">응답 신뢰도: <b>${esc(reliability.reliabilityTier || "약간 신뢰")}</b></div>`
+    : "";
   const warn = reliability.reliable
     ? ""
     : `<div class="banner warn">응답 과정에서 일부 문항 간 편차가 감지된 결과입니다. 현재 모습을 참고하실 수 있도록 해석은 그대로 제공해 드리며, 나에게 꼭 맞는 정밀한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
@@ -728,6 +733,7 @@ function resultHtml(session, opts = {}) {
   })();
 
   return `
+    ${trust}
     ${warn}
     <p>${esc(session.displayName)} · ${esc(editionLabel(session.edition))} · ${esc(session.grade)} · ${esc(session.major)}</p>
     <div class="card">
