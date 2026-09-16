@@ -96,7 +96,7 @@ export const REGIONS = [
   "세종",
 ];
  
-// 전 판본 33문항 고정(1–33). 29–33은 연구용(쿤) 문항이며 채점에서 제외됩니다.
+// 전 판본 37문항 고정(1–37). 29–33은 연구용(쿤), 34–37은 점검 문항이며 채점에서 제외됩니다.
 export const ELEMENTARY_ITEMS = [
   // [1] 즉흥 실행 (IE) - 7문항
   { id: 1, axis: "IE", text: "숙제나 공부를 할 때 미리 계획하기보다 그때그때 내 마음 내키는 대로 시작한다." },
@@ -165,6 +165,11 @@ export const ELEMENTARY_ITEMS = [
     paradigm_type: "new_normal",
     text: "나에게 꼭 맞는 새로운 공부 방법을 찾아내서, 이전보다 훨씬 자신감 있게 실력이 늘고 있다.",
   },
+  // [6] 점검 문항 - 4문항 (채점 제외)
+  { id: 34, axis: "CHECK", check_type: "attention", text: "시스템 점검용입니다. 3번을 선택해 주세요." },
+  { id: 35, axis: "CHECK", check_type: "attention", text: "시스템 점검용입니다. 4번을 선택해 주세요." },
+  { id: 36, axis: "CHECK", check_type: "lie", text: "나는 단 한 번도 거짓말한 적이 없다." },
+  { id: 37, axis: "CHECK", check_type: "lie", text: "나는 숙제를 한 번도 미룬 적이 없다." },
 ];
 
 export const UNIV_ITEMS = [
@@ -231,11 +236,37 @@ export const UNIV_ITEMS = [
     paradigm_type: "new_normal",
     text: "나에게 꼭 맞는 새로운 학습 방식을 찾아, 이전보다 자신감 있게 성과가 나고 있다.",
   },
+  // CHECK 34–37 (채점 제외): 주의집중/허위(미화) 점검
+  {
+    id: 34,
+    axis: "CHECK",
+    check_type: "attention",
+    text: "시스템 점검용 문항입니다. 3번을 선택해 주세요.",
+  },
+  {
+    id: 35,
+    axis: "CHECK",
+    check_type: "attention",
+    text: "시스템 점검용 문항입니다. 4번을 선택해 주세요.",
+  },
+  {
+    id: 36,
+    axis: "CHECK",
+    check_type: "lie",
+    text: "나는 단 한 번도 거짓말한 적이 없다.",
+  },
+  {
+    id: 37,
+    axis: "CHECK",
+    check_type: "lie",
+    text: "나는 늘 해야 할 일을 미루지 않고 바로 한다.",
+  },
 ];
 
-// v2.0은 33문항(q1~q33) 구조이므로, 기존(1판) 주의·허위 문항 번호(37/65/77/78, 52/76)는 사용하지 않습니다.
-export const ATTENTION_EXPECT = {};
-export const LIE_IDS = [];
+// v2.0+에서는 점검 문항을 별도 번호로 둡니다. (기존 1판의 주의·허위 문항 번호 37/65/77/78, 52/76과는 무관)
+export const ATTENTION_EXPECT = { 34: 3, 35: 4 };
+export const LIE_IDS = [36, 37];
+export const LIE_HIGH_THRESHOLD = 5; // 5~6은 '비현실적 미화' 가능성으로 표시
 
 // v2.0 검증: 1~28 채점 문항 내 일관성(절댓값 차이 >= 2면 비일관) 및 극단반응 탐지
 export const CONSISTENCY_PAIRS = [
@@ -247,7 +278,7 @@ export const CONSISTENCY_PAIRS = [
 export const CONSISTENCY_DIFF_THRESHOLD = 2;
 export const EXTREME_RESPONSE_COUNT_THRESHOLD = 24; // 1 또는 6이 28문항 중 너무 많으면 비정상 응답으로 간주
 
-export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33];
+export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33, 34, 35, 36, 37];
 
 export const SCALES = {
   ie: {
@@ -295,7 +326,7 @@ export function displayList(ids) {
 
 export function scoringManualLines() {
   return {
-    means: "각 척도는 문항평균(1–6점)입니다. 1–28번 문항으로 네 축을 계산하며, 29–33번(쿤 5문항)은 연구용으로만 저장되고 채점·해석에서 제외됩니다.",
+    means: "각 척도는 문항평균(1–6점)입니다. 1–28번 문항으로 네 축을 계산하며, 29–33번(쿤 5문항)과 34–37번(점검 문항)은 저장만 되고 채점·해석에서 제외됩니다.",
     keys: `즉흥 실행 ${displayList(SCALES.ie.items)}, 체계 분석 ${displayList(SCALES.sa.items)}, 위임·위축 ${displayList(SCALES.wd.items)}, 영향 지향 ${displayList(SCALES.io.items)}.`,
     bands: "대략 2.5 미만 저점, 2.5–4.0 미만 중앙, 4.0 이상 고점입니다. 이 구간은 참고용이며, 규준은 후속입니다.",
     saNote: "",
@@ -337,6 +368,7 @@ const SCHOOL_TEXT = {
   31: "공부 방법을 바꿔야 할 것 같은데, 어디서부터 어떻게 시작해야 할지 몰라 답답하다.",
   32: "지금까지 해보지 않았던 새로운 공부 방법이나 도구를 과감하게 시도해보는 중이다.",
   33: "나에게 꼭 맞는 새로운 공부 방법을 찾아, 이전보다 자신감 있게 실력이 늘고 있다.",
+  37: "나는 숙제나 해야 할 공부를 미루지 않고 바로 하는 편이다.",
 };
 
 const ADULT_TEXT = {
@@ -373,6 +405,7 @@ const ADULT_TEXT = {
   31: "일·학습 방식을 바꿔야 할 것 같은데, 어디서부터 어떻게 시작해야 할지 몰라 답답하다.",
   32: "지금까지 해보지 않았던 새로운 방식이나 도구를 과감하게 시도해보는 중이다.",
   33: "나에게 꼭 맞는 새로운 방식을 찾아, 이전보다 자신감 있게 성과가 나고 있다.",
+  37: "나는 해야 할 업무를 미루지 않고 바로 처리하는 편이다.",
 };
 
 function applyTextMap(items, map) {

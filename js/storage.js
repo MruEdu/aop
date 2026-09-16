@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260915v";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915v";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260916a";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260916a";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -316,7 +316,16 @@ export const store = {
   },
 
   sessionsToCsv(rows, includeName) {
-    const ids = Array.from({ length: 33 }, (_, i) => i + 1);
+    const maxId = rows.reduce((acc, s) => {
+      const a = s.answers || {};
+      for (const k of Object.keys(a)) {
+        const n = Number(k);
+        if (Number.isFinite(n) && n > acc) acc = n;
+      }
+      return acc;
+    }, 0);
+    const n = Math.max(33, maxId || 0);
+    const ids = Array.from({ length: n }, (_, i) => i + 1);
     const itemCols = ids.map((id) => `q${id}`);
     const header = [
       "result_no",
