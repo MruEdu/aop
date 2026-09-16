@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916g";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916g";
+import { DOCS } from "./docs.js?v=20260916e";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916e";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,22 +15,14 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916g";
-import { store, usingCloud } from "./storage.js?v=20260916g";
+} from "./items.js?v=20260916e";
+import { store, usingCloud } from "./storage.js?v=20260916e";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
 
 function devMode() {
   return new URLSearchParams(location.search).get("mode") === "dev";
-}
-
-function langUrl(lang) {
-  const l = String(lang || "").toLowerCase();
-  const v = UI_LANGS.includes(l) ? l : "ko";
-  const u = new URL(location.href);
-  u.searchParams.set("lang", v);
-  return u.pathname + u.search + u.hash;
 }
 
 function expertGateMode() {
@@ -46,135 +38,6 @@ function buildVersion() {
   } catch {
     return "";
   }
-}
-
-const UI_LANGS = ["ko", "en", "mn"]; // Mongolian = Cyrillic
-function uiLang() {
-  const q = new URLSearchParams(location.search).get("lang") || "";
-  const saved = localStorage.getItem("aop.lang") || "";
-  const v = (q || saved || "ko").toLowerCase();
-  return UI_LANGS.includes(v) ? v : "ko";
-}
-function setUiLang(lang) {
-  const l = String(lang || "").toLowerCase();
-  const v = UI_LANGS.includes(l) ? l : "ko";
-  localStorage.setItem("aop.lang", v);
-  const u = new URL(location.href);
-  u.searchParams.set("lang", v);
-  history.replaceState(null, "", u.pathname + u.search + u.hash);
-}
-function t(key) {
-  const KO = {
-    "nav.take": "검사 하기",
-    "nav.lookup": "결과조회",
-    "nav.manual": "사용설명서",
-    "nav.guide": "해석요강",
-    "nav.expert": "전문가",
-    "nav.admin": "관리자",
-    "btn.applyOpenMail": "신청 메일 열기",
-    "btn.login": "로그인",
-    "btn.logout": "로그아웃",
-    "btn.home": "홈으로",
-    "btn.consent": "동의하고 계속",
-    "btn.checkCode": "코드 확인",
-    "btn.toItems": "문항으로",
-    "btn.submit": "제출하고 결과 보기",
-    "btn.saving": "저장 중…",
-    "btn.copyNo": "번호 복사",
-    "btn.pdf": "PDF 저장",
-    "btn.viewGuide": "해석요강 보기",
-    "btn.expertApplyLogin": "전문가 자료(신청/로그인)",
-    "btn.view": "보기",
-    "btn.enter": "들어가기",
-    "btn.issueExpertCode": "전문가 코드 발급",
-    "btn.csvResearch": "연구 CSV (이름 제외)",
-    "btn.csvCounsel": "상담 CSV (이름 포함)",
-    "btn.disable": "정지",
-    "btn.enable": "재활성",
-    "cta.elementary": "초등용 시작",
-    "cta.elementary.long": "초등용 검사 시작",
-    "cta.school": "중고등용 시작",
-    "cta.school.long": "중고등용 검사 시작",
-    "cta.univ": "대학생용 시작",
-    "cta.univ.long": "대학생용 검사 시작",
-    "cta.adult": "성인용 시작",
-    "cta.adult.long": "성인용 검사 시작",
-  };
-  const EN = {
-    "nav.take": "Take test",
-    "nav.lookup": "Results",
-    "nav.manual": "Manual",
-    "nav.guide": "Guide",
-    "nav.expert": "Expert",
-    "nav.admin": "Admin",
-    "btn.applyOpenMail": "Open application email",
-    "btn.login": "Sign in",
-    "btn.logout": "Sign out",
-    "btn.home": "Home",
-    "btn.consent": "Agree & continue",
-    "btn.checkCode": "Check code",
-    "btn.toItems": "Continue",
-    "btn.submit": "Submit & view results",
-    "btn.saving": "Saving…",
-    "btn.copyNo": "Copy number",
-    "btn.pdf": "Save PDF",
-    "btn.viewGuide": "View guide",
-    "btn.expertApplyLogin": "Expert (apply/sign in)",
-    "btn.view": "View",
-    "btn.enter": "Sign in",
-    "btn.issueExpertCode": "Issue expert code",
-    "btn.csvResearch": "Research CSV (no names)",
-    "btn.csvCounsel": "Counseling CSV (with names)",
-    "btn.disable": "Disable",
-    "btn.enable": "Enable",
-    "cta.elementary": "Elementary",
-    "cta.elementary.long": "Start (Elementary)",
-    "cta.school": "Middle/High",
-    "cta.school.long": "Start (School)",
-    "cta.univ": "University",
-    "cta.univ.long": "Start (University)",
-    "cta.adult": "Adult",
-    "cta.adult.long": "Start (Adult)",
-  };
-  const MN = {
-    "nav.take": "Тест өгөх",
-    "nav.lookup": "Үр дүн",
-    "nav.manual": "Заавар",
-    "nav.guide": "Гарын авлага",
-    "nav.expert": "Мэргэжилтэн",
-    "nav.admin": "Админ",
-    "btn.applyOpenMail": "Өргөдлийн имэйл нээх",
-    "btn.login": "Нэвтрэх",
-    "btn.logout": "Гарах",
-    "btn.home": "Нүүр",
-    "btn.consent": "Зөвшөөрөөд үргэлжлүүлэх",
-    "btn.checkCode": "Код шалгах",
-    "btn.toItems": "Асуулт руу",
-    "btn.submit": "Илгээж, үр дүн харах",
-    "btn.saving": "Хадгалж байна…",
-    "btn.copyNo": "Дугаар хуулах",
-    "btn.pdf": "PDF хадгалах",
-    "btn.viewGuide": "Гарын авлага харах",
-    "btn.expertApplyLogin": "Мэргэжилтэн (өргөдөл/нэвтрэх)",
-    "btn.view": "Харах",
-    "btn.enter": "Нэвтрэх",
-    "btn.issueExpertCode": "Мэргэжилтний код олгох",
-    "btn.csvResearch": "Судалгааны CSV (нэргүй)",
-    "btn.csvCounsel": "Зөвлөгөөний CSV (нэртэй)",
-    "btn.disable": "Идэвхгүй болгох",
-    "btn.enable": "Идэвхжүүлэх",
-    "cta.elementary": "Бага анги",
-    "cta.elementary.long": "Эхлэх (бага анги)",
-    "cta.school": "Сургууль",
-    "cta.school.long": "Эхлэх (сургууль)",
-    "cta.univ": "Их сургууль",
-    "cta.univ.long": "Эхлэх (их сургууль)",
-    "cta.adult": "Насанд хүрэгч",
-    "cta.adult.long": "Эхлэх (насанд хүрэгч)",
-  };
-  const L = uiLang();
-  const dict = L === "en" ? EN : L === "mn" ? MN : KO;
-  return dict[key] ?? KO[key] ?? key;
 }
 
 const expertGate = {
@@ -330,14 +193,6 @@ function layout(inner, opts = {}) {
     : " 현재는 이 브라우저에만 저장됩니다. 연구 보관은 Supabase 연결 후입니다.";
   const subtitle = r.startsWith("/take/adult") ? "성인: 업무 방식 검사" : "초등용 · 중고등용 · 대학생용 · 성인용";
   const expertOk = Boolean(opts.expertOk);
-  const L = uiLang();
-  const langPills = `
-    <div class="lang" style="display:flex;gap:6px;align-items:center">
-      <a href="${esc(langUrl("ko"))}" class="pill ${L === "ko" ? "on" : ""}" style="text-decoration:none">KO</a>
-      <a href="${esc(langUrl("en"))}" class="pill ${L === "en" ? "on" : ""}" style="text-decoration:none">EN</a>
-      <a href="${esc(langUrl("mn"))}" class="pill ${L === "mn" ? "on" : ""}" style="text-decoration:none">MN</a>
-    </div>
-  `;
   return `
     <div class="shell">
       <header class="top">
@@ -346,14 +201,13 @@ function layout(inner, opts = {}) {
           <small>${subtitle}</small>
         </a>
         <nav class="nav">
-          ${navLink("#/take", t("nav.take"), r)}
-          ${navLink("#/lookup", t("nav.lookup"), r)}
-          ${navLink("#/manual", t("nav.manual"), r)}
-          ${expertOk ? navLink("#/guide", t("nav.guide"), r) : ""}
-          ${navLink("#/expert", t("nav.expert"), r)}
-          ${navLink("#/admin", t("nav.admin"), r)}
+          ${navLink("#/take", "검사 하기", r)}
+          ${navLink("#/lookup", "결과조회", r)}
+          ${navLink("#/manual", "사용설명서", r)}
+          ${expertOk ? navLink("#/guide", "해석요강", r) : ""}
+          ${navLink("#/expert", "전문가", r)}
+          ${navLink("#/admin", "관리자", r)}
         </nav>
-        ${langPills}
       </header>
       ${inner}
       <footer class="footer">
@@ -370,8 +224,7 @@ function options(list, selected) {
   ).join("");
 }
 
-// 중고등용: 학교급(분석용) — 대안학교/홈스쿨링 포함
-const SCHOOL_LEVELS = ["중학교", "고등학교", "대안학교", "홈스쿨링"];
+const SCHOOL_LEVELS = ["중학교", "고등학교"];
 const SCHOOL_YEARS = ["1학년", "2학년", "3학년"];
 const HIGH_SCHOOL_TYPES = ["전문계고", "일반/인문계고", "특목·자사고"];
 const UNIV_LEVELS = ["학부", "대학원"];
@@ -434,12 +287,7 @@ const take = {
 };
 
 function steps(n) {
-  const names =
-    uiLang() === "en"
-      ? ["Intro", "Code", "Info", "Items"]
-      : uiLang() === "mn"
-        ? ["Танилцуулга", "Код", "Мэдээлэл", "Асуулт"]
-        : ["안내", "코드", "정보", "문항"];
+  const names = ["안내", "코드", "정보", "문항"];
   return `<div class="steps">${names.map((name, i) => `<span class="${i === n ? "on" : ""}">${i + 1} ${name}</span>`).join("")}</div>`;
 }
 
@@ -528,7 +376,7 @@ function editionCards(longCopy) {
       desc: longCopy
         ? `초등학생 눈높이 문항으로 되어 있습니다. 초등학교 4학년 이상을 권합니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
         : "초등학생 문항.",
-      cta: longCopy ? t("cta.elementary.long") : t("cta.elementary"),
+      cta: longCopy ? "초등용 검사 시작" : "초등용 시작",
     },
     {
       key: "school",
@@ -537,7 +385,7 @@ function editionCards(longCopy) {
       desc: longCopy
         ? `숙제·수행평가·모둠 등 학교 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
         : "숙제·수행평가·모둠 장면.",
-      cta: longCopy ? t("cta.school.long") : t("cta.school"),
+      cta: longCopy ? "중고등용 검사 시작" : "중고등용 시작",
     },
     {
       key: "univ",
@@ -546,7 +394,7 @@ function editionCards(longCopy) {
       desc: longCopy
         ? `대학 과제·팀·AI 장면의 말로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
         : "대학 과제·팀·AI 장면.",
-      cta: longCopy ? t("cta.univ.long") : t("cta.univ"),
+      cta: longCopy ? "대학생용 검사 시작" : "대학생용 시작",
     },
     {
       key: "adult",
@@ -555,7 +403,7 @@ function editionCards(longCopy) {
       desc: longCopy
         ? `업무·보고·프로젝트 등 일과 연구 장면의 언어로 되어 있습니다. 닉네임과 간단한 배경 정보 뒤 총 ${TOTAL_ITEMS}문항에 답합니다.`
         : "업무·보고·프로젝트 장면.",
-      cta: longCopy ? t("cta.adult.long") : t("cta.adult"),
+      cta: longCopy ? "성인용 검사 시작" : "성인용 시작",
     },
   ];
 
@@ -643,7 +491,7 @@ function takeView() {
   const ed = takeEdition();
   syncTakeEdition(ed);
   if (!ed) {
-    return `<main><h1>${esc(t("nav.take"))}</h1>
+    return `<main><h1>검사 하기</h1>
       <p class="lede">초등학생·중고등학생·대학생·성인, 지금 해당하는 쪽을 고르면 됩니다.</p>
       ${editionCards(true)}
       ${developerNote()}
@@ -664,7 +512,7 @@ function takeView() {
       <p class="progress">이 검사는 대학생용 파일럿 데이터를 바탕으로 문항·축 구조를 정리하고, 표현을 판본별 장면(초등–성인)으로 확장한 버전입니다. 규준(전국 단위)과 일부 심화 검증은 후속 데이터로 계속 보강합니다.</p>
       <p>배움과 탐구에서, 목표했던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 몰입하고 싶어지는 것(매력성)이 좋습니다. 무엇을 할지 분명할 때 이 셋이 살아납니다. 결과는 네 축 프로파일로 바로 보여 드리며, ${when} 다시 확인하실 수 있습니다.</p>
       <p>학번·전화·이메일은 받지 않습니다. 문의할 때는 결과번호가 필요합니다. 응답은 연구·상담을 위한 자료로 보관됩니다. 계속하면 이 안내에 동의하는 것입니다.</p>
-      <div class="actions"><button class="btn" data-act="consent">${esc(t("btn.consent"))}</button></div>
+      <div class="actions"><button class="btn" data-act="consent">동의하고 계속</button></div>
     </div></main>`;
   }
   if (t.step === 1) {
@@ -673,7 +521,7 @@ function takeView() {
       <input id="code" value="${esc(t.code)}" placeholder="AOP-OPEN 또는 EXP-…" /></div>
       <p class="progress">혼자 하실 때는 ${PUBLIC_CODE} 를 넣으면 됩니다. 상담·수업에서는 전문가가 준 코드를 넣습니다.</p>
       ${t.err ? `<p class="err">${esc(t.err)}</p>` : ""}
-      <div class="actions"><button class="btn" data-act="check-code">${esc(t("btn.checkCode"))}</button></div>
+      <div class="actions"><button class="btn" data-act="check-code">코드 확인</button></div>
     </div></main>`;
   }
   if (t.step === 2) {
@@ -716,7 +564,7 @@ function takeView() {
         <div class="row"><label for="major">${esc(majorName)}</label><select id="major">${options(tracks, t.major)}</select></div>
         <div class="row"><label for="region">주 생활 지역(시·도)</label><select id="region">${options(REGIONS, t.regionProvince)}</select></div>
       </div>
-      <div class="actions"><button class="btn" data-act="to-items">${esc(t("btn.toItems"))}</button></div>
+      <div class="actions"><button class="btn" data-act="to-items">문항으로</button></div>
     </div></main>`;
   }
   const filled = itemList.filter((i) => t.answers[i.id] != null).length;
@@ -737,7 +585,7 @@ function takeView() {
     <p class="legend">${ed === "elementary" ? "1 전혀 아니다 · 6 정말 그렇다" : "1 전혀 그렇지 않다 · 6 매우 그렇다"}</p>
     ${items}
     ${t.err ? `<p class="err">${esc(t.err)}</p>` : ""}
-    <div class="actions"><button class="btn" data-act="submit" ${t.busy ? "disabled" : ""}>${t.busy ? esc(t("btn.saving")) : esc(t("btn.submit"))}</button></div>
+    <div class="actions"><button class="btn" data-act="submit" ${t.busy ? "disabled" : ""}>${t.busy ? "저장 중…" : "제출하고 결과 보기"}</button></div>
   </main>`;
 }
 
