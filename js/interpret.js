@@ -1,5 +1,5 @@
-import { SCALE_ORDER, SCALES } from "./items.js?v=20260916a";
-import { band, bandLabel } from "./scoring.js?v=20260916a";
+import { SCALE_ORDER, SCALES } from "./items.js?v=20260916c";
+import { band, bandLabel } from "./scoring.js?v=20260916c";
 
 function scene(edition) {
   if (edition === "adult") {
@@ -59,9 +59,6 @@ export function comboNote(scores, edition) {
   if (ie === "low" && wd === "high") {
     return "절차는 붙들지만 비판·분량에서 자신감이 꺾일 수 있습니다. 계획과 부담 신호를 한자리에 두고 조절하면 좋습니다.";
   }
-  if (ie === "high" && sa === "high") {
-    return "기민하게 돌파하면서도 구조를 설계하는 듀얼 주력형입니다. 시작 전에 분량을 조금 나누면 분석의 힘이 실행을 더 받쳐 줍니다.";
-  }
   if (sa === "high" && io === "high") {
     return `구조를 읽고 사람을 움직이는 쪽으로 ${s.studyGa} 배치될 수 있습니다.`;
   }
@@ -84,7 +81,7 @@ const SA_PHRASE = {
 const WD_LINE = {
   high: "WD(부담 신호)가 높습니다. 비판·분량·실패 앞에서 자신감이 뚝 떨어지거나, 그냥 맡겨버리고 싶어질 수 있습니다. 부담이 커지는 장면을 먼저 정리하면 운영이 쉬워집니다.",
   mid: "WD(부담 신호)는 보통입니다. 가끔 마음이 얼어붙거나 맡기고 싶어질 수 있으니, 마감과 피드백 장면만 점검해도 충분합니다.",
-  low: "WD(부담 신호)는 낮은 편입니다. 부담이 와도 비교적 버티며 운영을 이어갈 가능성이 큽니다.",
+  low: "WD(부담 신호)는 낮은 편입니다. 부담이 와도 비교적 버티며 운영을 이어갈 가능성이 큽니다. 다만 높은 주체적 통제감으로 피로를 견디고 있는 상태일 수 있으니, 의도적인 ‘강제 멈춤/휴식 루틴’을 함께 두어야 장기 완주가 가능합니다.",
 };
 const IO_LINE = {
   high: "영향 지향이 높아, 사람·팀을 모아 일을 만들고 싶은 방향이 분명합니다.",
@@ -105,10 +102,11 @@ export function summaryInterpret(scores, edition) {
   const fit = edition === "adult" ? "이번 일과 맞나" : "이번 학기와 맞나";
   const snap = SCALE_ORDER.map((k) => `${SCALES[k].name} ${bandLabel(scores[k])}`).join(" · ");
   const centralTemperament = scores.ie >= 2.5 && scores.ie < 4 && scores.sa >= 2.5 && scores.sa < 4;
+  const dualCore = scores.ie >= 4 && scores.sa >= 4;
   const engineLine = centralTemperament
     ? "주력 방식이 한쪽으로 크게 쏠리기보다, 상황에 따라 완급을 조율하는 중앙형에 가깝습니다."
-    : scores.ie >= 4 && scores.sa >= 4
-      ? "기민한 돌파(IE)와 구조 설계(SA)를 함께 쓰는 듀얼 주력형입니다."
+    : dualCore
+      ? "설계하는 개척자(Dual Core)형입니다. 직관적 돌파력(IE)과 논리적 구조화(SA)를 동시에 가동하는 복합 엔진입니다. 아이디어를 마감 압박과 빠른 실행으로 현장에 부딪혀 실체화하고, 그 과정을 다시 데이터와 도식으로 정돈해 새로운 표준과 매뉴얼을 완성해내는 강력한 시너지를 냅니다."
       : scores.ie >= 4 && scores.sa < 4
         ? "IE(즉흥 실행)가 주력인 돌파형입니다. 다만 시작 전 분량을 아주 작게 나누면 힘이 더 안정적으로 이어집니다."
         : scores.sa >= 4 && scores.ie < 4
@@ -121,7 +119,7 @@ export function summaryInterpret(scores, edition) {
   ];
   const combo = comboNote(scores, edition);
   if (combo) paragraphs.push(combo);
-  paragraphs.push(`한 축씩 「${fit}」를 물으면 다음 운영이 분명해집니다.`);
+  paragraphs.push(`한 축씩 "${fit}"를 물으면 다음 운영이 분명해집니다.`);
   return { snap, paragraphs };
 }
 

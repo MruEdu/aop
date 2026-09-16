@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916a";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916a";
+import { DOCS } from "./docs.js?v=20260916c";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916c";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916a";
-import { store, usingCloud } from "./storage.js?v=20260916a";
+} from "./items.js?v=20260916c";
+import { store, usingCloud } from "./storage.js?v=20260916c";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -634,7 +634,7 @@ function resultHtml(session, opts = {}) {
     <p>${esc(line.text)}</p></div>`).join("");
   const warn = session.reliable
     ? ""
-    : `<div class="banner warn">주의·허위 문항에 걸린 결과입니다. 아래 해석은 그대로 보여 드리며, 한 번 더 실시하시면 상담·연구에 쓰기 좋습니다.</div>`;
+    : `<div class="banner warn">응답 과정에서 일부 문항 간 편차가 감지된 결과입니다. 현재 모습을 참고하실 수 있도록 해석은 그대로 제공해 드리며, 나에게 꼭 맞는 정밀한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
   const summaryBody = summary.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
   return `
     ${warn}
@@ -659,7 +659,7 @@ function resultHtml(session, opts = {}) {
       <p class="progress">이 번호를 알려 주시면 기록을 찾을 수 있습니다. 이메일은 보내지 않습니다.</p>
       <div class="actions">
         <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">번호 복사</button>
-        <button class="btn ghost" data-act="print">인쇄</button>
+        <button class="btn ghost" data-act="print">PDF 저장</button>
         ${expertOk ? `<a class="btn ghost" href="#/guide">해석요강 보기</a>` : `<a class="btn ghost" href="#/expert">전문가 자료(신청/로그인)</a>`}
       </div>
       <p class="progress" style="margin-top:12px">개발: 바이브스타틱스 현용찬(교육학박사)</p>
