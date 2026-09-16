@@ -6,7 +6,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260916x";
+} from "./items.js?v=20260916y";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -30,17 +30,20 @@ export function scoreAnswers(answers) {
     .filter((v) => v != null);
 
   let attentionAnswered = 0;
-  let attentionItemsOk = true;
+  let attentionCorrect = 0;
   for (const [rawId, expect] of Object.entries(ATTENTION_EXPECT)) {
     const id = Number(rawId);
     const v = answers[id];
     if (v == null) continue; // 레거시(33문항) 데이터는 점검 문항이 없을 수 있음
     attentionAnswered += 1;
-    if (v !== expect) attentionItemsOk = false;
+    if (v === expect) attentionCorrect += 1;
   }
   // 점검 문항이 존재하지 않는 레거시 세션은 이 스크린을 '미적용'으로 처리
   const attentionItemsApplied = attentionAnswered > 0;
   // attention_ok는 '지정 응답 점검' 스크린의 통과 여부를 의미합니다.
+  // 3문항을 두고, 2개 이상 정답이면 통과(단, 레거시처럼 실제로 답한 점검 문항 수가 2개면 2개 모두 정답이 필요).
+  const attentionNeed = Math.min(2, attentionAnswered);
+  const attentionItemsOk = attentionCorrect >= attentionNeed;
   const attentionOk = attentionItemsApplied ? attentionItemsOk : true;
 
   const ones = answeredScored.filter((v) => v === 1).length;
