@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916z";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916z";
+import { DOCS } from "./docs.js?v=20260916za";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916za";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916z";
-import { store, usingCloud } from "./storage.js?v=20260916z";
-import { scoreAnswers } from "./scoring.js?v=20260916z";
+} from "./items.js?v=20260916za";
+import { store, usingCloud } from "./storage.js?v=20260916za";
+import { scoreAnswers } from "./scoring.js?v=20260916za";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -214,6 +214,7 @@ function layout(inner, opts = {}) {
       <footer class="footer">
         <p>© 2026 바이브스타틱스(VibeStatics) · 개발 현용찬(교육학 박사). All rights reserved.</p>
         <p>개발: 바이브스타틱스 현용찬(교육학박사)</p>
+        <p>문의: <a href="mailto:hyc6999@gmail.com">hyc6999@gmail.com</a> · <a href="tel:+821031056999">010-3105-6999</a></p>
         <p>초등용·중고등용·대학생용·성인용 ${TEST_NAME}. 문항·채점·해석의 무단 복제·배포를 금합니다.${cloudNote}</p>
       </footer>
     </div>`;
