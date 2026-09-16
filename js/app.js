@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916v";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916v";
+import { DOCS } from "./docs.js?v=20260916w";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916w";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916v";
-import { store, usingCloud } from "./storage.js?v=20260916v";
-import { scoreAnswers } from "./scoring.js?v=20260916v";
+} from "./items.js?v=20260916w";
+import { store, usingCloud } from "./storage.js?v=20260916w";
+import { scoreAnswers } from "./scoring.js?v=20260916w";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -720,6 +720,7 @@ function resultHtml(session, opts = {}) {
         <h2 style="margin-top:0">국면 체크(현재 단계)</h2>
         <p class="progress">29–33번은 채점에서 제외되며, 쿤(Paradigm) 변화 모델을 참고해 “지금 ${scene.work}의 변화 단계”를 돌아보기 위한 성찰 질문입니다.</p>
         <p class="progress">쿤은 변화가 “익숙한 규칙이 잘 굴러감 → 예외가 쌓임 → 전환기 → 새 시도 → 새 정착”처럼 이어질 수 있다고 보았습니다.</p>
+        <p class="progress">지금 국면을 “좋고 나쁨”으로 판단하기보다, 나에게 맞는 새 규칙(패턴)을 찾아 작게 실험하고 굳혀 가는 과정으로 보시면 도움이 됩니다.</p>
         <p>${lead}</p>
         ${qHtml}
       </div>
