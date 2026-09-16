@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916t";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916t";
+import { DOCS } from "./docs.js?v=20260916u";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916u";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916t";
-import { store, usingCloud } from "./storage.js?v=20260916t";
-import { scoreAnswers } from "./scoring.js?v=20260916t";
+} from "./items.js?v=20260916u";
+import { store, usingCloud } from "./storage.js?v=20260916u";
+import { scoreAnswers } from "./scoring.js?v=20260916u";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -666,11 +666,11 @@ function resultHtml(session, opts = {}) {
     if (!vals.length) return "";
 
     const meta = {
-      29: { name: "순항(익숙한 방식)", phase: "normal_science" },
-      30: { name: "한계 감지(이상 신호)", phase: "anomaly" },
-      31: { name: "막막함(위기)", phase: "crisis" },
-      32: { name: "새 시도(전환)", phase: "revolution" },
-      33: { name: "새 정착(새 정상)", phase: "new_normal" },
+      29: { name: "순항(익숙한 방식이 잘 굴러감)", phase: "normal_science" },
+      30: { name: "한계 신호(바꿀 필요가 생김)", phase: "anomaly" },
+      31: { name: "전환기(번데기·사춘기 같은 구간)", phase: "crisis" },
+      32: { name: "실험·혁신(새 방법을 시험 중)", phase: "revolution" },
+      33: { name: "재정착(새 방식이 자리 잡음)", phase: "new_normal" },
     };
     const maxV = Math.max(...vals.map((x) => x.v));
     const tops = vals.filter((x) => x.v === maxV);
@@ -689,16 +689,16 @@ function resultHtml(session, opts = {}) {
         `이 루틴이 깨질 때는 언제인가요? 깨지기 전에 지킬 수 있는 ‘최소 조건’은 무엇인가요?`,
       ],
       anomaly: [
-        `예전 방식이 잘 안 먹히는 건 어떤 장면에서 가장 먼저 느껴지나요? (분량/난이도/피드백/마감)`,
-        `바꾸고 싶은 건 “방법”인가요, “환경(시간·장소·도구)”인가요? 지금 당장 바꿀 수 있는 1가지는 무엇인가요?`,
+        `예전 방식이 “예전만큼” 안 먹히는 건 어떤 장면에서 가장 먼저 느껴지나요? (분량/난이도/피드백/마감)`,
+        `이건 실패라기보다 “성장에 맞춘 업데이트 신호”일 수 있어요. 방법/환경(시간·장소·도구) 중 지금 먼저 바꿀 1가지는 무엇인가요?`,
       ],
       crisis: [
-        `막막함이 올라올 때, 가장 먼저 막히는 건 무엇인가요? (착수/유지/마감/피드백)`,
+        `이 구간은 “망가진 게 아니라 바뀌는 중”일 수 있어요. 막막함이 올라올 때, 가장 먼저 막히는 건 무엇인가요? (착수/유지/마감/피드백)`,
         `지금은 ‘정답 찾기’보다 ‘첫 한 조각’을 정하는 게 우선일 수 있어요. 오늘 10분만 할 수 있는 가장 작은 조각은 무엇인가요?`,
       ],
       revolution: [
         `새로 시도 중인 방법/도구 중에서 “계속 가져갈 것 1개”와 “버릴 것 1개”는 무엇인가요?`,
-        `새 시도는 흔들릴 수 있어요. 실패를 줄이려면 ‘중간 점검’은 언제, 어떤 방식으로 잡을까요?`,
+        `새 시도는 흔들릴 수 있어요. 실패를 줄이려면 ‘중간 점검(10분)’을 언제, 어떤 방식으로 잡을까요?`,
       ],
       new_normal: [
         `새 방식이 자리 잡는 데 도움이 된 핵심 요인은 무엇이었나요? (사람/환경/도구/절차)`,
@@ -717,8 +717,8 @@ function resultHtml(session, opts = {}) {
 
     return `
       <div class="card">
-        <h2 style="margin-top:0">패러다임(국면) 체크</h2>
-        <p class="progress">29–33번은 채점에서 제외되며, “지금 ${scene.work}의 국면”을 돌아보기 위한 성찰 질문입니다.</p>
+        <h2 style="margin-top:0">국면 체크(현재 단계)</h2>
+        <p class="progress">29–33번은 채점에서 제외되며, 쿤(Paradigm) 변화 모델을 참고해 “지금 ${scene.work}의 변화 단계”를 돌아보기 위한 성찰 질문입니다.</p>
         <p>${lead}</p>
         ${qHtml}
       </div>
