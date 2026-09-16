@@ -244,6 +244,7 @@ a.btn { text-decoration: none; }
   font-size: 14px;
 }
 .banner.warn { background: var(--warn-bg); color: var(--warn); }
+.banner.ok { background: rgba(36, 85, 68, 0.12); color: #1f5a44; }
 .banner.note { background: var(--soft); color: var(--accent-2); }
 .version-line {
   margin-top: 10px;

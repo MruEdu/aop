@@ -6,7 +6,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260916y";
+} from "./items.js?v=20260916z";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -45,6 +45,13 @@ export function scoreAnswers(answers) {
   const attentionNeed = Math.min(2, attentionAnswered);
   const attentionItemsOk = attentionCorrect >= attentionNeed;
   const attentionOk = attentionItemsApplied ? attentionItemsOk : true;
+  const attentionTier = !attentionItemsApplied
+    ? null
+    : attentionCorrect >= attentionAnswered && attentionAnswered >= 3
+      ? "매우 신뢰"
+      : attentionItemsOk
+        ? "약간 신뢰"
+        : "낮음";
 
   const ones = answeredScored.filter((v) => v === 1).length;
   const sixes = answeredScored.filter((v) => v === 6).length;
@@ -58,7 +65,17 @@ export function scoreAnswers(answers) {
   // 신뢰도(reliable)는 '점검(주의/허위/극단반응) 문항'만으로 판단합니다.
   // 레거시 데이터처럼 점검 문항이 없으면 해당 스크린은 미적용(통과)으로 처리합니다.
   const reliable = (attentionItemsApplied ? attentionItemsOk : true) && lieOk;
-  return { scores, attentionOk, lieOk, reliable };
+  const reliabilityTier = !reliable ? "낮음" : (attentionTier || "약간 신뢰");
+  return {
+    scores,
+    attentionOk,
+    lieOk,
+    reliable,
+    attentionAnswered,
+    attentionCorrect,
+    attentionTier,
+    reliabilityTier,
+  };
 }
 
 export function band(score) {
