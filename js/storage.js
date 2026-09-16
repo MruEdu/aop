@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260916za";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260916za";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260916zb";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260916zb";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -118,35 +118,42 @@ export const store = {
     const session = buildSession(input, code);
     const sb = await supabase();
     if (sb) {
-      const { error } = await sb.rpc("submit_aop_session", {
-        p: {
-          id: session.id,
-          access_code_id: session.accessCodeId,
-          result_no: session.resultNo,
-          edition: session.edition,
-          display_name: session.displayName,
-          gender: session.gender,
-          grade: session.grade,
-          major: session.major,
-          region: session.region,
-          region_province: session.regionProvince || null,
-          school_level: session.schoolLevel || null,
-          school_year: session.schoolYear || null,
-          high_school_type: session.highSchoolType || null,
-          univ_level: session.univLevel || null,
-          univ_year: session.univYear || null,
-          grad_level: session.gradLevel || null,
-          adult_role_type: session.adultRoleType || null,
-          answers: session.answers,
-          scores: session.scores,
-          attention_ok: session.attentionOk,
-          lie_ok: session.lieOk,
-          reliable: session.reliable,
-          consent_version: session.consentVersion,
-          created_at: session.createdAt,
-        },
-      });
-      if (error) throw error;
+      const payload = {
+        id: session.id,
+        access_code_id: session.accessCodeId,
+        result_no: session.resultNo,
+        edition: session.edition,
+        display_name: session.displayName,
+        gender: session.gender,
+        grade: session.grade,
+        major: session.major,
+        region: session.region,
+        region_province: session.regionProvince || null,
+        school_level: session.schoolLevel || null,
+        school_year: session.schoolYear || null,
+        high_school_type: session.highSchoolType || null,
+        univ_level: session.univLevel || null,
+        univ_year: session.univYear || null,
+        grad_level: session.gradLevel || null,
+        adult_role_type: session.adultRoleType || null,
+        answers: session.answers,
+        scores: session.scores,
+        attention_ok: session.attentionOk,
+        lie_ok: session.lieOk,
+        reliable: session.reliable,
+        consent_version: session.consentVersion,
+        created_at: session.createdAt,
+      };
+      const { error } = await sb.rpc("submit_aop_session", { p: payload });
+      if (error) {
+        const msg = String(error?.message || error || "");
+        if (msg.includes("sessions_edition_check")) {
+          throw new Error(
+            "서버 저장소(Supabase) 스키마 업데이트가 필요합니다. `supabase/patch-elementary.sql`(또는 `supabase/patch-edition.sql`)을 Supabase SQL Editor에서 실행한 뒤 다시 제출해 주세요.",
+          );
+        }
+        throw error;
+      }
       return session;
     }
     const rows = readSessions();
