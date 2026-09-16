@@ -74,13 +74,13 @@
 
 - `CONSISTENCY_PAIRS`로 지정된 문항쌍의 점수 차이가 너무 크면 비일관으로 봅니다.
 - 판정:
-  - \(|a-b| \ge 2\) 이면 `attention_ok = false`
+  - \(|a-b| > 3\) 이면 `attention_ok = false` (차이 3까지 허용)
   - 모든 쌍이 통과하면 `attention_ok = true`
 
 현재 설정:
 
 - (2, 4) / (8, 11) / (15, 16) / (22, 25)
-- `CONSISTENCY_DIFF_THRESHOLD = 2`
+- `CONSISTENCY_DIFF_THRESHOLD = 3`
 
 ### 3.2 점검 문항(지정 응답/허위·미화)
 

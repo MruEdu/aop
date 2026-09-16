@@ -275,7 +275,9 @@ export const CONSISTENCY_PAIRS = [
   [15, 16], // WD: 과부하/걱정·막막
   [22, 25], // IO: 리더/영향 역할
 ];
-export const CONSISTENCY_DIFF_THRESHOLD = 2;
+// 연구 초기 단계에서는 지나치게 엄격한 일관성 컷오프가 표본을 왜곡할 수 있으므로,
+// 문항쌍 차이 3점까지는 허용합니다. (차이 4점 이상이면 비일관)
+export const CONSISTENCY_DIFF_THRESHOLD = 3;
 export const EXTREME_RESPONSE_COUNT_THRESHOLD = 24; // 1 또는 6이 28문항 중 너무 많으면 비정상 응답으로 간주
 
 export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33, 34, 35, 36, 37];

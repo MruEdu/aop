@@ -8,7 +8,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260916e";
+} from "./items.js?v=20260916k";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -35,7 +35,7 @@ export function scoreAnswers(answers) {
     const va = answers[a];
     const vb = answers[b];
     if (va == null || vb == null) return true;
-    return Math.abs(va - vb) < CONSISTENCY_DIFF_THRESHOLD;
+    return Math.abs(va - vb) <= CONSISTENCY_DIFF_THRESHOLD;
   });
 
   const attentionItemsOk = Object.entries(ATTENTION_EXPECT).every(([rawId, expect]) => {
