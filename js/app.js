@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916h";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916h";
+import { DOCS } from "./docs.js?v=20260916g";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916g";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916h";
-import { store, usingCloud } from "./storage.js?v=20260916h";
+} from "./items.js?v=20260916g";
+import { store, usingCloud } from "./storage.js?v=20260916g";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -175,235 +175,6 @@ function t(key) {
   const L = uiLang();
   const dict = L === "en" ? EN : L === "mn" ? MN : KO;
   return dict[key] ?? KO[key] ?? key;
-}
-
-function likertLabelForLang(edition, value, fallbackKo) {
-  const L = uiLang();
-  if (L === "ko") return fallbackKo;
-  const v = Number(value);
-  if (L === "en") {
-    if (edition === "elementary") {
-      return (
-        {
-          1: "Not at all",
-          2: "No",
-          3: "Mostly no",
-          4: "A little yes",
-          5: "Yes",
-          6: "Very much",
-        }[v] || fallbackKo
-      );
-    }
-    return (
-      {
-        1: "Not at all",
-        2: "No",
-        3: "Mostly no",
-        4: "Mostly yes",
-        5: "Yes",
-        6: "Very much",
-      }[v] || fallbackKo
-    );
-  }
-  // Mongolian (Cyrillic)
-  if (edition === "elementary") {
-    return (
-      {
-        1: "Огт биш",
-        2: "Биш",
-        3: "Тийм ч биш",
-        4: "Жаахан тийм",
-        5: "Тийм",
-        6: "Яг тийм",
-      }[v] || fallbackKo
-    );
-  }
-  return (
-    {
-      1: "Огт тийм биш",
-      2: "Тийм биш",
-      3: "Ихэнхдээ тийм биш",
-      4: "Ихэнхдээ тийм",
-      5: "Тийм",
-      6: "Маш тийм",
-    }[v] || fallbackKo
-  );
-}
-
-function legendLine(edition) {
-  const L = uiLang();
-  if (L === "ko") return edition === "elementary" ? "1 전혀 아니다 · 6 정말 그렇다" : "1 전혀 그렇지 않다 · 6 매우 그렇다";
-  if (L === "en") return edition === "elementary" ? "1 Not at all · 6 Very much" : "1 Not at all · 6 Very much";
-  return edition === "elementary" ? "1 Огт биш · 6 Яг тийм" : "1 Огт тийм биш · 6 Маш тийм";
-}
-
-const GEN_ITEM_TEXT_EN = {
-  1: "I learn better by trying things right away than by reading long explanations.",
-  2: "Even if it’s not perfect, I prefer to try quickly and see the result.",
-  3: "Rather than spending time planning, I jump into tasks based on my intuition.",
-  4: "I focus best when a deadline is right in front of me.",
-  5: "I like breaking the usual way and trying a new approach.",
-  6: "Instead of organizing my thoughts for a long time, I start first and adjust as I go.",
-  7: "When I have options, I tend to start with what attracts me most.",
-  8: "To avoid unexpected situations, I make a thorough step-by-step plan.",
-  9: "I feel at ease when I divide the workload in advance and keep a steady schedule.",
-  10: "To reduce mistakes, I follow clear instructions and standard procedures carefully.",
-  11: "I feel most comfortable when I organize knowledge using diagrams, charts, or flowcharts.",
-  12: "I prefer explaining things logically based on data and evidence.",
-  13: "I enjoy taking apart systems/mechanisms and analyzing how they work.",
-  14: "I enjoy finding hidden rules and logical structures across different materials or data.",
-  15: "When I get critical feedback, I can become discouraged and lose motivation quickly.",
-  16: "When the workload gets too big, I feel overwhelmed and don’t know where to start.",
-  17: "If I make mistakes or my performance drops, I get stuck in self-doubt and self-blame for a while.",
-  18: "I tend to skim AI summaries and not go back to the original sources/books.",
-  19: "When I’m pressed for time, I’m tempted to copy AI’s answer with little or no editing.",
-  20: "If AI doesn’t give an instant answer, searching/reading to find it feels boring.",
-  21: "When a problem is hard, I tend to wait for someone (a person or tool) to give me the answer instead of sticking with it.",
-  22: "I want to work with many people, lead a team, and have influence in a group or community.",
-  23: "I want my ideas to create positive change in many people’s thinking or behavior.",
-  24: "I find it appealing to move people’s hearts, communicate, and coordinate relationships.",
-  25: "I aim for a role that brings people together and drives a project toward its goals.",
-  26: "In meetings or presentations, I tend to speak clearly and persuade others.",
-  27: "When opinions differ, I often take the role of organizing and driving a decision.",
-  28: "I enjoy creating opportunities proactively and connecting people to get things done.",
-  29: "My current way of studying/work is going smoothly in a familiar order without much worry.",
-  30: "A method that used to work well feels like it has hit its limit lately.",
-  31: "I feel I need to change my approach, but I’m frustrated because I don’t know where to start.",
-  32: "I’m boldly trying new methods or tools that I haven’t used before.",
-  33: "I’ve found a new approach that fits me, and I’m gaining confidence and results.",
-  34: "System check item: please select option 3.",
-  35: "System check item: please select option 4.",
-  36: "I have never lied even once.",
-  37: "I always do what I have to do right away and never procrastinate.",
-};
-
-const GEN_ITEM_TEXT_MN = {
-  1: "Урт тайлбар уншихаас илүү шууд оролдоод асуудлыг шийдэж, хийж байгаад сурдаг.",
-  2: "Төгс биш байсан ч гэсэн хурдан туршаад үр дүнг нь харахыг илүүд үздэг.",
-  3: "Төлөвлөхөд цаг зарцуулахаас илүү зөн совингоороо шууд ажилдаа ордог.",
-  4: "Хугацаа тулсан үед л төвлөрөл огцом нэмэгддэг.",
-  5: "Хэвшмэл аргыг эвдэж, шинэ аргаар турших дуртай.",
-  6: "Удаан бодож цэгцлэхээс илүү эхлээд эхэлж, явцдаа чигээ тааруулдаг.",
-  7: "Сонголт олон бол хамгийн их татагдсан зүйлээсээ эхэлдэг.",
-  8: "Санаандгүй нөхцөлөөс зайлсхийхийн тулд алхам бүрийн нарийн төлөвлөгөө гаргадаг.",
-  9: "Ажлын хэмжээг урьдчилж хуваагаад тогтмол хуваариар хийхэд тайван байдаг.",
-  10: "Алдаа багасгахын тулд тодорхой заавар, стандарт журмыг нягт мөрддөг.",
-  11: "Диаграм, хүснэгт, схемээр мэдлэгээ эмхэлж цэгцлэхэд хамгийн тухтай байдаг.",
-  12: "Баримт, өгөг, нотолгоонд тулгуурлан логикоор тайлбарлахыг илүүд үздэг.",
-  13: "Систем хэрхэн ажилладгийг задлан шинжлэх дуртай.",
-  14: "Өөр өөр материал/өгөг дундах далд дүрэм, логик бүтцийг олох дуртай.",
-  15: "Шүүмжлэлтэй санал сонсоход амархан мохож, урам буурдаг.",
-  16: "Ажлын хэмжээ хэт их болоход дарагдаж, хаанаас эхлэхээ мэдэхгүй болдог.",
-  17: "Алдаа гаргах эсвэл үнэлгээ буурахад өөртөө эргэлзэж, өөрийгөө буруутгах нь удаан үргэлжилдэг.",
-  18: "AI-ийн товч хураангуйг л гүйлгээд, эх сурвалж/ном руу буцаж хардаггүй талтай.",
-  19: "Хугацаа тулвал AI-ийн хариуг бараг засахгүйгээр шууд ашиглах хүсэл төрдөг.",
-  20: "AI шууд хариулахгүй бол хайх/унших явц уйтгартай санагддаг.",
-  21: "Асуудал хэцүү бол тууштай зууралдахаас илүү хүн/хэрэгсэл хариуг өгөөсэй гэж хүлээдэг.",
-  22: "Олон хүнтэй хамтарч, багийг удирдаж, бүлэгт нөлөө үзүүлэхийг хүсдэг.",
-  23: "Миний санаа олон хүний бодол, үйлдэлд эерэг өөрчлөлт авчрахыг хүсдэг.",
-  24: "Хүмүүсийг ойлгуулж, харилцаж, харилцааг зохицуулах үүрэг надад сонирхолтой.",
-  25: "Хүмүүсийг нэгтгээд зорилго руу хөтлөх үүргийг чиглүүлдэг.",
-  26: "Хурал/танилцуулгад санаагаа тодорхой хэлж, итгүүлэх нь надад амархан.",
-  27: "Санал зөрөхөд би эмхэлж нэгтгээд шийдвэрт хүргэх үүрэг авдаг.",
-  28: "Өөрөө боломж гаргаж, хүмүүсийг холбож ажлыг хөдөлгөх дуртай.",
-  29: "Одоогийн сурах/ажиллах арга маань танил дарааллаар санаа зоволтгүй сайн явж байна.",
-  30: "Өмнө нь сайн ажилладаг байсан арга сүүлийн үед хязгаартаа тулсан мэт санагддаг.",
-  31: "Аргаа өөрчлөх хэрэгтэй мэт боловч хаанаас эхлэхээ мэдэхгүй бухимддаг.",
-  32: "Өмнө хэрэглэж байгаагүй шинэ арга/хэрэгсэл зоригтой туршиж байна.",
-  33: "Надад тохирох шинэ аргаа олж, өмнөхөөсөө илүү өөртөө итгэлтэй болж үр дүн гарч байна.",
-  34: "Системийн шалгалтын асуулт: 3-г сонгоно уу.",
-  35: "Системийн шалгалтын асуулт: 4-г сонгоно уу.",
-  36: "Би хэзээ ч нэг ч удаа худал хэлж байгаагүй.",
-  37: "Би хийх ёстой ажлаа хэзээ ч хойшлуулалгүй шууд хийдэг.",
-};
-
-const ELEM_ITEM_TEXT_EN = {
-  1: "When I have homework or study, I start based on how I feel rather than making a plan first.",
-  2: "I focus much better when the due date or test is very close.",
-  3: "Instead of carefully checking the order, I prefer to try first and learn by doing.",
-  4: "If a new fun idea pops up, I put off what I was going to study and try that first.",
-  5: "Following the same fixed method every time feels boring and frustrating.",
-  6: "When time is tight, my brain feels sharp and I become more efficient.",
-  7: "Starting right away feels less annoying than preparing and planning for a long time.",
-  8: "Before I start, I write a to-do list or plan for the order of what I will do.",
-  9: "I feel like studying only when my desk, books, and notes are neatly organized.",
-  10: "When I meet a hard problem, I try to understand the reason and how it works, not just memorize the answer.",
-  11: "I regularly divide how much I will study each day and set it for myself.",
-  12: "I read the teacher’s instructions or rules carefully before I start.",
-  13: "If my schedule doesn’t go as planned, I feel uncomfortable and it bothers me.",
-  14: "I like summarizing what I studied using tables, pictures, or simple diagrams.",
-  15: "When homework or tasks pile up, I feel stuck and don’t know where to start.",
-  16: "Before a hard test or presentation, I worry first and want to avoid everything.",
-  17: "If a homework is too hard to solve alone, I sometimes give up or stop trying.",
-  18: "I feel anxious about being wrong or being laughed at by friends.",
-  19: "If a problem is even a little complex, I want to ask someone else or let them handle it.",
-  20: "When parents or teachers pressure me, I lose energy and my mind freezes.",
-  21: "I’m afraid to try new tasks or study because I feel my skills aren’t enough.",
-  22: "In group work, it feels comfortable for me to take the leader role.",
-  23: "I feel proud when friends recognize my ideas and follow them.",
-  24: "When friends argue, I often step in and help organize and solve it.",
-  25: "I want to be someone cool who takes important roles for my class or group.",
-  26: "I’m not afraid to speak clearly in front of friends or present my thoughts.",
-  27: "I don’t like just following orders with no say in decisions.",
-  28: "If a friend or younger student doesn’t understand something, I want to kindly teach them.",
-  29: "Right now my studying is going well in a familiar order and feels comfortable.",
-  30: "A studying method that used to work well feels like it has hit its limit now.",
-  31: "I think I need to change how I study, but I feel stuck because I don’t know where to start.",
-  32: "I’m bravely trying new study methods, tutoring, or tools that I haven’t tried before.",
-  33: "I found a new study method that fits me, and my confidence and skills are growing.",
-  34: "System check item: please select option 3.",
-  35: "System check item: please select option 4.",
-  36: "I have never lied even once.",
-  37: "I have never put off my homework even once.",
-};
-
-const ELEM_ITEM_TEXT_MN = {
-  1: "Гэрийн даалгавар/хичээлээ хийхдээ эхлээд төлөвлөхөөс илүү тухайн үеийнхээ мэдрэмжээр эхэлдэг.",
-  2: "Даалгаврын хугацаа эсвэл шалгалт яг ойртох үед л илүү сайн төвлөрдөг.",
-  3: "Дарааллыг маш нягтлахын оронд эхлээд туршаад үзэх нь надад илүү байдаг.",
-  4: "Шинэ сонирхолтой санаа төрвөл хийх байсан хичээлээ түр хойшлуулаад тэрийгээ түрүүлж хийдэг.",
-  5: "Үргэлж нэг л аргаар яг адилхан хийх нь уйтгартай санагддаг.",
-  6: "Хугацаа шахуу үед тархи минь хурц болж, бүтээмж нэмэгддэг.",
-  7: "Удаан бэлдэж төлөвлөхөөс илүү шууд эхлэх нь төвөг багатай.",
-  8: "Эхлэхээсээ өмнө хийх ажлын жагсаалт эсвэл төлөвлөгөө гаргадаг.",
-  9: "Ширээ, дэвтэр, тэмдэглэл цэгцтэй байж байж л хичээл хийх хүсэл төрдөг.",
-  10: "Хэцүү бодлого таарахад зөвхөн хариуг цээжлэхээс илүү яагаад тийм болохыг ойлгохыг хичээдэг.",
-  11: "Өдөрт хийх хичээлийн хэмжээгээ тогтмол хувааж өөртөө тогтоодог.",
-  12: "Багшийн заавар, дүрмийг нягт уншсаны дараа эхэлдэг.",
-  13: "Миний төлөвлөгөө алдагдвал сэтгэл тавгүйтэж санаа зовдог.",
-  14: "Сурсан зүйлээ хүснэгт, зураг, схемээр товч цэгцлэх дуртай.",
-  15: "Даалгавар/ажил их овоорвол хаанаас эхлэхээ мэдэхгүй бөглөрдөг.",
-  16: "Хэцүү шалгалт/илтгэлийн өмнө санаа зовж, зугтмаар санагддаг.",
-  17: "Ганцаараа шийдэхэд хэцүү даалгавар гарвал заримдаа орхиод больчихдог.",
-  18: "Алдах вий, найзууд шоолох вий гэж санаа зовж түгшдэг.",
-  19: "Бага зэрэг төвөгтэй асуудал гарвал өөр хүнээс асуух эсвэл даатгамаар болдог.",
-  20: "Эцэг эх/багш шахахад хүчгүй болж, толгой царцдаг.",
-  21: "Чадвар хүрэхгүй юм шиг санагдаад шинэ даалгавар/хичээлд сорихоос айдаг.",
-  22: "Багийн ажилд ахлагч болох нь надад амархан.",
-  23: "Найзууд миний санааг зөвшөөрч дагах үед маш их урам авдаг.",
-  24: "Найзууд маргалдах үед дундаас нь зохицуулж шийдэх талтай.",
-  25: "Анги/багийнхаа төлөө чухал үүрэг хариуцдаг “мундаг хүн” болохыг хүсдэг.",
-  26: "Найзуудынхаа өмнө бодлоо тод хэлэхээс айдаггүй.",
-  27: "Ямар ч шийдвэр гаргах эрхгүй зүгээр л дагах нь надад таалагддаггүй.",
-  28: "Найз эсвэл дүү мэдэхгүй зүйлээ асуувал чин сэтгэлээсээ зааж өгмөөр байдаг.",
-  29: "Одоо миний хичээл танил аргаар, санаа зоволтгүй тайван сайн явж байна.",
-  30: "Өмнө нь сайн ажилладаг байсан арга маань одоо хязгаартаа тулсан мэт санагддаг.",
-  31: "Хичээлээ өөрчлөх хэрэгтэй юм шиг боловч хаанаас эхлэхээ мэдэхгүй бухимддаг.",
-  32: "Өмнө туршиж байгаагүй шинэ арга, сургалт эсвэл хэрэгслийг зоригтой туршиж байна.",
-  33: "Надад тохирох шинэ аргыг олж, өмнөхөөсөө илүү өөртөө итгэлтэй болж чадвар нэмэгдэж байна.",
-  34: "Системийн шалгалтын асуулт: 3-г сонгоно уу.",
-  35: "Системийн шалгалтын асуулт: 4-г сонгоно уу.",
-  36: "Би хэзээ ч нэг ч удаа худал хэлж байгаагүй.",
-  37: "Би гэрийн даалгавраа нэг ч удаа хойшлуулж байгаагүй.",
-};
-
-function itemTextForLang(edition, item) {
-  const L = uiLang();
-  if (L === "ko") return item.text;
-  const id = Number(item?.id);
-  const isElem = edition === "elementary";
-  if (L === "en") return (isElem ? ELEM_ITEM_TEXT_EN : GEN_ITEM_TEXT_EN)[id] || item.text;
-  return (isElem ? ELEM_ITEM_TEXT_MN : GEN_ITEM_TEXT_MN)[id] || item.text;
 }
 
 const expertGate = {
@@ -952,18 +723,18 @@ function takeView() {
   const pct = Math.round((filled / itemList.length) * 100);
   const items = itemList.map((item) => `
     <div class="item">
-      <div class="q"><span class="num">${item.id}.</span>${esc(itemTextForLang(ed, item))}</div>
+      <div class="q"><span class="num">${item.id}.</span>${esc(item.text)}</div>
       <div class="likert">
         ${LIKERT.map((opt) => `
           <button type="button" data-act="ans" data-id="${item.id}" data-v="${opt.value}" class="${t.answers[item.id] === opt.value ? "on" : ""}">
-            <b>${opt.value}</b>${esc(likertLabelForLang(ed, opt.value, opt.label))}
+            <b>${opt.value}</b>${esc(opt.label)}
           </button>`).join("")}
       </div>
     </div>`).join("");
   return `<main><h1>${who} 검사 시작</h1>${steps(3)}
     <p class="progress">${filled} / ${itemList.length} · ${hint}</p>
     <div class="meter" aria-hidden="true"><i style="width:${pct}%"></i></div>
-    <p class="legend">${esc(legendLine(ed))}</p>
+    <p class="legend">${ed === "elementary" ? "1 전혀 아니다 · 6 정말 그렇다" : "1 전혀 그렇지 않다 · 6 매우 그렇다"}</p>
     ${items}
     ${t.err ? `<p class="err">${esc(t.err)}</p>` : ""}
     <div class="actions"><button class="btn" data-act="submit" ${t.busy ? "disabled" : ""}>${t.busy ? esc(t("btn.saving")) : esc(t("btn.submit"))}</button></div>
