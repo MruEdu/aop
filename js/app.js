@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916r";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916r";
+import { DOCS } from "./docs.js?v=20260916t";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916t";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916r";
-import { store, usingCloud } from "./storage.js?v=20260916r";
-import { scoreAnswers } from "./scoring.js?v=20260916r";
+} from "./items.js?v=20260916t";
+import { store, usingCloud } from "./storage.js?v=20260916t";
+import { scoreAnswers } from "./scoring.js?v=20260916t";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -655,6 +655,76 @@ function resultHtml(session, opts = {}) {
     ? ""
     : `<div class="banner warn">응답 과정에서 일부 문항 간 편차가 감지된 결과입니다. 현재 모습을 참고하실 수 있도록 해석은 그대로 제공해 드리며, 나에게 꼭 맞는 정밀한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
   const summaryBody = summary.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
+
+  const paradigmCard = (() => {
+    const a = session?.answers || {};
+    const ids = [29, 30, 31, 32, 33];
+    const vals = ids
+      .map((id) => ({ id, v: a[id] ?? a[String(id)] }))
+      .map((x) => ({ ...x, v: x.v == null || x.v === "" ? null : Number(x.v) }))
+      .filter((x) => Number.isFinite(x.v));
+    if (!vals.length) return "";
+
+    const meta = {
+      29: { name: "순항(익숙한 방식)", phase: "normal_science" },
+      30: { name: "한계 감지(이상 신호)", phase: "anomaly" },
+      31: { name: "막막함(위기)", phase: "crisis" },
+      32: { name: "새 시도(전환)", phase: "revolution" },
+      33: { name: "새 정착(새 정상)", phase: "new_normal" },
+    };
+    const maxV = Math.max(...vals.map((x) => x.v));
+    const tops = vals.filter((x) => x.v === maxV);
+    const topNames = tops.map((x) => meta[x.id]?.name || `문항 ${x.id}`).join(" · ");
+
+    const phaseKey = tops.length === 1 ? meta[tops[0].id]?.phase : "mix";
+    const scene = session.edition === "adult"
+      ? { work: "일", study: "업무", task: "업무" }
+      : session.edition === "school" || session.edition === "elementary"
+        ? { work: "공부", study: "공부", task: "숙제·수행평가" }
+        : { work: "학업", study: "학업", task: "과제" };
+
+    const qs = {
+      normal_science: [
+        `지금 ${scene.study}에서 “잘 굴러가는 루틴”은 무엇인가요? (시간·장소·도구·순서)`,
+        `이 루틴이 깨질 때는 언제인가요? 깨지기 전에 지킬 수 있는 ‘최소 조건’은 무엇인가요?`,
+      ],
+      anomaly: [
+        `예전 방식이 잘 안 먹히는 건 어떤 장면에서 가장 먼저 느껴지나요? (분량/난이도/피드백/마감)`,
+        `바꾸고 싶은 건 “방법”인가요, “환경(시간·장소·도구)”인가요? 지금 당장 바꿀 수 있는 1가지는 무엇인가요?`,
+      ],
+      crisis: [
+        `막막함이 올라올 때, 가장 먼저 막히는 건 무엇인가요? (착수/유지/마감/피드백)`,
+        `지금은 ‘정답 찾기’보다 ‘첫 한 조각’을 정하는 게 우선일 수 있어요. 오늘 10분만 할 수 있는 가장 작은 조각은 무엇인가요?`,
+      ],
+      revolution: [
+        `새로 시도 중인 방법/도구 중에서 “계속 가져갈 것 1개”와 “버릴 것 1개”는 무엇인가요?`,
+        `새 시도는 흔들릴 수 있어요. 실패를 줄이려면 ‘중간 점검’은 언제, 어떤 방식으로 잡을까요?`,
+      ],
+      new_normal: [
+        `새 방식이 자리 잡는 데 도움이 된 핵심 요인은 무엇이었나요? (사람/환경/도구/절차)`,
+        `이 방식을 “내 매뉴얼”로 남긴다면, 다음 번 나에게 꼭 적어둘 3줄은 무엇인가요?`,
+      ],
+      mix: [
+        `지금 응답은 한 국면으로 단정하기보다 “전환기(혼합)”에 가까울 수 있어요. 위 항목 중 어떤 두 장면이 같이 느껴지나요?`,
+        `전환기에는 ‘하나를 크게 바꾸기’보다 ‘하나만 고정하기’가 도움이 됩니다. 지금 고정할 1가지는 무엇인가요?`,
+      ],
+    }[phaseKey] || [];
+
+    const qHtml = qs.length ? `<ul class="tips">${qs.slice(0, 2).map((q) => `<li>${esc(q)}</li>`).join("")}</ul>` : "";
+    const lead = tops.length === 1
+      ? `응답은 <b>${esc(topNames)}</b> 쪽 문장에 더 가까웠습니다.`
+      : `응답은 <b>${esc(topNames)}</b> 쪽 문장이 비슷하게 높았습니다. (전환기/혼합일 수 있습니다.)`;
+
+    return `
+      <div class="card">
+        <h2 style="margin-top:0">패러다임(국면) 체크</h2>
+        <p class="progress">29–33번은 채점에서 제외되며, “지금 ${scene.work}의 국면”을 돌아보기 위한 성찰 질문입니다.</p>
+        <p>${lead}</p>
+        ${qHtml}
+      </div>
+    `;
+  })();
+
   return `
     ${warn}
     <p>${esc(session.displayName)} · ${esc(editionLabel(session.edition))} · ${esc(session.grade)} · ${esc(session.major)}</p>
@@ -672,6 +742,7 @@ function resultHtml(session, opts = {}) {
       <p class="progress">${esc(summary.snap)}</p>
       ${summaryBody}
     </div>
+    ${paradigmCard}
     <div class="card">
       <p>문의·재열람용 결과번호</p>
       <div class="result-no">${esc(session.resultNo)}</div>
