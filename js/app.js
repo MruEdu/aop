@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916n";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916n";
+import { DOCS } from "./docs.js?v=20260916p";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916p";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916n";
-import { store, usingCloud } from "./storage.js?v=20260916n";
+} from "./items.js?v=20260916p";
+import { store, usingCloud } from "./storage.js?v=20260916p";
+import { scoreAnswers } from "./scoring.js?v=20260916p";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -591,6 +592,24 @@ function takeView() {
 
 function resultHtml(session, opts = {}) {
   const expertOk = Boolean(opts.expertOk);
+  let reliability = {
+    attentionOk: session.attentionOk,
+    lieOk: session.lieOk,
+    reliable: session.reliable,
+  };
+  // 기존 완료 세션도 최신 로직으로 신뢰도를 재계산해 표시(저장값은 유지)
+  try {
+    if (session?.answers) {
+      const rescored = scoreAnswers(session.answers);
+      reliability = {
+        attentionOk: rescored.attentionOk,
+        lieOk: rescored.lieOk,
+        reliable: rescored.reliable,
+      };
+    }
+  } catch {
+    // 레거시 데이터/불완전 응답은 저장된 값을 그대로 사용
+  }
   const lines = profileLines(session.scores, session.edition);
   const preface = resultPreface(session.edition);
   const summary = summaryInterpret(session.scores, session.edition);
@@ -632,7 +651,7 @@ function resultHtml(session, opts = {}) {
   const cards = lines.map((line) => `
     <div class="card"><h2 style="margin-top:0">${esc(line.name)} · ${esc(line.band)} (${line.score.toFixed(2)})</h2>
     <p>${esc(line.text)}</p></div>`).join("");
-  const warn = session.reliable
+  const warn = reliability.reliable
     ? ""
     : `<div class="banner warn">응답 과정에서 일부 문항 간 편차가 감지된 결과입니다. 현재 모습을 참고하실 수 있도록 해석은 그대로 제공해 드리며, 나에게 꼭 맞는 정밀한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
   const summaryBody = summary.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
@@ -770,12 +789,18 @@ async function adminView() {
     <td>${esc(c.label)}</td><td>${c.active ? "활성" : "정지"}</td>
     <td>${c.kind === "expert" ? `<button class="btn ghost small" data-act="toggle-code" data-id="${c.id}" data-on="${c.active ? "1" : "0"}">${c.active ? "정지" : "재활성"}</button>` : ""}</td>
   </tr>`).join("");
-  const sessRows = filtered.map((s) => `<tr>
+  const sessRows = filtered.map((s) => {
+    let rel = Boolean(s.reliable);
+    try {
+      if (s?.answers) rel = scoreAnswers(s.answers).reliable;
+    } catch {}
+    return `<tr>
     <td><a href="#/result/${esc(s.resultNo)}">${esc(s.resultNo)}</a></td>
     <td>${esc(s.displayName)}</td><td>${esc(editionLabel(s.edition))}</td><td>${esc(s.accessCode)}</td>
-    <td><span class="${s.reliable ? "pill" : "pill bad"}">${s.reliable ? "양호" : "신뢰 불가"}</span></td>
+    <td><span class="${rel ? "pill" : "pill bad"}">${rel ? "양호" : "신뢰 불가"}</span></td>
     <td>${esc(String(s.createdAt).replace("T", " ").slice(0, 16))}</td>
-  </tr>`).join("");
+  </tr>`;
+  }).join("");
   return `<main><h1>관리자</h1>
     ${admin.err ? `<p class="err">${esc(admin.err)}</p>` : ""}
     <div class="card"><h2 style="margin-top:0">입장 코드</h2>

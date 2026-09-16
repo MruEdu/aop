@@ -8,7 +8,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260916n";
+} from "./items.js?v=20260916p";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -38,11 +38,17 @@ export function scoreAnswers(answers) {
     return Math.abs(va - vb) <= CONSISTENCY_DIFF_THRESHOLD;
   });
 
-  const attentionItemsOk = Object.entries(ATTENTION_EXPECT).every(([rawId, expect]) => {
+  let attentionAnswered = 0;
+  let attentionItemsOk = true;
+  for (const [rawId, expect] of Object.entries(ATTENTION_EXPECT)) {
     const id = Number(rawId);
     const v = answers[id];
-    return v === expect;
-  });
+    if (v == null) continue; // 레거시(33문항) 데이터는 점검 문항이 없을 수 있음
+    attentionAnswered += 1;
+    if (v !== expect) attentionItemsOk = false;
+  }
+  // 점검 문항이 존재하지 않는 레거시 세션은 이 스크린을 '미적용'으로 처리
+  const attentionItemsApplied = attentionAnswered > 0;
   // 점검 문항(지정 응답)과 일관성은 분리해서 보되, 연구 초기에는 지나치게 엄격한 컷오프를 피하기 위해
   // 최종 reliable은 '3가지 스크린 중 2개 이상 통과'로 판단합니다.
   const attentionOk = consistencyOk;
@@ -56,8 +62,15 @@ export function scoreAnswers(answers) {
     return v < LIE_HIGH_THRESHOLD;
   });
   const lieOk = !tooExtreme && lieItemsOk;
-  const screensPassed = [consistencyOk, attentionItemsOk, lieOk].filter(Boolean).length;
-  const reliable = screensPassed >= 2;
+  const screens = [
+    { applied: true, ok: consistencyOk },
+    { applied: attentionItemsApplied, ok: attentionItemsOk },
+    { applied: true, ok: lieOk },
+  ];
+  const applied = screens.filter((s) => s.applied);
+  const screensPassed = applied.filter((s) => s.ok).length;
+  // 원칙: 3개 중 2개 통과. 단, 레거시처럼 적용 가능한 스크린이 2개면 2개 모두 통과.
+  const reliable = screensPassed >= Math.min(2, applied.length);
   return { scores, attentionOk, lieOk, reliable };
 }
 
