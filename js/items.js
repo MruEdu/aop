@@ -313,7 +313,8 @@ export const SCALES = {
   },
 };
 
-export const SCALE_ORDER = ["ie", "sa", "wd", "io"];
+// 표시 순서: 기질 엔진(IE/SA/IO) → 심리 부하 센서(WD)
+export const SCALE_ORDER = ["ie", "sa", "io", "wd"];
 
 export function displayNo(id) {
   return Number(id);
@@ -329,7 +330,7 @@ export function displayList(ids) {
 export function scoringManualLines() {
   return {
     means: "각 척도는 문항평균(1–6점)입니다. 1–28번 문항으로 네 축을 계산하며, 29–33번(쿤 5문항)과 34–37번(점검 문항)은 저장만 되고 채점·해석에서 제외됩니다.",
-    keys: `즉흥 실행 ${displayList(SCALES.ie.items)}, 체계 분석 ${displayList(SCALES.sa.items)}, 위임·위축 ${displayList(SCALES.wd.items)}, 영향 지향 ${displayList(SCALES.io.items)}.`,
+    keys: `즉흥 실행 ${displayList(SCALES.ie.items)}, 체계 분석 ${displayList(SCALES.sa.items)}, 영향 지향 ${displayList(SCALES.io.items)}, 위임·위축 ${displayList(SCALES.wd.items)}.`,
     bands: "대략 2.5 미만 저점, 2.5–4.0 미만 중앙, 4.0 이상 고점입니다. 이 구간은 참고용이며, 규준은 후속입니다.",
     saNote: "",
     flags: "",
