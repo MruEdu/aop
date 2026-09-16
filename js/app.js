@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916zd";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zd";
+import { DOCS } from "./docs.js?v=20260916ze";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916ze";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916zd";
-import { store, usingCloud } from "./storage.js?v=20260916zd";
-import { scoreAnswers } from "./scoring.js?v=20260916zd";
+} from "./items.js?v=20260916ze";
+import { store, usingCloud } from "./storage.js?v=20260916ze";
+import { scoreAnswers } from "./scoring.js?v=20260916ze";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -726,14 +726,35 @@ function resultHtml(session, opts = {}) {
       ? `응답은 <b>${esc(topNames)}</b> 쪽 문장에 더 가까웠습니다.`
       : `응답은 <b>${esc(topNames)}</b> 쪽 문장이 비슷하게 높았습니다. (전환기/혼합일 수 있습니다.)`;
 
+    const supporter = session.edition === "adult"
+      ? "동료·상담자"
+      : session.edition === "univ"
+        ? "멘토·상담자"
+        : "부모·교사";
+    const consumerTips = [
+      `${supporter}는 “왜 안 하니?”보다 <b>첫 한 조각</b>(10분/1문제/3줄)을 같이 정해 주는 게 도움이 됩니다.`,
+      `결과보다 과정 질문이 좋습니다. “지금 뭐가 제일 막히니?”보다 “지금 <b>10분만</b> 할 조각은 뭐로 할까?”로 바꿔 보세요.`,
+      `바꾸는 시기엔 흔들림이 정상입니다. 시간·장소·도구·순서 중 <b>하나만 고정</b>해도 안정이 빨라집니다.`,
+    ];
+    const consumerHtml = `<ul class="tips">${consumerTips.map((t) => `<li>${t}</li>`).join("")}</ul>`;
+    const rawLine = vals.length
+      ? `<p class="progress">원점수(1–6): ${vals.map((x) => `${x.id}=${x.v}`).join(" · ")}</p>`
+      : "";
+
     return `
       <div class="card">
         <h2 style="margin-top:0">국면 체크(현재 단계)</h2>
-        <p class="progress">29–33번은 채점에서 제외되며, 쿤(Paradigm) 변화 모델을 참고해 “지금 ${scene.work}의 변화 단계”를 돌아보기 위한 성찰 질문입니다.</p>
-        <p class="progress">쿤은 변화가 “익숙한 규칙이 잘 굴러감 → 예외가 쌓임 → 전환기 → 새 시도 → 새 정착”처럼 이어질 수 있다고 보았습니다.</p>
-        <p class="progress">지금 국면을 “좋고 나쁨”으로 판단하기보다, 나에게 맞는 새 규칙(패턴)을 찾아 작게 실험하고 굳혀 가는 과정으로 보시면 도움이 됩니다.</p>
+        ${
+          expertOk
+            ? `<p class="progress">29–33번은 채점에서 제외되며, 쿤(Paradigm) 변화 모델을 참고해 “지금 ${scene.work}의 변화 단계”를 돌아보기 위한 성찰 질문입니다.</p>
+               <p class="progress">쿤은 변화가 “익숙한 규칙이 잘 굴러감 → 예외가 쌓임 → 전환기 → 새 시도 → 새 정착”처럼 이어질 수 있다고 보았습니다.</p>
+               <p class="progress">지금 국면을 “좋고 나쁨”으로 판단하기보다, 나에게 맞는 새 규칙(패턴)을 찾아 작게 실험하고 굳혀 가는 과정으로 보시면 도움이 됩니다.</p>`
+            : `<p class="progress">아래 문장들은 채점과 별개로, 요즘 ${scene.work} 운영 흐름을 돌아보기 위한 참고입니다.</p>
+               <p class="progress">${supporter}가 도울 때는 ‘설명’보다 <b>착수 크기</b>를 줄여 주는 쪽이 효과적일 때가 많습니다.</p>`
+        }
         <p>${lead}</p>
-        ${qHtml}
+        ${expertOk ? qHtml : consumerHtml}
+        ${expertOk ? rawLine : ""}
       </div>
     `;
   })();
