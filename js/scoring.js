@@ -1,14 +1,12 @@
 import {
   ATTENTION_EXPECT,
-  CONSISTENCY_DIFF_THRESHOLD,
-  CONSISTENCY_PAIRS,
   EXTREME_RESPONSE_COUNT_THRESHOLD,
   LIE_HIGH_THRESHOLD,
   LIE_IDS,
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260916w";
+} from "./items.js?v=20260916x";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -26,17 +24,10 @@ export function scoreAnswers(answers) {
     });
     scores[key] = Math.round(mean(vals) * 100) / 100;
   }
-  // v2.0+ 검증: 1) 일관성(28문항 내) + 2) 점검 문항(주의/허위) + 3) 극단반응
+  // v2.0+ 검증: 점검 문항(주의/허위) + 극단반응(1/6 반복)
   const answeredScored = Array.from({ length: 28 }, (_, i) => i + 1)
     .map((id) => answers[id])
     .filter((v) => v != null);
-
-  const consistencyOk = CONSISTENCY_PAIRS.every(([a, b]) => {
-    const va = answers[a];
-    const vb = answers[b];
-    if (va == null || vb == null) return true;
-    return Math.abs(va - vb) <= CONSISTENCY_DIFF_THRESHOLD;
-  });
 
   let attentionAnswered = 0;
   let attentionItemsOk = true;
@@ -49,9 +40,8 @@ export function scoreAnswers(answers) {
   }
   // 점검 문항이 존재하지 않는 레거시 세션은 이 스크린을 '미적용'으로 처리
   const attentionItemsApplied = attentionAnswered > 0;
-  // 점검 문항(지정 응답)과 일관성은 분리해서 보되, 연구 초기에는 지나치게 엄격한 컷오프를 피하기 위해
-  // 최종 reliable은 '3가지 스크린 중 2개 이상 통과'로 판단합니다.
-  const attentionOk = consistencyOk;
+  // attention_ok는 '지정 응답 점검' 스크린의 통과 여부를 의미합니다.
+  const attentionOk = attentionItemsApplied ? attentionItemsOk : true;
 
   const ones = answeredScored.filter((v) => v === 1).length;
   const sixes = answeredScored.filter((v) => v === 6).length;
@@ -62,15 +52,9 @@ export function scoreAnswers(answers) {
     return v < LIE_HIGH_THRESHOLD;
   });
   const lieOk = !tooExtreme && lieItemsOk;
-  const screens = [
-    { applied: true, ok: consistencyOk },
-    { applied: attentionItemsApplied, ok: attentionItemsOk },
-    { applied: true, ok: lieOk },
-  ];
-  const applied = screens.filter((s) => s.applied);
-  const screensPassed = applied.filter((s) => s.ok).length;
-  // 원칙: 3개 중 2개 통과. 단, 레거시처럼 적용 가능한 스크린이 2개면 2개 모두 통과.
-  const reliable = screensPassed >= Math.min(2, applied.length);
+  // 신뢰도(reliable)는 '점검(주의/허위/극단반응) 문항'만으로 판단합니다.
+  // 레거시 데이터처럼 점검 문항이 없으면 해당 스크린은 미적용(통과)으로 처리합니다.
+  const reliable = (attentionItemsApplied ? attentionItemsOk : true) && lieOk;
   return { scores, attentionOk, lieOk, reliable };
 }
 
