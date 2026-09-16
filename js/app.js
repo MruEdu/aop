@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916ze";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916ze";
+import { DOCS } from "./docs.js?v=20260916zf";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zf";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916ze";
-import { store, usingCloud } from "./storage.js?v=20260916ze";
-import { scoreAnswers } from "./scoring.js?v=20260916ze";
+} from "./items.js?v=20260916zf";
+import { store, usingCloud } from "./storage.js?v=20260916zf";
+import { scoreAnswers } from "./scoring.js?v=20260916zf";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -630,7 +630,7 @@ function resultHtml(session, opts = {}) {
         : { work: "학업", task: "과제", place: "학기" };
     return `
       <div class="card overload">
-        <h2 style="margin-top:0">WD 과부하 경고등(높음)</h2>
+        <h2 style="margin-top:0">부담 신호 도움말(WD 높음)</h2>
         <p class="lede">지금은 ${scene.task}·마감·피드백에서 부담이 커지면 <b>마음이 얼어붙거나</b> “그냥 맡겨버리고 싶다”는 생각이 쉽게 올라올 수 있습니다. 이건 성격이 아니라, <b>부담 신호</b>입니다.</p>
         <h2>15분 처방(마이크로 태스크)</h2>
         <ul class="tips">
@@ -770,7 +770,6 @@ function resultHtml(session, opts = {}) {
     <div class="card"><div class="bars">${bars}</div>
       <p class="progress" style="margin-top:12px">문항평균(1–6점). 막대는 비교용이며, 네 축을 따로 읽습니다.</p>
     </div>
-    ${overloadCard}
     ${cards}
     <div class="card">
       <h2 style="margin-top:0">종합 해석</h2>
@@ -778,6 +777,7 @@ function resultHtml(session, opts = {}) {
       ${summaryBody}
     </div>
     ${paradigmCard}
+    ${overloadCard}
     <div class="card">
       <p>문의·재열람용 결과번호</p>
       <div class="result-no">${esc(session.resultNo)}</div>
