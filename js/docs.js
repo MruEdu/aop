@@ -1,4 +1,4 @@
-import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260916k";
+import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260916n";
 
 const SCORE = scoringManualLines();
 const TOTAL_ITEMS = itemsFor("univ").length;
@@ -31,7 +31,8 @@ export const DOCS = [
         heading: "주의·허위 문항",
         body: [
           "v2.0+에서는 점검 문항(34–37번)을 함께 둡니다. (예: “시스템 점검용입니다. 3번을 선택해 주세요.”)",
-          "신뢰도 표시는 ① 1–28번의 일관성(일부 문항쌍 점수 차이) ② 극단반응(1/6 반복) ③ 점검 문항의 지정 응답/과도한 미화 응답을 종합합니다.",
+          "신뢰도 표시는 ① 1–28번의 일관성(일부 문항쌍 점수 차이) ② 점검 문항의 지정 응답 ③ 극단반응(1/6 반복)·과도한 미화 응답을 함께 봅니다.",
+          "연구 초기 단계에서는 지나치게 엄격하게 걸러내지 않도록, 위 스크린 중 일부가 흔들려도 결과는 참고용으로 제공될 수 있습니다.",
           "신뢰도가 낮게 표시되더라도 결과는 그대로 보여 드립니다. 나에게 더 잘 맞는 결과를 확인하고 싶으실 때, 부담이 덜한 시간에 한 번 더 실시해 보시기를 권합니다.",
         ],
       },

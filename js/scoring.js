@@ -8,7 +8,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260916k";
+} from "./items.js?v=20260916n";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -43,7 +43,9 @@ export function scoreAnswers(answers) {
     const v = answers[id];
     return v === expect;
   });
-  const attentionOk = consistencyOk && attentionItemsOk;
+  // 점검 문항(지정 응답)과 일관성은 분리해서 보되, 연구 초기에는 지나치게 엄격한 컷오프를 피하기 위해
+  // 최종 reliable은 '3가지 스크린 중 2개 이상 통과'로 판단합니다.
+  const attentionOk = consistencyOk;
 
   const ones = answeredScored.filter((v) => v === 1).length;
   const sixes = answeredScored.filter((v) => v === 6).length;
@@ -54,7 +56,9 @@ export function scoreAnswers(answers) {
     return v < LIE_HIGH_THRESHOLD;
   });
   const lieOk = !tooExtreme && lieItemsOk;
-  return { scores, attentionOk, lieOk, reliable: attentionOk && lieOk };
+  const screensPassed = [consistencyOk, attentionItemsOk, lieOk].filter(Boolean).length;
+  const reliable = screensPassed >= 2;
+  return { scores, attentionOk, lieOk, reliable };
 }
 
 export function band(score) {

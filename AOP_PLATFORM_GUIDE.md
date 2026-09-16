@@ -74,13 +74,13 @@
 
 - `CONSISTENCY_PAIRS`로 지정된 문항쌍의 점수 차이가 너무 크면 비일관으로 봅니다.
 - 판정:
-  - \(|a-b| > 3\) 이면 `attention_ok = false` (차이 3까지 허용)
+  - \(|a-b| > 4\) 이면 `attention_ok = false` (차이 4까지 허용)
   - 모든 쌍이 통과하면 `attention_ok = true`
 
 현재 설정:
 
 - (2, 4) / (8, 11) / (15, 16) / (22, 25)
-- `CONSISTENCY_DIFF_THRESHOLD = 3`
+- `CONSISTENCY_DIFF_THRESHOLD = 4`
 
 ### 3.2 점검 문항(지정 응답/허위·미화)
 
@@ -102,7 +102,14 @@
 
 ### 3.4 최종 신뢰도(reliable)
 
-- `reliable = attention_ok && lie_ok`
+연구 초기 단계에서는 스크리닝을 너무 엄격하게 적용하면 표본을 왜곡할 수 있으므로, 아래 **3가지 스크린 중 2개 이상 통과**를 `reliable`로 봅니다.
+
+- 스크린 3종:
+  1) **일관성**(attention_ok)
+  2) **점검 문항 지정 응답**(ATTENTION_EXPECT)
+  3) **허위·미화/극단반응**(lie_ok)
+- 판정:
+  - `reliable = (통과한 스크린 개수 >= 2)`
 
 ---
 

@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916k";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916k";
+import { DOCS } from "./docs.js?v=20260916n";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916n";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916k";
-import { store, usingCloud } from "./storage.js?v=20260916k";
+} from "./items.js?v=20260916n";
+import { store, usingCloud } from "./storage.js?v=20260916n";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
