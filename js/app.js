@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916d";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916d";
+import { DOCS } from "./docs.js?v=20260916e";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916e";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,8 +15,8 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916d";
-import { store, usingCloud } from "./storage.js?v=20260916d";
+} from "./items.js?v=20260916e";
+import { store, usingCloud } from "./storage.js?v=20260916e";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -61,7 +61,7 @@ function expertApplyFormHtml() {
   return `
       <div class="card" style="margin:16px 0">
         <h2 style="margin-top:0">전문가 회원가입 신청</h2>
-        <p class="progress">기본정보를 작성한 뒤 <b>신청 메일 보내기</b>를 누르세요. 승인 후 계정을 발급합니다. (아이디=이메일)</p>
+        <p class="progress">기본정보를 작성한 뒤 <b>신청 메일 열기</b>를 누르세요. 메일 앱(또는 Gmail 작성 화면)이 열리면 내용을 확인한 뒤 <b>전송</b>을 눌러 주시면 됩니다. 승인 후 계정을 발급합니다. (아이디=이메일)</p>
         <div class="grid two">
           <div class="row"><label for="apname">성명</label><input id="apname" value="${esc(expertGate.applyName)}" /></div>
           <div class="row"><label for="aporg">소속(기관/학교/조직)</label><input id="aporg" value="${esc(expertGate.applyOrg)}" /></div>
@@ -75,7 +75,7 @@ function expertApplyFormHtml() {
         <div class="row"><label for="apnote">추가 메모(선택)</label><input id="apnote" value="${esc(expertGate.applyNote)}" /></div>
         ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
         <div class="actions">
-          <button class="btn" data-act="expert-apply" ${expertGate.busy ? "disabled" : ""}>신청 메일 보내기</button>
+          <button class="btn" data-act="expert-apply" ${expertGate.busy ? "disabled" : ""}>신청 메일 열기</button>
         </div>
       </div>
   `;
@@ -85,7 +85,7 @@ function expertGateView(mode) {
   const contact = `
     <p class="progress">신청 후 승인 방식으로 운영합니다. 필요하시면 바이브스타틱스로 연락해 주십시오.</p>
     <p style="margin:0 0 8px"><b>현용찬</b> 010-3105-6999</p>
-    <p class="progress">신청 메일을 보낸 뒤, 전화로 한 번 더 연락해 주세요.</p>
+    <p class="progress">신청 메일을 <b>전송</b>하신 뒤, 전화로 한 번 더 연락해 주세요.</p>
   `;
 
   const body = mode === "auth"
@@ -909,7 +909,7 @@ async function onClick(e) {
       "- 전문 분야/경험: " + (exp || ""),
       "- 추가 메모: " + (note || ""),
       "",
-      "메일을 보낸 뒤 010-3105-6999로 전화드리겠습니다.",
+      "메일을 전송한 뒤 010-3105-6999로 전화드리겠습니다.",
     ].join("\n");
 
     location.href = mailtoHref("hyc6999@gmail.com", subject, body);
