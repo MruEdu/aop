@@ -1,5 +1,5 @@
-import { SCALE_ORDER, SCALES } from "./items.js?v=20260916zf";
-import { band, bandLabel } from "./scoring.js?v=20260916zf";
+import { SCALE_ORDER, SCALES } from "./items.js?v=20260916zg";
+import { band, bandLabel } from "./scoring.js?v=20260916zg";
 
 function scene(edition) {
   if (edition === "adult") {
@@ -79,7 +79,7 @@ const SA_PHRASE = {
   low: "맥락을 보고 유연하게 조절하는 힘",
 };
 const WD_LINE = {
-  high: "WD(부담 신호)가 높습니다. 분량·마감·피드백이 겹치면 마음이 얼어붙거나 ‘그냥 맡겨버리고 싶다’는 생각이 쉽게 올라올 수 있습니다. 이건 성격이 아니라 신호이니, 부담이 커지는 장면을 먼저 정리하면 운영이 쉬워집니다.",
+  high: "WD(부담 신호)가 높습니다. 분량·마감·피드백이 겹치면 마음이 얼어붙거나 ‘그냥 맡겨버리고 싶다’는 생각이 쉽게 올라올 수 있어요. 이건 나약함이 아니라, 지금 부담이 크다는 신호입니다. 부담이 커지는 장면을 먼저 정리하면 운영이 훨씬 쉬워집니다.",
   mid: "WD(부담 신호)는 보통입니다. 장면에 따라 마음이 얼어붙거나 맡기고 싶어질 수 있으니, 마감과 피드백 장면만 점검해도 충분합니다.",
   low: "WD(부담 신호)는 낮은 편입니다. 부담이 와도 비교적 버티며 운영을 이어갈 가능성이 큽니다. 다만 높은 주체적 통제감으로 피로를 견디고 있는 상태일 수 있으니, 의도적인 ‘강제 멈춤/휴식 루틴’을 함께 두어야 장기 완주가 가능합니다.",
 };
@@ -91,7 +91,7 @@ const IO_LINE = {
 
 export function resultPreface(edition) {
   const when = edition === "adult" ? "지금 시기" : "지금 학기";
-  return `${when}의 학업·업무 운영을 네 축으로 보여 드립니다. 맞다·틀리다가 없으며, 저점도 결함이 아니라 다른 강점의 형태일 수 있습니다. 각 축을 따로 읽은 뒤 맨 아래 종합에서 한 장면으로 묶어 보시면 됩니다. 학기나 일이 바뀌면 다시 확인하실 수 있습니다.`;
+  return `사람의 운영 방식은 상황에 따라 달라질 수 있어요—이 결과는 ‘평가’가 아니라 ${when}의 나를 이해하고 조정점을 찾는 지도입니다. 맞다·틀리다가 없으며, 저점도 결함이 아니라 다른 강점의 형태일 수 있습니다. 각 축을 따로 읽은 뒤 맨 아래 종합에서 한 장면으로 묶어 보시면 됩니다. 학기나 일이 바뀌면 다시 확인하실 수 있습니다.`;
 }
 
 export function summaryInterpret(scores, edition) {
@@ -113,7 +113,9 @@ export function summaryInterpret(scores, edition) {
           ? "SA(체계 분석)가 주력인 구조형입니다. 시작을 작게 끊어 ‘착수’만 해도 효율이 크게 올라갑니다."
           : `지금은 ${IE_PHRASE[ie]}이면서, ${SA_PHRASE[sa]}이 함께 있습니다.`;
   // 강점(엔진) → 에너지 방향 → 부담 신호(마지막) 순으로 읽습니다.
+  const comfortLine = "먼저, 지금의 당신은 충분히 괜찮습니다. 지금까지 버텨온 방식에는 이유가 있어요—이 결과는 잘잘못을 가리는 평가가 아니라, 더 편해지기 위한 조정점을 찾는 안내입니다.";
   const paragraphs = [
+    comfortLine,
     engineLine,
     IO_LINE[io],
   ];
