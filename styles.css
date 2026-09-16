@@ -342,8 +342,19 @@ a.btn { text-decoration: none; }
 @media (max-width: 640px) {
   .likert { grid-template-columns: repeat(3, 1fr); }
   .bar-row { grid-template-columns: 92px 1fr 52px; }
-  .spectrum { grid-template-columns: 1fr; gap: 2px; }
-  .spectrum .low, .spectrum .mid, .spectrum .high { text-align: left; white-space: normal; }
+  /* 작은 화면(iPhone 세로)에서 라벨이 글자 단위로 깨지는 것을 방지하기 위해
+     좌/우 라벨을 같은 줄에, 중앙 라벨을 아래 줄에 배치합니다. */
+  .spectrum {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "low high"
+      "mid mid";
+    gap: 4px 10px;
+    font-size: 11px;
+  }
+  .spectrum .low { grid-area: low; text-align: left; white-space: normal; word-break: keep-all; }
+  .spectrum .high { grid-area: high; text-align: right; white-space: normal; word-break: keep-all; }
+  .spectrum .mid { grid-area: mid; text-align: center; white-space: nowrap; }
 }
 
 @page {
@@ -351,6 +362,7 @@ a.btn { text-decoration: none; }
   margin: 12mm;
 }
 @media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #fff !important; }
   .shell { max-width: none; padding: 0 !important; }
   .nav { display: none !important; }
@@ -361,4 +373,5 @@ a.btn { text-decoration: none; }
   .footer { font-size: 10px; }
   .spectrum { font-size: 11px; }
   .bar-row { grid-template-columns: 96px 1fr 52px; }
+  .track { border: 1px solid #cfc6b8; }
 }

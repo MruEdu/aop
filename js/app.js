@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916zb";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zb";
+import { DOCS } from "./docs.js?v=20260916zd";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zd";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916zb";
-import { store, usingCloud } from "./storage.js?v=20260916zb";
-import { scoreAnswers } from "./scoring.js?v=20260916zb";
+} from "./items.js?v=20260916zd";
+import { store, usingCloud } from "./storage.js?v=20260916zd";
+import { scoreAnswers } from "./scoring.js?v=20260916zd";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -224,6 +224,11 @@ function options(list, selected) {
   return `<option value="">선택</option>` + list.map((o) =>
     `<option value="${esc(o)}" ${o === selected ? "selected" : ""}>${esc(o)}</option>`,
   ).join("");
+}
+
+function isIOS() {
+  const ua = navigator.userAgent || "";
+  return /iPad|iPhone|iPod/.test(ua);
 }
 
 const SCHOOL_LEVELS = ["중학교", "고등학교"];
@@ -758,9 +763,11 @@ function resultHtml(session, opts = {}) {
       <p class="progress">이 번호를 알려 주시면 기록을 찾을 수 있습니다. 이메일은 보내지 않습니다.</p>
       <div class="actions">
         <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">번호 복사</button>
-        <button class="btn ghost" data-act="print">PDF 저장</button>
+        <button class="btn ghost" data-act="print">${isIOS() ? "PDF 저장(PC 권장)" : "PDF 저장"}</button>
         ${expertOk ? `<a class="btn ghost" href="#/guide">해석요강 보기</a>` : `<a class="btn ghost" href="#/expert">전문가 자료(신청/로그인)</a>`}
       </div>
+      ${isIOS() ? `<p class="progress" style="margin-top:10px">iPhone/iPad(특히 앱 내 브라우저)에서는 PDF 저장이 동작하지 않을 수 있습니다. PC에서 이용해 주세요.</p>` : ""}
+      ${!isIOS() ? `<p class="progress" style="margin-top:10px">PC에서 PDF 저장 시, 인쇄 옵션의 “배경 그래픽”을 켜면 막대(그래프)가 더 잘 보입니다.</p>` : ""}
       <p class="progress" style="margin-top:12px">개발: 바이브스타틱스 현용찬(교육학박사)</p>
     </div>`;
 }
@@ -1172,7 +1179,13 @@ async function onClick(e) {
   if (act === "copy-no") {
     void navigator.clipboard.writeText(btn.dataset.no);
   }
-  if (act === "print") window.print();
+  if (act === "print") {
+    if (isIOS()) {
+      alert("iPhone/iPad에서는 PDF 저장이 동작하지 않을 수 있습니다. PC에서 PDF 저장을 이용해 주세요.");
+      return;
+    }
+    window.print();
+  }
   if (act === "issue") {
     await store.createExpertCode(admin.label);
     admin.label = "";
