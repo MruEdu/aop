@@ -8,7 +8,7 @@ import {
   SCALE_ORDER,
   SCORING_EXCLUDED_IDS,
   SCALES,
-} from "./items.js?v=20260916e";
+} from "./items.js?v=20260916g";
 
 function mean(xs) {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
