@@ -1,4 +1,4 @@
-import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260916zi";
+import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260916zj";
 
 const SCORE = scoringManualLines();
 const TOTAL_ITEMS = itemsFor("univ").length;
@@ -17,12 +17,12 @@ export const DOCS = [
         ],
       },
       {
-        heading: "이럴 때 특히 유용해요",
+        heading: "이 검사는 이런 분께 도움이 돼요",
         body: [
-          "시작은 하는데 금방 무너질 때(미루기, 중간에 힘 빠짐, 마감에 몰림).",
-          "숙제·수행평가·시험/과제가 겹칠 때(부담 신호가 커지는 장면을 찾고 싶을 때).",
-          "공부법을 바꿔야 할 것 같은데 감이 안 올 때(지금 내 운영 리듬부터 잡고 싶을 때).",
-          "상담/코칭의 첫 단계(현재 모습을 빠르게 정리해 대화를 시작하고 싶을 때).",
+          "나의 학습/업무 성향(운영 스타일)을 알고 싶을 때.",
+          "자기 자신을 더 잘 이해하고, 잘 되는 조건과 흔들리는 장면을 정리해 보고 싶을 때.",
+          "자녀/학생이 어떤 방식에서 힘이 나고, 어떤 장면에서 부담이 커지는지 이해하고 싶을 때.",
+          "상담/코칭에서 현재 모습을 빠르게 정리해 대화를 시작하고 싶을 때.",
         ],
       },
       {
