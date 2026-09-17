@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260917p";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917p";
+import { DOCS } from "./docs.js?v=20260917r";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917r";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260917p";
-import { store, usingCloud } from "./storage.js?v=20260917p";
-import { scoreAnswers } from "./scoring.js?v=20260917p";
+} from "./items.js?v=20260917r";
+import { store, usingCloud } from "./storage.js?v=20260917r";
+import { scoreAnswers } from "./scoring.js?v=20260917r";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -659,9 +659,13 @@ function resultHtml(session, opts = {}) {
       </div>
       <div class="score">${session.scores[k].toFixed(2)}</div>
     </div>`).join("");
-  const cards = lines.map((line) => `
-    <div class="card"><h2 style="margin-top:0">${esc(line.name)} · ${esc(line.band)} (${line.score.toFixed(2)})</h2>
-    <p>${esc(line.text)}</p></div>`).join("");
+  const cards = lines.map((line) => {
+    const sp = SCALES[line.key]?.spectrum || {};
+    const title = `${sp.low || ""} ↔ ${sp.high || ""}`;
+    return `
+    <div class="card"><h2 style="margin-top:0">${esc(title)} · ${esc(line.band)} (${line.score.toFixed(2)})</h2>
+    <p>${esc(line.text)}</p></div>`;
+  }).join("");
   const trust = reliability.reliable
     ? `<div class="banner ok">응답 신뢰도: <b>${esc(reliability.reliabilityTier || "약간 신뢰")}</b></div>`
     : "";
