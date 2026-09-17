@@ -1,4 +1,4 @@
-import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260916zj";
+import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260917h";
 
 const SCORE = scoringManualLines();
 const TOTAL_ITEMS = itemsFor("univ").length;
@@ -174,7 +174,7 @@ export const DOCS = [
       {
         heading: "도구의 범위",
         body: [
-          `검사를 하는 사람이 지금 학업·업무를 어떻게 돌리는지, 막히면 주체가 어디에 접히는지를 짧은 프로파일로 찍습니다. 초등용·중고등용·대학생용·성인용을 같이 엽니다. 전 판본이 같은 ${TOTAL_ITEMS}문항 구조이며, 29–33번(쿤 5문항)과 34–38번(점검 문항)은 채점에서 제외됩니다.`,
+          `검사를 하는 사람이 지금 학업·업무를 어떻게 돌리는지, 막히는 장면이 어디인지(분량·마감·피드백 등)를 짧은 프로파일로 정리합니다. 초등용·중고등용·대학생용·성인용을 같이 엽니다. 전 판본이 같은 ${TOTAL_ITEMS}문항 구조이며, 29–33번(연구용 문항)과 34–38번(점검 문항)은 채점에서 제외됩니다.`,
           "이 도구의 자리는 지금 학업·업무를 어떻게 돌리는지의 짧은 프로파일입니다. 학습양식·성격·자기조절학습 도구와 함께 쓰면 장면이 더 분명해집니다.",
           "1판은 탐색적 요인분석에 기초합니다. 학업방식을 확인하고 학습 운영을 돕는 자료로 쓰십시오. CFA·규준은 후속입니다.",
         ],
