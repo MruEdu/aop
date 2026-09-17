@@ -1,5 +1,5 @@
-import { SCALE_ORDER, SCALES } from "./items.js?v=20260916zj";
-import { band, bandLabel } from "./scoring.js?v=20260916zj";
+import { SCALE_ORDER, SCALES } from "./items.js?v=20260917k";
+import { band, bandLabel } from "./scoring.js?v=20260917k";
 
 function scene(edition) {
   if (edition === "adult") {
@@ -28,7 +28,7 @@ function axisCopy(edition) {
     sa: {
       high: `잘 되는 규칙(패턴)을 찾아 표·도식·체크리스트로 정리하는 쪽이 강하게 나타납니다. ${s.study}에서 “내 방식”을 만들 힘이 큽니다. 부담이 큰 날에는 규칙이 더 빡빡해지면서 시작이 늦어지는 모습이 함께 나타날 수도 있어요.`,
       mid: `상황에 따라 규칙을 세우기도 하고 풀기도 하는 편입니다. 복잡한 ${s.task}에서는 “잘 될 때의 조건(시간·장소·도구·순서)”을 한두 개만 고정해도 내 패턴이 빨리 잡힙니다.`,
-      low: `규칙을 딱딱하게 세우기보다 맥락을 보고 유연하게 조절하는 쪽으로 나타납니다. 한편 구조가 필요한 ${s.task}에서는 “고정할 1개”가 없을 때 더 흔들리는 느낌이 들 수도 있어요. (예: 시작 시간, 장소, 첫 10분 할 일)`,
+      low: `규칙을 딱딱하게 세우기보다 맥락을 보고 유연하게 조절하는 쪽으로 나타납니다. 한편 구조가 필요한 ${s.task}에서는 “고정할 1개”가 없을 때 더 흔들리는 느낌이 들 수도 있어요. (예: 시작 시간, 장소, 가장 쉬운 첫 단계)`,
     },
     wd: {
       high: "부담을 빨리 감지하는 레이더가 예민한 편입니다. 분량·마감·피드백이 겹치면 마음이 얼어붙거나 ‘그냥 맡겨버리고 싶다’는 생각이 쉽게 올라올 수 있어요. 성격의 문제가 아니라, 지금 부담이 크다는 신호로 읽을 수 있습니다.",
@@ -99,32 +99,152 @@ export function resultPreface(edition) {
   return `사람의 운영 방식은 상황에 따라 달라질 수 있어요—이 결과는 ‘평가’가 아니라 ${when}의 나를 이해하고 조정점을 찾는 지도입니다. 맞다·틀리다가 없으며, 저점도 결함이 아니라 다른 강점의 형태일 수 있습니다. 각 축을 따로 읽은 뒤 맨 아래 종합에서 한 장면으로 묶어 보시면 됩니다. 학기나 일이 바뀌면 다시 확인하실 수 있습니다.`;
 }
 
-export function summaryInterpret(scores, edition) {
-  const ie = band(scores.ie);
-  const sa = band(scores.sa);
-  const wd = band(scores.wd);
-  const io = band(scores.io);
-  const fit = edition === "adult" ? "이번 일과 맞나" : "이번 학기와 맞나";
+function userSummaryInterpret(scores, edition) {
+  const ieB = band(scores.ie);
+  const saB = band(scores.sa);
+  const wdB = band(scores.wd);
   const snap = SCALE_ORDER.map((k) => `${SCALES[k].name} ${bandLabel(scores[k])}`).join(" · ");
-  const centralTemperament = scores.ie >= 2.5 && scores.ie < 4 && scores.sa >= 2.5 && scores.sa < 4;
-  const dualCore = scores.ie >= 4 && scores.sa >= 4;
-  const comfortLine = "지금까지 버텨온 방식에는 이유가 있어요—이 결과는 잘잘못을 가리는 평가가 아니라, 지금의 나를 이해하고 조정점을 찾기 위한 안내입니다.";
-  const engineLine = centralTemperament
-    ? "주력 방식이 한쪽으로 크게 쏠리기보다, 상황에 따라 완급을 조율하는 모습이 함께 나타나는 편입니다."
-    : dualCore
-      ? "직관적 돌파(IE)와 구조화(SA)가 함께 높게 나타납니다. ‘빨리 해보고(돌파) → 다시 정리해 표준을 만드는(구조)’ 리듬이 같이 보일 수 있어요."
-      : scores.ie >= 4 && scores.sa < 4
-        ? "시작과 추진(IE)이 비교적 두드러지고, 구조화(SA)는 필요할 때만 붙는 편으로 나타날 수 있습니다."
-        : scores.sa >= 4 && scores.ie < 4
-          ? "구조화(SA)가 비교적 두드러지고, 돌입(IE)은 상황을 보며 켜는 편으로 나타날 수 있습니다."
-          : `지금은 ${IE_PHRASE[ie]}과(와) ${SA_PHRASE[sa]}이 함께 보이는 편입니다.`;
-  const rhythmLine = `요약하면, ${IE_PHRASE[ie]}이(가) ${SA_PHRASE[sa]}과(와) 함께 나타나고, 에너지는 ${IO_PHRASE[io]} 흐르는 편입니다.`;
-  const paragraphs = [comfortLine, rhythmLine, engineLine];
-  const combo = comboNote(scores, edition);
-  if (combo) paragraphs.push(combo);
-  paragraphs.push(WD_LINE[wd]);
-  paragraphs.push(`한 축씩 "${fit}"를 물으면 다음 운영이 분명해집니다.`);
+  const isSchoolish = edition === "elementary" || edition === "school";
+  const fit = edition === "adult" ? "이번 일" : (edition === "univ" ? "이번 과제·학기" : "이번 학기");
+  const s = scene(edition);
+
+  const headline = (() => {
+    const ieH = scores.ie >= 4;
+    const saH = scores.sa >= 4;
+    const ioH = scores.io >= 4;
+    const ioL = scores.io < 2.5;
+    const centralIE = scores.ie >= 2.5 && scores.ie < 4;
+    const centralSA = scores.sa >= 2.5 && scores.sa < 4;
+    const centralEngines = centralIE && centralSA;
+    if (ieH && saH && ioH) return "기획과 실행을 함께 챙기며, 함께 이끄는 편";
+    if (ieH && saH && ioL) return "해보면서 정리해 ‘내 방식’을 만드는 편";
+    if (ieH && ioH) return "빠르게 시작하고, 함께할 때 힘이 나는 편";
+    if (ieH && ioL) return "혼자 몰입하면 속도가 잘 나는 편";
+    if (saH && ioH) return "흐름을 정리하고, 역할을 나누며 이끄는 편";
+    if (saH && ioL) return "깊게 파고들어 구조를 만드는 편";
+    if (centralEngines && ioH) return "상황에 맞게 조절하며, 사람 사이를 연결하는 편";
+    if (centralEngines && ioL) return "상황에 맞게 바꾸며, 자기 페이스로 가는 편";
+    return "상황에 따라 방식과 페이스를 조절하는 편";
+  })();
+
+  const wdBadge = (() => {
+    if (wdB === "low") return "부담 신호는 낮은 편(대체로 버티며 이어갈 수 있음)";
+    if (wdB === "mid") return "부담 신호는 보통(장면에 따라 흔들릴 수 있음)";
+    return "부담 신호가 높은 편(부담이 커질 때 막막해질 수 있음)";
+  })();
+
+  const opener = "이 결과는 성적표가 아니라, 요즘의 흐름을 정리하기 위한 참고입니다. 좋고 나쁨을 가르기보다, 잘 되는 조건과 흔들리는 장면을 찾는 데 도움이 됩니다.";
+  const how = [];
+  if (scores.ie >= 4) how.push(`필요가 보이면 생각을 오래 끌기보다 ${s.task}에 먼저 들어가 보며 방향을 잡는 편입니다.`);
+  else if (scores.ie < 2.5) how.push(`단계와 절차가 잡혀 있으면 ${s.task}를 안정적으로 이어가는 편입니다.`);
+  else how.push(`${s.task}의 성격에 따라, 빠르게 들어갈 때도 있고 계획을 세울 때도 있습니다.`);
+
+  if (scores.sa >= 4) how.push(`정리·체계가 잡힐수록 마음이 편해지고, 내 방식을 만들어 가는 힘이 큽니다.`);
+  else if (scores.sa < 2.5) how.push(`규칙을 딱딱하게 세우기보다 맥락을 보고 유연하게 조절하는 쪽으로 나타날 수 있습니다.`);
+  else how.push(`필요할 때 규칙을 세우고 풀 줄 아는 편이라, 상황에 맞춘 조절이 가능합니다.`);
+
+  if (scores.io >= 4) how.push("혼자보다 함께할 때 에너지가 더 잘 붙고, 의견을 모으거나 방향을 제시하는 역할에서 보람을 느낄 수 있습니다.");
+  else if (scores.io < 2.5) how.push(`대인 조율보다 ${s.study}의 깊이·집중 쪽에서 힘이 나는 편일 수 있습니다.`);
+  else how.push("상황에 따라 협력·조율·독립을 오갈 수 있습니다.");
+
+  if (wdB === "high") how.push("분량·마감·피드백이 겹칠 때는 마음이 얼어붙거나 맡기고 싶어질 수 있는데, 성격이 아니라 부담이 커졌다는 신호로 볼 수 있습니다.");
+  else if (wdB === "mid") how.push("대체로는 괜찮지만, 마감·피드백 장면에서는 부담이 커질 수 있습니다.");
+  else how.push("부담이 와도 비교적 버티는 편이지만, 오래 달릴수록 피로가 쌓이지 않는지 한 번씩 점검해 보는 게 좋습니다.");
+
+  const tips = [];
+  tips.push(`큰 계획을 한 번에 완성하기보다, ${s.task}를 “지금 바로 할 수 있는 크기”로 나눠 보면 도움이 될 때가 많습니다. (예: 목차 3줄, 문제 1개, 첫 문단)`);
+  tips.push("중간에 한 번 점검할 시점을 잡아두면 부담이 줄어들 수 있습니다. (예: 언제까지 무엇을 어디까지 공유할지)");
+  if (isSchoolish) {
+    tips.push("주변에서는 결과를 ‘평가’로 쓰기보다, 다시 붙을 수 있는 조건(시간·장소·도구·순서)을 같이 정리해 주는 방식이 도움이 됩니다.");
+  }
+  const closing = `네 축을 한 줄씩 읽어본 뒤, "${fit}에서 무엇이 잘 맞고 무엇이 힘든지"를 한두 장면으로만 묶어 보면 다음 선택이 훨씬 쉬워질 수 있어요.`;
+
+  const paragraphs = [
+    opener,
+    `요약: ${headline} · ${wdBadge}`,
+    ...how,
+    "이렇게 해보면 좋아요:",
+    ...tips.slice(0, isSchoolish ? 3 : 2).map((t) => `- ${t}`),
+    closing,
+  ];
   return { snap, paragraphs };
+}
+
+function expertDetailedReport(scores, edition, ctx = {}) {
+  const s = scene(edition);
+  const snap = `IE ${scores.ie.toFixed(2)} / SA ${scores.sa.toFixed(2)} / WD ${scores.wd.toFixed(2)} / IO ${scores.io.toFixed(2)}`;
+  const reliability = ctx.reliability || null;
+  const relLine = reliability
+    ? `신뢰도: reliable=${String(reliability.reliable)}, attention_ok=${String(reliability.attentionOk)}, lie_ok=${String(reliability.lieOk)}`
+    : "신뢰도: (표시 정보 없음)";
+
+  const sections = [
+    {
+      heading: "1) 기본 지표",
+      body: [
+        "본 결과는 학업·과제(성인 판본은 일/업무) 장면에서 나타나는 운영 방식의 경향을 요약합니다.",
+        snap,
+        relLine,
+      ],
+    },
+    {
+      heading: "2) 과제 인지 및 정보 처리 양식",
+      body: [
+        scores.sa >= 4
+          ? `표·도식·체크리스트처럼 구조가 보일 때 통제감이 올라가고, ${s.task}를 체계적으로 정리해 가는 강점이 두드러질 수 있습니다.`
+          : scores.sa < 2.5
+            ? `규칙을 고정하기보다 맥락을 보며 유연하게 조절하는 경향이 나타날 수 있습니다. 구조가 필요한 ${s.task}에서는 “기준 1개”를 잡아두면 도움이 될 때가 많습니다.`
+            : `필요할 때 규칙을 세우고 풀 줄 아는 편이라, ${s.task}의 성격에 맞춰 조절이 가능합니다.`,
+        scores.ie >= 4
+          ? `착수는 빠른 편이며, 해보면서 방향을 잡는 리듬이 강점으로 나타날 수 있습니다.`
+          : scores.ie < 2.5
+            ? `착수는 신중한 편이며, 단계와 절차가 잡힐수록 안정적으로 이어가는 경향이 나타날 수 있습니다.`
+            : `상황에 따라 빠른 착수와 계획을 오갈 수 있습니다.`,
+      ],
+    },
+    {
+      heading: "3) 심리적 부하 및 과업 통제성(WD)",
+      body: [
+        band(scores.wd) === "high"
+          ? `분량·마감·피드백이 겹칠 때 부담이 빠르게 올라갈 수 있습니다. 이때의 반응은 성격 규정이 아니라, 부담이 커졌다는 신호로 읽는 것이 안전합니다.`
+          : band(scores.wd) === "low"
+            ? `압박 상황에서도 비교적 버티며 이어갈 가능성이 큽니다. 다만 오래 달릴수록 피로가 쌓이지 않는지 점검하고, 회복 시간을 의도적으로 확보하는 것이 도움이 됩니다.`
+            : `대체로는 괜찮지만, 특정 장면(마감·피드백 등)에서는 부담이 커질 수 있습니다.`,
+      ],
+    },
+    {
+      heading: "4) 대인관계 및 역할 지향(IO)",
+      body: [
+        scores.io >= 4
+          ? "사람과 함께할 때 에너지가 붙고, 의견을 모으거나 방향을 제시하는 역할에서 보람을 느낄 수 있습니다."
+          : scores.io < 2.5
+            ? `대인 조율보다 ${s.study}의 깊이·집중 쪽에서 힘이 나는 편일 수 있습니다. 이 방향도 충분히 기능적인 운영 방식입니다.`
+            : "상황에 따라 협력·조율·독립을 오갈 수 있습니다.",
+      ],
+    },
+    {
+      heading: "5) 종합적 역동과 장면 시사점",
+      body: [
+        "이 결과는 ‘좋고 나쁨’이 아니라, 지금 시기 어떤 조건에서 강점이 살아나고 어떤 장면에서 부담이 커지는지에 대한 힌트로 활용하는 것이 적절합니다.",
+        "특히 팀 과제/프로젝트에서는 역할과 기준을 명확히 나누면 강점이 더 안정적으로 이어질 수 있습니다.",
+      ],
+    },
+    {
+      heading: "6) 운영 제언(부드러운 제안)",
+      body: [
+        `착수 전 “전체 완성”을 요구하기보다, ${s.task}의 뼈대를 먼저 잡고(초안/목차/요점) 진행 과정에서 정리 수준을 올리는 방식이 도움이 될 수 있습니다.`,
+        "중간 점검 시점을 잡아두면, 부담이 커지는 장면을 줄이고 결과의 품질도 안정될 수 있습니다.",
+      ],
+    },
+  ];
+
+  return { snap, sections };
+}
+
+export function summaryInterpret(scores, edition, opts = {}) {
+  const audience = opts.audience || "user";
+  if (audience === "expert") return expertDetailedReport(scores, edition, opts);
+  return userSummaryInterpret(scores, edition);
 }
 
 export function profileLines(scores, edition) {

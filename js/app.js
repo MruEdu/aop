@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916zj";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zj";
+import { DOCS } from "./docs.js?v=20260917k";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917k";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916zj";
-import { store, usingCloud } from "./storage.js?v=20260916zj";
-import { scoreAnswers } from "./scoring.js?v=20260916zj";
+} from "./items.js?v=20260917k";
+import { store, usingCloud } from "./storage.js?v=20260917k";
+import { scoreAnswers } from "./scoring.js?v=20260917k";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -448,7 +448,7 @@ function home() {
         지금은 누구나 바로 해 보실 수 있습니다. 이후 실시 방법이 바뀌면 다시 공지합니다.
         맞다·틀리다가 없습니다. 지금 시기에 가까운 쪽을 고르면 됩니다.
         결과는 즉흥 실행, 체계 분석, 위임·위축, 영향 지향 네 축으로 바로 보여 드립니다.
-        약 10–15분, 공개 코드는 ${PUBLIC_CODE} 입니다. 문의할 때는 결과번호를 알려 주십시오.
+        약간의 시간이 필요합니다. 공개 코드는 ${PUBLIC_CODE} 입니다. 문의할 때는 결과번호를 알려 주십시오.
         <div class="version-line">업데이트가 안 보이면 <b>V2 링크</b>로 다시 열어 보세요: <span class="mono">${esc(shareUrl)}</span></div>
       </div>
       ${editionCards(true)}
@@ -598,6 +598,7 @@ function takeView() {
 
 function resultHtml(session, opts = {}) {
   const expertOk = Boolean(opts.expertOk);
+  const adminOk = Boolean(opts.adminOk);
   let reliability = {
     attentionOk: session.attentionOk,
     lieOk: session.lieOk,
@@ -620,7 +621,10 @@ function resultHtml(session, opts = {}) {
   }
   const lines = profileLines(session.scores, session.edition);
   const preface = resultPreface(session.edition);
-  const summary = summaryInterpret(session.scores, session.edition);
+  const summary = summaryInterpret(session.scores, session.edition, { audience: "user" });
+  const expertReport = (expertOk || adminOk)
+    ? summaryInterpret(session.scores, session.edition, { audience: "expert", reliability })
+    : null;
   const wdOverload = (session.scores?.wd ?? 0) >= 3.5;
   const overloadCard = wdOverload ? (() => {
     const scene = session.edition === "adult"
@@ -632,11 +636,11 @@ function resultHtml(session, opts = {}) {
       <div class="card overload">
         <h2 style="margin-top:0">부담 신호 도움말(WD 높음)</h2>
         <p class="lede">지금은 ${scene.task}·마감·피드백에서 부담이 커지면 <b>마음이 얼어붙거나</b> “그냥 맡겨버리고 싶다”는 생각이 쉽게 올라올 수 있습니다. 이건 성격이 아니라, <b>부담 신호</b>입니다.</p>
-        <h2>15분 처방(마이크로 태스크)</h2>
+        <h2>작게 시작하는 팁</h2>
         <ul class="tips">
-          <li><b>15분 타이머</b>를 켜고 “첫 한 조각”만 해보는 게 도움이 될 때가 많습니다. (예: 목차 3줄, 문제 1개, 파일 열고 제목만)</li>
-          <li><b>중간 마감</b>을 먼저 두면 부담이 줄어드는 경우가 많습니다. (예: 제출 3일 전 ‘중간 점검’ 10분)</li>
-          <li>AI/사람 도움은 <b>초안·정리</b>에 쓰고, 마지막은 <b>내 말</b> 한 줄이라도 붙여 보면 좋습니다.</li>
+          <li>시작을 “크게” 잡기보다, <b>바로 할 수 있을 만큼</b> 작게 잡아보면 도움이 될 때가 많습니다. (예: 목차 3줄, 문제 1개, 파일 열고 제목만)</li>
+          <li><b>중간 점검 시점</b>을 미리 한 번 잡아두면, 부담이 줄어드는 경우가 많습니다. (예: “언제까지 무엇을 어디까지”만 공유)</li>
+          <li>AI/사람 도움은 <b>초안·정리</b>에 쓰고, 마지막은 <b>내 말</b> 한 줄이라도 붙여 보는 쪽이 안전합니다.</li>
         </ul>
         <p class="progress">핵심은 “크게 결심”이 아니라, 부담이 커지는 순간에도 <b>다시 붙을 수 있는 크기</b>로 줄이는 데 있습니다.</p>
       </div>
@@ -664,100 +668,31 @@ function resultHtml(session, opts = {}) {
     : "";
   const warn = reliability.reliable
     ? ""
-    : `<div class="banner warn">응답 과정에서 일부 문항 간 편차가 감지된 결과입니다. 현재 모습을 참고하실 수 있도록 해석은 그대로 제공해 드리며, 나에게 꼭 맞는 정밀한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
-  const summaryBody = summary.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
+    : `<div class="banner warn">응답 점검 문항(주의·허위)에서 일부가 기준과 달라, 이번 결과는 참고용으로 안내드립니다. 현재 모습을 이해하실 수 있도록 해석은 그대로 제공해 드리며, 더 또렷한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
+  const summaryBody = summary.paragraphs.map((p) =>
+    p.startsWith("- ")
+      ? `<p class="tip">${esc(p.slice(2))}</p>`
+      : `<p>${esc(p)}</p>`
+  ).join("");
 
-  const paradigmCard = (() => {
-    const a = session?.answers || {};
-    const ids = [29, 30, 31, 32, 33];
-    const vals = ids
-      .map((id) => ({ id, v: a[id] ?? a[String(id)] }))
-      .map((x) => ({ ...x, v: x.v == null || x.v === "" ? null : Number(x.v) }))
-      .filter((x) => Number.isFinite(x.v));
-    if (!vals.length) return "";
-
-    const meta = {
-      29: { name: "순항(익숙한 방식이 잘 굴러감)", phase: "normal_science" },
-      30: { name: "한계 신호(바꿀 필요가 생김)", phase: "anomaly" },
-      31: { name: "전환기(번데기·사춘기 같은 구간)", phase: "crisis" },
-      32: { name: "실험·혁신(새 방법을 시험 중)", phase: "revolution" },
-      33: { name: "재정착(새 방식이 자리 잡음)", phase: "new_normal" },
-    };
-    const maxV = Math.max(...vals.map((x) => x.v));
-    const tops = vals.filter((x) => x.v === maxV);
-    const topNames = tops.map((x) => meta[x.id]?.name || `문항 ${x.id}`).join(" · ");
-
-    const phaseKey = tops.length === 1 ? meta[tops[0].id]?.phase : "mix";
-    const scene = session.edition === "adult"
-      ? { work: "일", study: "업무", task: "업무" }
-      : session.edition === "school" || session.edition === "elementary"
-        ? { work: "공부", study: "공부", task: "숙제·수행평가" }
-        : { work: "학업", study: "학업", task: "과제" };
-
-    const qs = {
-      normal_science: [
-        `지금 ${scene.study}에서 “잘 굴러가는 루틴”은 무엇인가요? (시간·장소·도구·순서)`,
-        `이 루틴이 깨질 때는 언제인가요? 깨지기 전에 지킬 수 있는 ‘최소 조건’은 무엇인가요?`,
-      ],
-      anomaly: [
-        `예전 방식이 “예전만큼” 안 먹히는 건 어떤 장면에서 가장 먼저 느껴지나요? (분량/난이도/피드백/마감)`,
-        `이건 실패라기보다 “성장에 맞춘 업데이트 신호”일 수 있어요. 방법/환경(시간·장소·도구) 중 지금 먼저 바꿀 1가지는 무엇인가요?`,
-      ],
-      crisis: [
-        `이 구간은 “망가진 게 아니라 바뀌는 중”일 수 있어요. 막막함이 올라올 때, 가장 먼저 막히는 건 무엇인가요? (착수/유지/마감/피드백)`,
-        `지금은 ‘정답 찾기’보다 ‘첫 한 조각’을 정하는 게 우선일 수 있어요. 오늘 10분만 할 수 있는 가장 작은 조각은 무엇인가요?`,
-      ],
-      revolution: [
-        `새로 시도 중인 방법/도구 중에서 “계속 가져갈 것 1개”와 “버릴 것 1개”는 무엇인가요?`,
-        `새 시도는 흔들릴 수 있어요. 실패를 줄이려면 ‘중간 점검(10분)’을 언제, 어떤 방식으로 잡을까요?`,
-      ],
-      new_normal: [
-        `새 방식이 자리 잡는 데 도움이 된 핵심 요인은 무엇이었나요? (사람/환경/도구/절차)`,
-        `이 방식을 “내 매뉴얼”로 남긴다면, 다음 번 나에게 꼭 적어둘 3줄은 무엇인가요?`,
-      ],
-      mix: [
-        `지금 응답은 한 국면으로 단정하기보다 “전환기(혼합)”에 가까울 수 있어요. 위 항목 중 어떤 두 장면이 같이 느껴지나요?`,
-        `전환기에는 ‘하나를 크게 바꾸기’보다 ‘하나만 고정하기’가 도움이 됩니다. 지금 고정할 1가지는 무엇인가요?`,
-      ],
-    }[phaseKey] || [];
-
-    const qHtml = qs.length ? `<ul class="tips">${qs.slice(0, 2).map((q) => `<li>${esc(q)}</li>`).join("")}</ul>` : "";
-    const lead = tops.length === 1
-      ? `응답은 <b>${esc(topNames)}</b> 쪽 문장에 더 가까웠습니다.`
-      : `응답은 <b>${esc(topNames)}</b> 쪽 문장이 비슷하게 높았습니다. (전환기/혼합일 수 있습니다.)`;
-
-    const supporter = session.edition === "adult"
-      ? "동료·상담자"
-      : session.edition === "univ"
-        ? "멘토·상담자"
-        : "부모·교사";
-    const consumerTips = [
-      `${supporter}는 “왜 안 하니?”보다 <b>첫 한 조각</b>(10분/1문제/3줄)을 같이 정해 주는 게 도움이 됩니다.`,
-      `결과보다 과정 질문이 좋습니다. “지금 뭐가 제일 막히니?”보다 “지금 <b>10분만</b> 할 조각은 뭐로 할까?”로 바꿔 보세요.`,
-      `바꾸는 시기엔 흔들림이 정상입니다. 시간·장소·도구·순서 중 <b>하나만 고정</b>해도 안정이 빨라집니다.`,
-    ];
-    const consumerHtml = `<ul class="tips">${consumerTips.map((t) => `<li>${t}</li>`).join("")}</ul>`;
-    const rawLine = vals.length
-      ? `<p class="progress">원점수(1–6): ${vals.map((x) => `${x.id}=${x.v}`).join(" · ")}</p>`
-      : "";
-
+  const expertCard = expertReport ? (() => {
+    const secHtml = (expertReport.sections || []).map((s) => `
+      <section style="margin-top:14px">
+        <h3 style="margin:0 0 6px;font-size:15px">${esc(s.heading)}</h3>
+        ${s.body.map((p) => `<p>${esc(p)}</p>`).join("")}
+      </section>
+    `).join("");
+    const metaLine = `IE ${session.scores.ie.toFixed(2)} / SA ${session.scores.sa.toFixed(2)} / WD ${session.scores.wd.toFixed(2)} / IO ${session.scores.io.toFixed(2)}`;
+    const trustLine = `reliable=${String(reliability.reliable)} · attention_ok=${String(reliability.attentionOk)} · lie_ok=${String(reliability.lieOk)}`;
     return `
-      <div class="card">
-        <h2 style="margin-top:0">국면 체크(현재 단계)</h2>
-        ${
-          expertOk
-            ? `<p class="progress">29–33번은 채점에서 제외되며, 쿤(Paradigm) 변화 모델을 참고해 “지금 ${scene.work}의 변화 단계”를 돌아보기 위한 성찰 질문입니다.</p>
-               <p class="progress">쿤은 변화가 “익숙한 규칙이 잘 굴러감 → 예외가 쌓임 → 전환기 → 새 시도 → 새 정착”처럼 이어질 수 있다고 보았습니다.</p>
-               <p class="progress">지금 국면을 “좋고 나쁨”으로 판단하기보다, 나에게 맞는 새 규칙(패턴)을 찾아 작게 실험하고 굳혀 가는 과정으로 보시면 도움이 됩니다.</p>`
-            : `<p class="progress">아래 문장들은 채점과 별개로, 요즘 ${scene.work} 운영 흐름을 돌아보기 위한 참고입니다.</p>
-               <p class="progress">${supporter}가 도울 때는 ‘설명’보다 <b>착수 크기</b>를 줄여 주는 쪽이 효과적일 때가 많습니다.</p>`
-        }
-        <p>${lead}</p>
-        ${expertOk ? qHtml : consumerHtml}
-        ${expertOk ? rawLine : ""}
-      </div>
+      <details class="card" style="margin-top:12px">
+        <summary style="cursor:pointer"><b>전문가용 상세 보고서</b> <span class="progress">(펼치기)</span></summary>
+        <p class="progress" style="margin-top:10px">${esc(metaLine)}</p>
+        <p class="progress">${esc(trustLine)}</p>
+        ${secHtml}
+      </details>
     `;
-  })();
+  })() : "";
 
   return `
     ${trust}
@@ -776,7 +711,7 @@ function resultHtml(session, opts = {}) {
       <p class="progress">${esc(summary.snap)}</p>
       ${summaryBody}
     </div>
-    ${paradigmCard}
+    ${expertCard}
     ${overloadCard}
     <div class="card">
       <p>문의·재열람용 결과번호</p>
@@ -811,6 +746,7 @@ const admin = {
 async function render() {
   const root = document.getElementById("root");
   const r = route();
+  const adminOk = sessionStorage.getItem("aop.admin") === "1";
   let expertOk = devMode();
   if (!expertOk) {
     const mode = expertGateMode();
@@ -824,7 +760,7 @@ async function render() {
     }
   }
   if (MAINTENANCE_MODE && !devMode() && !r.startsWith("/admin")) {
-    root.innerHTML = layout(maintenanceView(), { expertOk });
+    root.innerHTML = layout(maintenanceView(), { expertOk, adminOk });
     return;
   }
   if (r.startsWith("/guide") || r.startsWith("/expert")) {
@@ -845,12 +781,12 @@ async function render() {
     try {
       const s = await store.getByResultNo(no);
       inner = s
-        ? `<main><h1>결과</h1>${resultHtml(s, { expertOk })}</main>`
+        ? `<main><h1>결과</h1>${resultHtml(s, { expertOk, adminOk })}</main>`
         : `<main><h1>결과</h1><p>결과번호에 해당하는 기록이 없습니다.</p></main>`;
     } catch (e) {
       inner = `<main><h1>결과</h1><p class="err">${esc(e.message || e)}</p></main>`;
     }
-    root.innerHTML = layout(inner, { expertOk });
+    root.innerHTML = layout(inner, { expertOk, adminOk });
     return;
   } else if (r.startsWith("/lookup")) {
     inner = `<main><h1>결과 조회</h1><div class="card">
@@ -863,7 +799,7 @@ async function render() {
     const page = DOCS.find((d) => r === "/" + d.id);
     inner = page ? docView(page) : home();
   }
-  root.innerHTML = layout(inner, { expertOk });
+  root.innerHTML = layout(inner, { expertOk, adminOk });
 }
 
 async function adminView() {
