@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916zj";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zj";
+import { DOCS } from "./docs.js?v=20260917mn1";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917mn1";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,15 +15,56 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916zj";
-import { store, usingCloud } from "./storage.js?v=20260916zj";
-import { scoreAnswers } from "./scoring.js?v=20260916zj";
+} from "./items.js?v=20260917mn1";
+import { store, usingCloud } from "./storage.js?v=20260917mn1";
+import { scoreAnswers } from "./scoring.js?v=20260917mn1";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
 
 function devMode() {
   return new URLSearchParams(location.search).get("mode") === "dev";
+}
+
+function lang() {
+  // 미리보기(안전) 모드: 기본은 ko, mode=dev일 때만 lang 파라미터를 적용합니다.
+  if (!devMode()) return "ko";
+  const l = (new URLSearchParams(location.search).get("lang") || "").trim().toLowerCase();
+  if (!l) return "ko";
+  if (l === "mn" || l.startsWith("mn")) return "mn";
+  return "ko";
+}
+
+const LANG = lang();
+
+const I18N_MN = {
+  "검사 하기": "Тест өгөх",
+  "결과조회": "Үр дүн хайх",
+  "결과 조회": "Үр дүн хайх",
+  "사용설명서": "Хэрэглэх заавар",
+  "해석요강": "Тайлбарын гарын авлага",
+  "해석요강 보기": "Тайлбарын гарын авлага үзэх",
+  "전문가": "Мэргэжилтэн",
+  "전문가 자료": "Мэргэжилтний материал",
+  "전문가 자료(신청/로그인)": "Мэргэжилтний материал (өргөдөл/нэвтрэх)",
+  "관리자": "Админ",
+  "검사 시작": "Тест эхлүүлэх",
+  "동의하고 계속": "Зөвшөөрөөд үргэлжлүүлэх",
+  "코드 확인": "Код шалгах",
+  "문항으로": "Асуулт руу",
+  "저장 중…": "Хадгалж байна…",
+  "제출하고 결과 보기": "Илгээж, үр дүн харах",
+  "번호 복사": "Дугаар хуулах",
+  "PDF 저장": "PDF хадгалах",
+  "PDF 저장(PC 권장)": "PDF хадгалах (PC зөвлөмж)",
+  "불러오는 중…": "Ачаалж байна…",
+  "선택": "Сонгох",
+  "결과번호에 해당하는 기록이 없습니다.": "Энэ дугаарт тохирох бичлэг олдсонгүй.",
+};
+
+function tr(s) {
+  if (LANG !== "mn") return s;
+  return I18N_MN[s] || s;
 }
 
 function expertGateMode() {
@@ -202,12 +243,12 @@ function layout(inner, opts = {}) {
           <small>${subtitle}</small>
         </a>
         <nav class="nav">
-          ${navLink("#/take", "검사 하기", r)}
-          ${navLink("#/lookup", "결과조회", r)}
-          ${navLink("#/manual", "사용설명서", r)}
-          ${expertOk ? navLink("#/guide", "해석요강", r) : ""}
-          ${navLink("#/expert", "전문가", r)}
-          ${navLink("#/admin", "관리자", r)}
+          ${navLink("#/take", tr("검사 하기"), r)}
+          ${navLink("#/lookup", tr("결과조회"), r)}
+          ${navLink("#/manual", tr("사용설명서"), r)}
+          ${expertOk ? navLink("#/guide", tr("해석요강"), r) : ""}
+          ${navLink("#/expert", tr("전문가"), r)}
+          ${navLink("#/admin", tr("관리자"), r)}
         </nav>
       </header>
       ${inner}
@@ -221,7 +262,7 @@ function layout(inner, opts = {}) {
 }
 
 function options(list, selected) {
-  return `<option value="">선택</option>` + list.map((o) =>
+  return `<option value="">${tr("선택")}</option>` + list.map((o) =>
     `<option value="${esc(o)}" ${o === selected ? "selected" : ""}>${esc(o)}</option>`,
   ).join("");
 }
@@ -498,7 +539,7 @@ function takeView() {
   const ed = takeEdition();
   syncTakeEdition(ed);
   if (!ed) {
-    return `<main><h1>검사 하기</h1>
+    return `<main><h1>${tr("검사 하기")}</h1>
       <p class="lede">초등학생·중고등학생·대학생·성인, 지금 해당하는 쪽을 고르면 됩니다.</p>
       ${editionCards(true)}
       ${developerNote()}
@@ -514,26 +555,26 @@ function takeView() {
   const hint = nowHint(ed);
   const when = ed === "adult" ? "시기가 바뀌면" : ed === "elementary" ? "학년이 바뀌면" : "학기가 바뀌면";
   if (t.step === 0) {
-    return `<main><h1>${who} 검사 시작</h1>${steps(0)}<div class="card">
+    return `<main><h1>${who} ${tr("검사 시작")}</h1>${steps(0)}<div class="card">
       <p>교육학 박사 현용찬이 개발한 <strong>${who} ${TEST_NAME}</strong>입니다. 지금 방식을 확인하고, 더 효율적인 운영에 도움을 드리고자 합니다.</p>
       <p class="progress">이 검사는 대학생용 파일럿 데이터를 바탕으로 문항·축 구조를 정리하고, 표현을 판본별 장면(초등–성인)으로 확장한 버전입니다. 규준(전국 단위)과 일부 심화 검증은 후속 데이터로 계속 보강합니다.</p>
       <p>배움과 탐구에서, 목표했던 것에 닿고(효과성), 힘과 시간을 아끼며(효율성), 다음에 또 몰입하고 싶어지는 것(매력성)이 좋습니다. 무엇을 할지 분명할 때 이 셋이 살아납니다. 결과는 네 축 프로파일로 바로 보여 드리며, ${when} 다시 확인하실 수 있습니다.</p>
       <p>학번·전화·이메일은 받지 않습니다. 문의할 때는 결과번호가 필요합니다. 응답은 연구·상담을 위한 자료로 보관됩니다. 계속하면 이 안내에 동의하는 것입니다.</p>
-      <div class="actions"><button class="btn" data-act="consent">동의하고 계속</button></div>
+      <div class="actions"><button class="btn" data-act="consent">${tr("동의하고 계속")}</button></div>
     </div></main>`;
   }
   if (t.step === 1) {
-    return `<main><h1>${who} 검사 시작</h1>${steps(1)}<div class="card">
+    return `<main><h1>${who} ${tr("검사 시작")}</h1>${steps(1)}<div class="card">
       <div class="row"><label for="code">입장 코드</label>
       <input id="code" value="${esc(t.code)}" placeholder="AOP-OPEN 또는 EXP-…" /></div>
       <p class="progress">혼자 하실 때는 ${PUBLIC_CODE} 를 넣으면 됩니다. 상담·수업에서는 전문가가 준 코드를 넣습니다.</p>
       ${t.err ? `<p class="err">${esc(t.err)}</p>` : ""}
-      <div class="actions"><button class="btn" data-act="check-code">코드 확인</button></div>
+      <div class="actions"><button class="btn" data-act="check-code">${tr("코드 확인")}</button></div>
     </div></main>`;
   }
   if (t.step === 2) {
     const nameLabel = t.codeKind === "expert" ? "표시 이름 (실명·이니셜 가능)" : "닉네임";
-    return `<main><h1>${who} 검사 시작</h1>${steps(2)}<div class="card">
+    return `<main><h1>${who} ${tr("검사 시작")}</h1>${steps(2)}<div class="card">
       <p class="progress">결과 화면과 문의 확인에 씁니다. 공개 검사에서는 닉네임이면 됩니다.</p>
       <div class="row"><label for="name">${nameLabel}</label>
       <input id="name" value="${esc(t.displayName)}" /></div>
@@ -571,7 +612,7 @@ function takeView() {
         <div class="row"><label for="major">${esc(majorName)}</label><select id="major">${options(tracks, t.major)}</select></div>
         <div class="row"><label for="region">주 생활 지역(시·도)</label><select id="region">${options(REGIONS, t.regionProvince)}</select></div>
       </div>
-      <div class="actions"><button class="btn" data-act="to-items">문항으로</button></div>
+      <div class="actions"><button class="btn" data-act="to-items">${tr("문항으로")}</button></div>
     </div></main>`;
   }
   const filled = itemList.filter((i) => t.answers[i.id] != null).length;
@@ -586,13 +627,13 @@ function takeView() {
           </button>`).join("")}
       </div>
     </div>`).join("");
-  return `<main><h1>${who} 검사 시작</h1>${steps(3)}
+  return `<main><h1>${who} ${tr("검사 시작")}</h1>${steps(3)}
     <p class="progress">${filled} / ${itemList.length} · ${hint}</p>
     <div class="meter" aria-hidden="true"><i style="width:${pct}%"></i></div>
     <p class="legend">${ed === "elementary" ? "1 전혀 아니다 · 6 정말 그렇다" : "1 전혀 그렇지 않다 · 6 매우 그렇다"}</p>
     ${items}
     ${t.err ? `<p class="err">${esc(t.err)}</p>` : ""}
-    <div class="actions"><button class="btn" data-act="submit" ${t.busy ? "disabled" : ""}>${t.busy ? "저장 중…" : "제출하고 결과 보기"}</button></div>
+    <div class="actions"><button class="btn" data-act="submit" ${t.busy ? "disabled" : ""}>${t.busy ? tr("저장 중…") : tr("제출하고 결과 보기")}</button></div>
   </main>`;
 }
 
@@ -783,9 +824,9 @@ function resultHtml(session, opts = {}) {
       <div class="result-no">${esc(session.resultNo)}</div>
       <p class="progress">이 번호를 알려 주시면 기록을 찾을 수 있습니다. 이메일은 보내지 않습니다.</p>
       <div class="actions">
-        <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">번호 복사</button>
-        <button class="btn ghost" data-act="print">${isIOS() ? "PDF 저장(PC 권장)" : "PDF 저장"}</button>
-        ${expertOk ? `<a class="btn ghost" href="#/guide">해석요강 보기</a>` : `<a class="btn ghost" href="#/expert">전문가 자료(신청/로그인)</a>`}
+        <button class="btn ghost" data-act="copy-no" data-no="${esc(session.resultNo)}">${tr("번호 복사")}</button>
+        <button class="btn ghost" data-act="print">${isIOS() ? tr("PDF 저장(PC 권장)") : tr("PDF 저장")}</button>
+        ${expertOk ? `<a class="btn ghost" href="#/guide">${tr("해석요강 보기")}</a>` : `<a class="btn ghost" href="#/expert">${tr("전문가 자료(신청/로그인)")}</a>`}
       </div>
       ${isIOS() ? `<p class="progress" style="margin-top:10px">iPhone/iPad(특히 앱 내 브라우저)에서는 PDF 저장이 동작하지 않을 수 있습니다. PC에서 이용해 주세요.</p>` : ""}
       ${!isIOS() ? `<p class="progress" style="margin-top:10px">PC에서 PDF 저장 시, 인쇄 옵션의 “배경 그래픽”을 켜면 막대(그래프)가 더 잘 보입니다.</p>` : ""}
@@ -840,20 +881,20 @@ async function render() {
   else if (r.startsWith("/take")) inner = takeView();
   else if (r.startsWith("/result/")) {
     const no = decodeURIComponent(r.slice(8));
-    inner = `<main><h1>결과</h1><p>불러오는 중…</p></main>`;
+    inner = `<main><h1>결과</h1><p>${tr("불러오는 중…")}</p></main>`;
     root.innerHTML = layout(inner, { expertOk });
     try {
       const s = await store.getByResultNo(no);
       inner = s
         ? `<main><h1>결과</h1>${resultHtml(s, { expertOk })}</main>`
-        : `<main><h1>결과</h1><p>결과번호에 해당하는 기록이 없습니다.</p></main>`;
+        : `<main><h1>결과</h1><p>${tr("결과번호에 해당하는 기록이 없습니다.")}</p></main>`;
     } catch (e) {
       inner = `<main><h1>결과</h1><p class="err">${esc(e.message || e)}</p></main>`;
     }
     root.innerHTML = layout(inner, { expertOk });
     return;
   } else if (r.startsWith("/lookup")) {
-    inner = `<main><h1>결과 조회</h1><div class="card">
+    inner = `<main><h1>${tr("결과 조회")}</h1><div class="card">
       <div class="row"><label for="no">결과번호</label><input id="no" placeholder="AOP-XXXX" /></div>
       <button class="btn" data-act="lookup">보기</button>
     </div></main>`;
