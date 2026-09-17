@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260917n";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917n";
+import { DOCS } from "./docs.js?v=20260917p";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917p";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260917n";
-import { store, usingCloud } from "./storage.js?v=20260917n";
-import { scoreAnswers } from "./scoring.js?v=20260917n";
+} from "./items.js?v=20260917p";
+import { store, usingCloud } from "./storage.js?v=20260917p";
+import { scoreAnswers } from "./scoring.js?v=20260917p";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -647,11 +647,8 @@ function resultHtml(session, opts = {}) {
     `;
   })() : "";
   const pct = (n) => `${Math.max(0, Math.min(100, ((n - 1) / 5) * 100))}%`;
-  const bars = SCALE_ORDER.map((k) => {
-    const axisLabel = `${SCALES[k].spectrum?.low || ""} ↔ ${SCALES[k].spectrum?.high || ""}`;
-    return `
+  const bars = SCALE_ORDER.map((k) => `
     <div class="bar-row">
-      <div>${esc(axisLabel)}</div>
       <div class="bar-mid">
         <div class="track"><div class="fill" style="width:${pct(session.scores[k])}"></div></div>
         <div class="spectrum">
@@ -661,8 +658,7 @@ function resultHtml(session, opts = {}) {
         </div>
       </div>
       <div class="score">${session.scores[k].toFixed(2)}</div>
-    </div>`;
-  }).join("");
+    </div>`).join("");
   const cards = lines.map((line) => `
     <div class="card"><h2 style="margin-top:0">${esc(line.name)} · ${esc(line.band)} (${line.score.toFixed(2)})</h2>
     <p>${esc(line.text)}</p></div>`).join("");

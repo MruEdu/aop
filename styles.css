@@ -296,7 +296,7 @@ a.btn { text-decoration: none; }
 .legend { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
 
 .bars { display: grid; gap: 14px; }
-.bar-row { display: grid; grid-template-columns: 110px 1fr 52px; gap: 10px; align-items: center; }
+.bar-row { display: grid; grid-template-columns: 1fr 52px; gap: 10px; align-items: center; }
 .bar-mid { display: grid; gap: 6px; }
 .track { height: 12px; background: #ece7de; border-radius: 99px; overflow: hidden; }
 .fill { height: 100%; background: var(--accent); }
@@ -341,7 +341,7 @@ a.btn { text-decoration: none; }
 
 @media (max-width: 640px) {
   .likert { grid-template-columns: repeat(3, 1fr); }
-  .bar-row { grid-template-columns: 92px 1fr 52px; }
+  .bar-row { grid-template-columns: 1fr 52px; }
   /* 작은 화면(iPhone 세로)에서 라벨이 글자 단위로 깨지는 것을 방지하기 위해
      좌/우 라벨을 같은 줄에, 중앙 라벨을 아래 줄에 배치합니다. */
   .spectrum {
@@ -372,6 +372,6 @@ a.btn { text-decoration: none; }
   .banner.note { display: none !important; }
   .footer { font-size: 10px; }
   .spectrum { font-size: 11px; }
-  .bar-row { grid-template-columns: 96px 1fr 52px; }
+  .bar-row { grid-template-columns: 1fr 52px; }
   .track { border: 1px solid #cfc6b8; }
 }
