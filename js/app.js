@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260917m";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917m";
+import { DOCS } from "./docs.js?v=20260917n";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917n";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260917m";
-import { store, usingCloud } from "./storage.js?v=20260917m";
-import { scoreAnswers } from "./scoring.js?v=20260917m";
+} from "./items.js?v=20260917n";
+import { store, usingCloud } from "./storage.js?v=20260917n";
+import { scoreAnswers } from "./scoring.js?v=20260917n";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -648,9 +648,7 @@ function resultHtml(session, opts = {}) {
   })() : "";
   const pct = (n) => `${Math.max(0, Math.min(100, ((n - 1) / 5) * 100))}%`;
   const bars = SCALE_ORDER.map((k) => {
-    const axisLabel = (expertOk || adminOk)
-      ? SCALES[k].name
-      : `${SCALES[k].spectrum?.low || ""} ↔ ${SCALES[k].spectrum?.high || ""}`;
+    const axisLabel = `${SCALES[k].spectrum?.low || ""} ↔ ${SCALES[k].spectrum?.high || ""}`;
     return `
     <div class="bar-row">
       <div>${esc(axisLabel)}</div>
