@@ -1,4 +1,4 @@
-import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260917k";
+import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260917m";
 
 const SCORE = scoringManualLines();
 const TOTAL_ITEMS = itemsFor("univ").length;
@@ -45,12 +45,12 @@ export const DOCS = [
       {
         heading: "결과 읽는 법(핵심 개념)",
         body: [
-          "이 결과는 크게 운영 엔진(1–3요인) + 부담 신호(4요인)로 읽습니다.",
+          "이 결과는 크게 운영 엔진(1–3요인) + 여유/상태(4요인)로 읽습니다.",
           "1–3요인(IE/SA/IO)은 ‘운영 스타일의 방향’을 보여주는 스펙트럼이며, 저점도 결함이 아니라 반대쪽 강점이 더 두드러지는 형태일 수 있어요.",
           "IE(즉흥 실행): 계획 정돈/신중 ↔ 즉흥 실행/돌파",
           "SA(체계 분석): 맥락 감각/유연 ↔ 체계 분석/구조",
           "IO(영향 지향): 내면 몰입/탐구 ↔ 영향 주도/리드",
-          "WD(부담 신호)는 성격이라기보다, 분량·마감·피드백 같은 장면에서 부담이 커질 때 몸과 마음이 보내는 신호로 읽습니다.",
+          "WD는 분량·마감·피드백 같은 장면에서 여유가 줄어들 때 어떤 반응이 먼저 올라오는지(막막함/위축/맡기고 싶음 등)를 보여줍니다.",
         ],
       },
       {

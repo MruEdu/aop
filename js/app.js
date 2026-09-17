@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260917k";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917k";
+import { DOCS } from "./docs.js?v=20260917m";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917m";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260917k";
-import { store, usingCloud } from "./storage.js?v=20260917k";
-import { scoreAnswers } from "./scoring.js?v=20260917k";
+} from "./items.js?v=20260917m";
+import { store, usingCloud } from "./storage.js?v=20260917m";
+import { scoreAnswers } from "./scoring.js?v=20260917m";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -634,8 +634,8 @@ function resultHtml(session, opts = {}) {
         : { work: "학업", task: "과제", place: "학기" };
     return `
       <div class="card overload">
-        <h2 style="margin-top:0">부담 신호 도움말(WD 높음)</h2>
-        <p class="lede">지금은 ${scene.task}·마감·피드백에서 부담이 커지면 <b>마음이 얼어붙거나</b> “그냥 맡겨버리고 싶다”는 생각이 쉽게 올라올 수 있습니다. 이건 성격이 아니라, <b>부담 신호</b>입니다.</p>
+        <h2 style="margin-top:0">여유가 줄어드는 장면 도움말</h2>
+        <p class="lede">지금은 ${scene.task}·마감·피드백에서 여유가 줄어들면 <b>마음이 얼어붙거나</b> “그냥 맡겨버리고 싶다”는 생각이 올라올 수 있습니다. 이런 반응은 누구에게나 나타날 수 있어요.</p>
         <h2>작게 시작하는 팁</h2>
         <ul class="tips">
           <li>시작을 “크게” 잡기보다, <b>바로 할 수 있을 만큼</b> 작게 잡아보면 도움이 될 때가 많습니다. (예: 목차 3줄, 문제 1개, 파일 열고 제목만)</li>
@@ -647,9 +647,13 @@ function resultHtml(session, opts = {}) {
     `;
   })() : "";
   const pct = (n) => `${Math.max(0, Math.min(100, ((n - 1) / 5) * 100))}%`;
-  const bars = SCALE_ORDER.map((k) => `
+  const bars = SCALE_ORDER.map((k) => {
+    const axisLabel = (expertOk || adminOk)
+      ? SCALES[k].name
+      : `${SCALES[k].spectrum?.low || ""} ↔ ${SCALES[k].spectrum?.high || ""}`;
+    return `
     <div class="bar-row">
-      <div>${SCALES[k].name}</div>
+      <div>${esc(axisLabel)}</div>
       <div class="bar-mid">
         <div class="track"><div class="fill" style="width:${pct(session.scores[k])}"></div></div>
         <div class="spectrum">
@@ -659,7 +663,8 @@ function resultHtml(session, opts = {}) {
         </div>
       </div>
       <div class="score">${session.scores[k].toFixed(2)}</div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
   const cards = lines.map((line) => `
     <div class="card"><h2 style="margin-top:0">${esc(line.name)} · ${esc(line.band)} (${line.score.toFixed(2)})</h2>
     <p>${esc(line.text)}</p></div>`).join("");
