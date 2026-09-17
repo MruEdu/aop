@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916zj";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zj";
+import { DOCS } from "./docs.js?v=20260917a";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917a";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916zj";
-import { store, usingCloud } from "./storage.js?v=20260916zj";
-import { scoreAnswers } from "./scoring.js?v=20260916zj";
+} from "./items.js?v=20260917a";
+import { store, usingCloud } from "./storage.js?v=20260917a";
+import { scoreAnswers } from "./scoring.js?v=20260917a";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -664,7 +664,7 @@ function resultHtml(session, opts = {}) {
     : "";
   const warn = reliability.reliable
     ? ""
-    : `<div class="banner warn">응답 과정에서 일부 문항 간 편차가 감지된 결과입니다. 현재 모습을 참고하실 수 있도록 해석은 그대로 제공해 드리며, 나에게 꼭 맞는 정밀한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
+    : `<div class="banner warn">응답 점검 문항(주의·허위)에서 일부가 기준과 달라, 이번 결과는 참고용으로 안내드립니다. 현재 모습을 이해하실 수 있도록 해석은 그대로 제공해 드리며, 더 또렷한 운영 프로파일을 확인하고 싶으실 때 편안한 마음으로 한 번 더 실시해 보시기를 권합니다.</div>`;
   const summaryBody = summary.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("");
 
   const paradigmCard = (() => {

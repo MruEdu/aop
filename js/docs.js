@@ -1,4 +1,4 @@
-import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260916zj";
+import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260917a";
 
 const SCORE = scoringManualLines();
 const TOTAL_ITEMS = itemsFor("univ").length;

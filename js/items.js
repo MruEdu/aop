@@ -275,16 +275,7 @@ export const ATTENTION_EXPECT = { 34: 3, 35: 5, 38: 1 };
 export const LIE_IDS = [36, 37];
 export const LIE_HIGH_THRESHOLD = 5; // 5~6은 '비현실적 미화' 가능성으로 표시
 
-// v2.0 검증: 1~28 채점 문항 내 일관성(절댓값 차이 >= 2면 비일관) 및 극단반응 탐지
-export const CONSISTENCY_PAIRS = [
-  [2, 4], // IE: 빠른 시도/마감 압박
-  [8, 11], // SA: 계획/정리
-  [15, 16], // WD: 과부하/걱정·막막
-  [22, 25], // IO: 리더/영향 역할
-];
-// 연구 초기 단계에서는 지나치게 엄격한 일관성 컷오프가 표본을 왜곡할 수 있으므로,
-// 문항쌍 차이 4점까지는 허용합니다. (차이 5점이면 비일관)
-export const CONSISTENCY_DIFF_THRESHOLD = 4;
+// v2.0 검증: 극단반응(1/6 반복) 탐지
 export const EXTREME_RESPONSE_COUNT_THRESHOLD = 24; // 1 또는 6이 28문항 중 너무 많으면 비정상 응답으로 간주
 
 export const SCORING_EXCLUDED_IDS = [29, 30, 31, 32, 33, 34, 35, 36, 37, 38];
