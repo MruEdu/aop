@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260916zg";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zg";
+import { DOCS } from "./docs.js?v=20260916zh";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260916zh";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260916zg";
-import { store, usingCloud } from "./storage.js?v=20260916zg";
-import { scoreAnswers } from "./scoring.js?v=20260916zg";
+} from "./items.js?v=20260916zh";
+import { store, usingCloud } from "./storage.js?v=20260916zh";
+import { scoreAnswers } from "./scoring.js?v=20260916zh";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -634,11 +634,11 @@ function resultHtml(session, opts = {}) {
         <p class="lede">지금은 ${scene.task}·마감·피드백에서 부담이 커지면 <b>마음이 얼어붙거나</b> “그냥 맡겨버리고 싶다”는 생각이 쉽게 올라올 수 있습니다. 이건 성격이 아니라, <b>부담 신호</b>입니다.</p>
         <h2>15분 처방(마이크로 태스크)</h2>
         <ul class="tips">
-          <li><b>15분 타이머</b>를 켜고 “첫 한 조각”만 합니다. (예: 목차 3줄, 문제 1개, 파일 열고 제목만)</li>
-          <li><b>중간 마감</b>을 먼저 잡습니다. (예: 제출 3일 전 ‘중간 점검’ 10분)</li>
-          <li>AI/사람 도움은 <b>초안·정리</b>에만 쓰고, 최종 결론은 <b>내 말로</b> 한 줄이라도 붙입니다.</li>
+          <li><b>15분 타이머</b>를 켜고 “첫 한 조각”만 해보는 게 도움이 될 때가 많습니다. (예: 목차 3줄, 문제 1개, 파일 열고 제목만)</li>
+          <li><b>중간 마감</b>을 먼저 두면 부담이 줄어드는 경우가 많습니다. (예: 제출 3일 전 ‘중간 점검’ 10분)</li>
+          <li>AI/사람 도움은 <b>초안·정리</b>에 쓰고, 마지막은 <b>내 말</b> 한 줄이라도 붙여 보면 좋습니다.</li>
         </ul>
-        <p class="progress">핵심은 “크게 결심”이 아니라, 부담이 커지는 순간에도 <b>다시 붙을 수 있는 크기</b>로 쪼개는 것입니다.</p>
+        <p class="progress">핵심은 “크게 결심”이 아니라, 부담이 커지는 순간에도 <b>다시 붙을 수 있는 크기</b>로 줄이는 데 있습니다.</p>
       </div>
     `;
   })() : "";

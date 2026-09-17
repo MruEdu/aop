@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260916zg";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260916zg";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260916zh";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260916zh";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
