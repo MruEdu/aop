@@ -19,6 +19,7 @@ create table if not exists public.sessions (
   display_name text not null,
   gender text not null,
   grade text not null,
+  school_performance text,
   major text not null,
   region text not null,
   -- v2.0 파일럿/규준 대비: 세분화 인구통계(분석용 전용 컬럼)
