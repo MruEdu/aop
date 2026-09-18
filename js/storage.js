@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260917r";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260917r";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260917u";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260917u";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -64,6 +64,7 @@ function buildSession(input, code) {
     displayName: input.displayName.trim(),
     gender: input.gender,
     grade: input.grade,
+    schoolPerformance: input.schoolPerformance || "",
     major: input.major,
     region: input.region,
     regionProvince: input.regionProvince || "",
@@ -128,6 +129,7 @@ export const store = {
         grade: session.grade,
         major: session.major,
         region: session.region,
+        school_performance: session.schoolPerformance || null,
         region_province: session.regionProvince || null,
         school_level: session.schoolLevel || null,
         school_year: session.schoolYear || null,
@@ -179,6 +181,7 @@ export const store = {
         displayName: data.display_name,
         gender: data.gender,
         grade: data.grade,
+        schoolPerformance: data.school_performance ?? "",
         major: data.major,
         region: data.region,
         regionProvince: data.region_province ?? "",
@@ -219,6 +222,7 @@ export const store = {
         displayName: row.display_name,
         gender: row.gender,
         grade: row.grade,
+        schoolPerformance: row.school_performance ?? "",
         major: row.major,
         region: row.region,
         regionProvince: row.region_province ?? "",
@@ -343,6 +347,7 @@ export const store = {
       ...(includeName ? ["display_name"] : []),
       "gender",
       "grade",
+      "school_performance",
       "major",
       "region",
       "region_province",
@@ -374,6 +379,7 @@ export const store = {
         ...(includeName ? [csvCell(s.displayName)] : []),
         csvCell(s.gender),
         csvCell(s.grade),
+        csvCell(s.schoolPerformance),
         csvCell(s.major),
         csvCell(s.region),
         csvCell(s.regionProvince),

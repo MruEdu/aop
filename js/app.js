@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260917r";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917r";
+import { DOCS } from "./docs.js?v=20260917u";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917u";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260917r";
-import { store, usingCloud } from "./storage.js?v=20260917r";
-import { scoreAnswers } from "./scoring.js?v=20260917r";
+} from "./items.js?v=20260917u";
+import { store, usingCloud } from "./storage.js?v=20260917u";
+import { scoreAnswers } from "./scoring.js?v=20260917u";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -238,6 +238,7 @@ const UNIV_LEVELS = ["학부", "대학원"];
 const UNIV_YEARS = ["1학년", "2학년", "3학년", "4학년"];
 const GRAD_LEVELS = ["석사 과정", "박사 과정"];
 const ADULT_ROLE_TYPES = ["일반", "전문직"];
+const PERFORMANCE_LEVELS = ["상", "중", "하", "응답하지 않음"];
 
 function bucketRegion(province) {
   const p = String(province || "").trim();
@@ -277,6 +278,7 @@ const take = {
   displayName: "",
   gender: "",
   grade: "",
+  schoolPerformance: "",
   // v2.0 파일럿용 세분화 인구통계(분석용 전용 컬럼으로 저장)
   regionProvince: "",
   schoolLevel: "",
@@ -480,6 +482,7 @@ function syncTakeEdition(ed) {
   take.displayName = "";
   take.gender = "";
   take.grade = "";
+  take.schoolPerformance = "응답하지 않음";
   take.regionProvince = "";
   take.schoolLevel = "";
   take.schoolYear = "";
@@ -567,6 +570,13 @@ function takeView() {
           ed === "adult"
             ? `<div class="row"><label for="adultRoleType">직업 구분</label><select id="adultRoleType">${options(ADULT_ROLE_TYPES, t.adultRoleType)}</select></div>`
             : ""
+        }
+        ${
+          ed === "school" || ed === "univ"
+            ? `<div class="row"><label for="schoolPerformance">학업성적(대략)</label><select id="schoolPerformance">${options(PERFORMANCE_LEVELS, t.schoolPerformance)}</select></div>`
+            : ed === "adult"
+              ? `<div class="row"><label for="schoolPerformance">업무성과(대략)</label><select id="schoolPerformance">${options(PERFORMANCE_LEVELS, t.schoolPerformance)}</select></div>`
+              : ""
         }
         <div class="row"><label for="major">${esc(majorName)}</label><select id="major">${options(tracks, t.major)}</select></div>
         <div class="row"><label for="region">주 생활 지역(시·도)</label><select id="region">${options(REGIONS, t.regionProvince)}</select></div>
@@ -906,6 +916,7 @@ function onChange(e) {
   const el = e.target;
   if (el.id === "gender") take.gender = el.value;
   if (el.id === "grade") take.grade = el.value;
+  if (el.id === "schoolPerformance") take.schoolPerformance = el.value;
   if (el.id === "schoolLevel") {
     take.schoolLevel = el.value;
     take.schoolYear = "";
@@ -1070,10 +1081,12 @@ async function onClick(e) {
     if (nameEl) take.displayName = nameEl.value;
     const g = document.getElementById("gender");
     const gr = document.getElementById("grade");
+    const perf = document.getElementById("schoolPerformance");
     const m = document.getElementById("major");
     const rg = document.getElementById("region");
     if (g) take.gender = g.value;
     if (gr) take.grade = gr.value;
+    if (perf) take.schoolPerformance = perf.value;
     if (m) take.major = m.value;
     if (rg) take.regionProvince = rg.value;
     take.region = bucketRegion(take.regionProvince);
@@ -1114,6 +1127,7 @@ async function onClick(e) {
         grade: take.grade,
         major: take.major,
         region: take.region,
+        schoolPerformance: take.schoolPerformance,
         regionProvince: take.regionProvince,
         schoolLevel: take.schoolLevel,
         schoolYear: take.schoolYear,
