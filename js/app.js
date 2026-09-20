@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260917u";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260917u";
+import { DOCS } from "./docs.js?v=20260918a";
+import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260918a";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260917u";
-import { store, usingCloud } from "./storage.js?v=20260917u";
-import { scoreAnswers } from "./scoring.js?v=20260917u";
+} from "./items.js?v=20260918a";
+import { store, usingCloud } from "./storage.js?v=20260918a";
+import { scoreAnswers } from "./scoring.js?v=20260918a";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -27,9 +27,9 @@ function devMode() {
 }
 
 function expertGateMode() {
-  // Cloud(=Supabase 연결)에서는 연구자/전문가 계정 로그인으로 자료를 엽니다.
-  // 로컬 모드에서는 기존 EXP- 코드로만 열 수 있습니다.
-  return usingCloud() ? "auth" : "code";
+  // 운영(=Supabase 연결)에서도 EXP- 코드로 전문가 자료를 열 수 있게 합니다.
+  // (이메일 로그인/코드 해금 둘 다 지원)
+  return usingCloud() ? "both" : "code";
 }
 
 function buildVersion() {
@@ -57,6 +57,14 @@ const expertGate = {
   next: "",
   busy: false,
 };
+
+function expertCodeUnlocked() {
+  const v = buildVersion();
+  const tok = sessionStorage.getItem("aop.expert") || "";
+  // 이전 버전에서 열어둔 상태는 자동 만료(업데이트 후 재해금 필요)
+  if (tok && v && tok !== v) sessionStorage.removeItem("aop.expert");
+  return Boolean(v) && sessionStorage.getItem("aop.expert") === v;
+}
 
 function expertApplyFormHtml() {
   return `
@@ -89,43 +97,70 @@ function expertGateView(mode) {
     <p class="progress">신청 메일을 <b>전송</b>하신 뒤, 전화로 한 번 더 연락해 주세요.</p>
   `;
 
-  const body = mode === "auth"
+  const authBox = `
+    <p class="lede">계정을 발급받으셨다면 로그인해 주세요.</p>
+    <div class="row">
+      <label for="expem">이메일</label>
+      <input id="expem" value="${esc(expertGate.email)}" placeholder="you@example.com" />
+    </div>
+    <div class="row">
+      <label for="exppw">비밀번호</label>
+      <input id="exppw" type="password" value="${esc(expertGate.password)}" />
+    </div>
+    ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+    <div class="actions">
+      <button class="btn" data-act="expert-login" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "로그인"}</button>
+      <button class="btn ghost" data-act="expert-logout">로그아웃</button>
+    </div>
+  `;
+
+  const codeBox = `
+    <p class="lede">관리자에게 받은 EXP- 코드를 넣어 주세요.</p>
+    <div class="row">
+      <label for="expcode">EXP- 코드</label>
+      <input id="expcode" value="${esc(expertGate.code)}" placeholder="EXP-XXXXXX" />
+    </div>
+    ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
+    <div class="actions">
+      <button class="btn" data-act="expert-unlock" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "코드 확인"}</button>
+    </div>
+  `;
+
+  const body = mode === "both"
     ? `
-      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) 계정으로 로그인한 분에게만 공유합니다.</p>
+      <p class="lede">전문가 자료는 <b>계정 로그인</b> 또는 <b>EXP- 코드</b>로 열 수 있습니다.</p>
       ${contact}
       ${expertApplyFormHtml()}
-
-      <p class="progress">이미 계정을 발급받으셨다면 아래로 로그인해 주세요.</p>
-      <div class="row">
-        <label for="expem">이메일</label>
-        <input id="expem" value="${esc(expertGate.email)}" placeholder="you@example.com" />
+      <div class="grid two" style="margin-top:10px">
+        <div class="card">${authBox}</div>
+        <div class="card">${codeBox}</div>
       </div>
-      <div class="row">
-        <label for="exppw">비밀번호</label>
-        <input id="exppw" type="password" value="${esc(expertGate.password)}" />
-      </div>
-      ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
-      <div class="actions">
-        <button class="btn" data-act="expert-login" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "로그인"}</button>
-        <button class="btn ghost" data-act="expert-logout">로그아웃</button>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn ghost" data-act="expert-clear">잠금 해제 해제</button>
         <a class="btn ghost" href="#/">홈으로</a>
       </div>
     `
-    : `
-      <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가) EXP- 코드 보유자에게만 공유합니다.</p>
-      ${contact}
-      ${expertApplyFormHtml()}
-      <p class="progress">이미 EXP- 코드를 받으셨다면 아래에 입력해 주세요.</p>
-      <div class="row">
-        <label for="expcode">EXP- 코드</label>
-        <input id="expcode" value="${esc(expertGate.code)}" placeholder="EXP-XXXXXX" />
-      </div>
-      ${expertGate.err ? `<p class="err">${esc(expertGate.err)}</p>` : ""}
-      <div class="actions">
-        <button class="btn" data-act="expert-unlock" ${expertGate.busy ? "disabled" : ""}>${expertGate.busy ? "확인 중…" : "코드 확인"}</button>
-        <a class="btn ghost" href="#/">홈으로</a>
-      </div>
-    `;
+    : mode === "auth"
+      ? `
+        <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가)에게만 공유합니다.</p>
+        ${contact}
+        ${expertApplyFormHtml()}
+        <div class="card" style="margin-top:10px">${authBox}</div>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn ghost" data-act="expert-clear">잠금 해제 해제</button>
+          <a class="btn ghost" href="#/">홈으로</a>
+        </div>
+      `
+      : `
+        <p class="lede">해석요강·전문가 학습자료·개발 배경은 공동 연구(또는 전문가)에게만 공유합니다.</p>
+        ${contact}
+        ${expertApplyFormHtml()}
+        <div class="card" style="margin-top:10px">${codeBox}</div>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn ghost" data-act="expert-clear">잠금 해제 해제</button>
+          <a class="btn ghost" href="#/">홈으로</a>
+        </div>
+      `;
 
   return `<main>
     <h1>전문가 자료</h1>
@@ -763,13 +798,23 @@ async function render() {
   let expertOk = devMode();
   if (!expertOk) {
     const mode = expertGateMode();
-    if (mode === "auth") expertOk = Boolean(await store.cloudSession());
-    else {
-      const v = buildVersion();
-      const tok = sessionStorage.getItem("aop.expert") || "";
-      // 이전 버전에서 열어둔 상태는 자동 만료(업데이트 후 재해금 필요)
-      if (tok && v && tok !== v) sessionStorage.removeItem("aop.expert");
-      expertOk = Boolean(v) && sessionStorage.getItem("aop.expert") === v;
+    const codeOk = expertCodeUnlocked();
+    if (mode === "auth") {
+      try {
+        expertOk = Boolean(await store.cloudSession());
+      } catch {
+        expertOk = false;
+      }
+    } else if (mode === "both") {
+      let authOk = false;
+      try {
+        authOk = Boolean(await store.cloudSession());
+      } catch {
+        authOk = false;
+      }
+      expertOk = authOk || codeOk;
+    } else {
+      expertOk = codeOk;
     }
   }
   if (MAINTENANCE_MODE && !devMode() && !r.startsWith("/admin")) {
@@ -1017,6 +1062,15 @@ async function onClick(e) {
       expertGate.err = err.message || "로그인에 실패했습니다.";
     }
     expertGate.busy = false;
+    await render();
+    return;
+  }
+  if (act === "expert-clear") {
+    expertGate.err = "";
+    try {
+      sessionStorage.removeItem("aop.expert");
+      if (usingCloud()) await store.cloudSignOut();
+    } catch {}
     await render();
     return;
   }
