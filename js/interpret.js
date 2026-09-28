@@ -1,9 +1,12 @@
-import { SCALE_ORDER, SCALES } from "./items.js?v=20260918a";
-import { band, bandLabel } from "./scoring.js?v=20260918a";
+import { itemsFor, SCALE_ORDER, SCALES } from "./items.js?v=20260928a";
+import { band, bandLabel } from "./scoring.js?v=20260928a";
 
 function scene(edition) {
   if (edition === "adult") {
     return { homework: "일", study: "일", task: "일", studyGa: "일이", nature: "일의 성격" };
+  }
+  if (edition === "elementary") {
+    return { homework: "숙제", study: "공부", task: "숙제", studyGa: "공부가", nature: "숙제 성격" };
   }
   if (edition === "school") {
     return { homework: "숙제·수행평가", study: "공부", task: "숙제", studyGa: "공부가", nature: "숙제 성격" };
@@ -249,6 +252,249 @@ function expertDetailedReport(scores, edition, ctx = {}) {
       ],
     },
   ];
+
+  return { snap, sections };
+}
+
+function mean(xs) {
+  if (!xs?.length) return null;
+  return xs.reduce((a, b) => a + b, 0) / xs.length;
+}
+
+function sd(xs) {
+  if (!xs?.length) return null;
+  const m = mean(xs);
+  const v = xs.reduce((acc, x) => acc + (x - m) ** 2, 0) / xs.length;
+  return Math.sqrt(v);
+}
+
+function formatItemLine(it, v) {
+  const n = Number(v);
+  const score = Number.isFinite(n) ? `${n}점` : "—";
+  const txt = String(it?.text || "").trim();
+  return `#${it.id} (${score}) ${txt}`;
+}
+
+function axisKeyFromUpper(axisUpper) {
+  if (axisUpper === "IE") return "ie";
+  if (axisUpper === "SA") return "sa";
+  if (axisUpper === "WD") return "wd";
+  if (axisUpper === "IO") return "io";
+  return null;
+}
+
+function axisDeepSection(axisUpper, session, opts = {}) {
+  const key = axisKeyFromUpper(axisUpper);
+  const edition = session.edition;
+  const answers = session.answers || {};
+  const axisItems = itemsFor(edition).filter((it) => it.axis === axisUpper);
+  const scored = axisItems
+    .map((it) => ({ it, v: Number(answers[it.id]) }))
+    .filter((x) => Number.isFinite(x.v));
+  const vals = scored.map((x) => x.v);
+  const s = scene(edition);
+
+  const spectrum = spec(key);
+  const axisName = SCALES[key]?.name || axisUpper;
+  const heading = `${axisName} (${spectrum.low} ↔ ${spectrum.high})`;
+
+  if (!vals.length) {
+    return {
+      heading,
+      body: [
+        "문항 응답 데이터가 없어 심층 분석을 만들 수 없습니다. (레거시 데이터이거나 저장이 불완전할 수 있습니다.)",
+      ],
+    };
+  }
+
+  const m = mean(vals);
+  const st = sd(vals);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const range = max - min;
+
+  const hi = vals.filter((v) => v >= 5).length;
+  const lo = vals.filter((v) => v <= 2).length;
+  const mixed = hi > 0 && lo > 0;
+
+  const consistency = (() => {
+    if (st <= 0.75 && range <= 2) return "비교적 일관";
+    if (st >= 1.2 || range >= 3) return "혼합(상황 의존)";
+    return "보통";
+  })();
+
+  const top = [...scored].sort((a, b) => (b.v - a.v) || (a.it.id - b.it.id)).slice(0, 3);
+  const bottom = [...scored].sort((a, b) => (a.v - b.v) || (a.it.id - b.it.id)).slice(0, 3);
+
+  const prompts = (() => {
+    if (axisUpper === "IE") {
+      return [
+        `“바로 들어가서 잘 풀렸던 ${s.task}”는 어떤 형태였나요? (시간·조건·도구·사람)`,
+        `빠르게 시작했다가 흔들리기 시작하는 순간은 보통 언제인가요? (중간 점검/피드백/막힘)`,
+        "시작 속도를 유지하면서도 품질을 올릴 때, 어떤 ‘한 단계 정리’가 가장 도움이 되나요?",
+      ];
+    }
+    if (axisUpper === "SA") {
+      return [
+        `${s.task}에서 “구조가 보일 때”는 구체적으로 무엇이 보일 때인가요? (목차/체크리스트/기준표)`,
+        "규칙·계획이 무너질 때, 그때 가장 불편한 것은 ‘시간’인가요, ‘품질’인가요, ‘통제감’인가요?",
+        "복잡한 장면에서 꼭 고정하고 싶은 ‘기준 1개’는 무엇인가요?",
+      ];
+    }
+    if (axisUpper === "WD") {
+      return [
+        `여유가 줄어드는 트리거는 무엇인가요? (분량/마감/피드백/비교/평가)`,
+        "막막해질 때, 실제로는 ‘무엇부터’가 가장 어려운가요? (첫 단계/기준/우선순위/시간)",
+        "도움(사람·도구)을 쓴다면, ‘대신 해달라’가 아니라 ‘어디까지 같이’가 안전할까요?",
+      ];
+    }
+    return [
+      "협업에서 가장 편한 역할은 무엇인가요? (리드/정리/설득/실행/조율/지원)",
+      "관계/팀 에너지가 올라갈 때의 조건은 무엇인가요? (사람 구성, 주제, 권한, 피드백)",
+      "혼자 몰입이 필요한 구간과, 함께해야 성과가 나는 구간은 어디에서 갈리나요?",
+    ];
+  })();
+
+  const tips = (() => {
+    if (axisUpper === "IE") {
+      return [
+        `“일단 시작”은 강점입니다. 다만 ${s.task}가 커질수록 ‘초안→정리’ 2단계로 나누면 안정성이 올라갑니다.`,
+        "시작 전 계획을 길게 세우기보다, ‘첫 10분 목표’(파일 열기/목차 3줄/문제 1개)를 고정해 보세요.",
+      ];
+    }
+    if (axisUpper === "SA") {
+      return [
+        `체계는 강점입니다. 기준을 3개 이상 세우면 오히려 굳을 수 있어 ‘기준 1개 + 금지 1개’처럼 작게 잡는 게 안전합니다.`,
+        `자료를 모으기만 하고 멈춘다면, ${s.task}를 “표/도식 1장”으로 먼저 요약해 뼈대를 만든 뒤 확장해 보세요.`,
+      ];
+    }
+    if (axisUpper === "WD") {
+      return [
+        `여유가 줄어드는 장면에서는 “크게 결심”보다 “크기를 줄이기”가 효과적입니다. (예: 첫 문단/첫 문제/첫 화면)`,
+        "비판·피드백이 트리거라면, ‘피드백을 받는 자리’를 늘리기보다 ‘중간 점검 1회’만 미리 예약해 부담을 낮춰 보세요.",
+      ];
+    }
+    return [
+      "사람·팀 에너지가 강점이라면, 시작 전에 ‘역할/기준/마감’ 3가지만 합의해도 충돌이 크게 줄 수 있습니다.",
+      "설득/조율이 부담이 될 때는, 말로 다 풀기보다 ‘한 장 요약’(목표/진척/요청)으로 소통량을 줄이는 방식이 유리합니다.",
+    ];
+  })();
+
+  const score = Number(session?.scores?.[key]);
+  const scoreLine = Number.isFinite(score)
+    ? `축 점수: ${score.toFixed(2)} (${bandLabel(score)}) · 문항평균 ${m.toFixed(2)} · 표준편차 ${st.toFixed(2)} · 범위 ${min}–${max}`
+    : `문항평균 ${m.toFixed(2)} · 표준편차 ${st.toFixed(2)} · 범위 ${min}–${max}`;
+
+  return {
+    heading,
+    body: [
+      scoreLine,
+      `응답 패턴: ${consistency}${mixed ? " · 높음/낮음이 함께 나타나 ‘장면에 따라 모드가 바뀌는’ 형태일 수 있습니다." : ""}`,
+      "높게 동의한 문항(상위):",
+      ...top.map((x) => `- ${formatItemLine(x.it, x.v)}`),
+      "낮게 동의한 문항(하위):",
+      ...bottom.map((x) => `- ${formatItemLine(x.it, x.v)}`),
+      "지도/상담 질문:",
+      ...prompts.map((q) => `- ${q}`),
+      "운영 팁:",
+      ...tips.map((t) => `- ${t}`),
+    ],
+  };
+}
+
+function kuhnSection(session) {
+  const edition = session.edition;
+  const answers = session.answers || {};
+  const items = itemsFor(edition).filter((it) => it.axis === "PARADIGM");
+  const rows = items
+    .map((it) => ({ it, v: Number(answers[it.id]) }))
+    .filter((x) => Number.isFinite(x.v));
+  if (!rows.length) {
+    return {
+      heading: "패러다임 상태(연구용 참고)",
+      body: [
+        "패러다임(쿤) 문항 응답이 없어 표시할 수 없습니다.",
+      ],
+    };
+  }
+  const max = Math.max(...rows.map((r) => r.v));
+  const top = rows.filter((r) => r.v === max);
+  const stageName = (id) => {
+    if (id === 29) return "정상(익숙/안정)";
+    if (id === 30) return "이상(한계 감지)";
+    if (id === 31) return "위기(답답/전환 필요)";
+    if (id === 32) return "혁명(새 시도)";
+    if (id === 33) return "새 정상(새 방식 정착)";
+    return "참고";
+  };
+  const topLine = top.length === 1
+    ? `현재는 “${stageName(top[0].it.id)}” 쪽에 가장 가깝게 체크되었습니다.`
+    : `현재는 여러 항목이 비슷하게 높게 체크되었습니다. (동률: ${top.map((t) => stageName(t.it.id)).join(", ")})`;
+
+  return {
+    heading: "패러다임 상태(연구용 참고)",
+    body: [
+      "이 섹션은 연구/코칭 참고를 위한 별도 문항(29–33)이며, 네 축 채점·해석과는 분리되어 있습니다.",
+      "체크한 점수 자체가 ‘단계’를 확정하는 것이 아니라, 지금 시기에 느끼는 분위기를 빠르게 스케치하는 용도로 보시면 좋습니다.",
+      "응답 요약:",
+      ...rows.map((r) => `- ${stageName(r.it.id)}: ${formatItemLine(r.it, r.v)}`),
+      topLine,
+      "정리 질문:",
+      "- 지금 방식이 ‘잘 되는 조건’은 무엇인가요? (시간/환경/도구/사람)",
+      "- 한계가 느껴지는 지점은 무엇인가요? (분량/평가/관계/동기)",
+      "- 바꾸고 싶은 한 가지가 있다면, 가장 작은 실험은 무엇인가요?",
+    ],
+  };
+}
+
+function guardianSection(session) {
+  const edition = session.edition;
+  if (edition !== "elementary" && edition !== "school") return null;
+  const s = scene(edition);
+  return {
+    heading: "보호자·교사 참고(지도 톤)",
+    body: [
+      `이 결과는 아이를 평가하기 위한 것이 아니라, ${s.task}가 잘 굴러가는 조건과 흔들리는 장면을 함께 찾기 위한 참고입니다.`,
+      "점수의 높고 낮음보다, “언제 잘 되고 언제 막히는지(조건)”를 관찰해 주는 방식이 효과적입니다.",
+      "지도 팁:",
+      "- 결과를 성적/태도 평가로 사용하지 않기(방어·위축을 키울 수 있습니다).",
+      "- ‘해야지’ 압박보다 ‘다시 붙을 수 있는 크기’로 줄여서 시작 돕기(첫 문제/첫 문단/첫 화면).",
+      "- 아이가 편해지는 구조가 있다면 ‘기준 1개’만 같이 고정하기(시간/장소/순서 중 하나).",
+      "- 피드백은 ‘틀렸다’가 아니라 ‘다음에 한 가지만 바꿔보자’로 마무리하기.",
+      "대화 질문:",
+      "- 이번 주에 가장 힘들었던 장면은 언제였어?",
+      "- 그때 누가/무엇이 있으면 조금 더 쉬웠을까?",
+      "- 다음에는 어떤 도움을 받으면 좋겠어? (대신/같이/확인만)",
+    ],
+  };
+}
+
+export function deepReport(session, opts = {}) {
+  const reliability = opts.reliability || null;
+  const snap = `IE ${session.scores.ie.toFixed(2)} / SA ${session.scores.sa.toFixed(2)} / WD ${session.scores.wd.toFixed(2)} / IO ${session.scores.io.toFixed(2)}`;
+  const relLine = reliability
+    ? `신뢰도: reliable=${String(reliability.reliable)}, attention_ok=${String(reliability.attentionOk)}, lie_ok=${String(reliability.lieOk)}`
+    : "신뢰도: (표시 정보 없음)";
+
+  const sections = [
+    {
+      heading: "0) 안내(상담·지도용)",
+      body: [
+        "전문 심층 리포트는 상담·지도 장면에서 ‘왜 이런 점수가 나왔는지(문항 패턴)’를 함께 읽기 위한 자료입니다.",
+        "해석은 정답이 아니라, 지금 시기에 맞는 조정점을 찾기 위한 가설로 보시면 좋습니다.",
+        snap,
+        relLine,
+      ],
+    },
+    axisDeepSection("IE", session, opts),
+    axisDeepSection("SA", session, opts),
+    axisDeepSection("WD", session, opts),
+    axisDeepSection("IO", session, opts),
+    kuhnSection(session),
+  ];
+
+  const g = guardianSection(session);
+  if (g) sections.push(g);
 
   return { snap, sections };
 }

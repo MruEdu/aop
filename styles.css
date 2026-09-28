@@ -100,6 +100,11 @@ p { margin: 0 0 12px; }
   padding: 22px;
   margin: 16px 0;
 }
+.card.locked {
+  background: linear-gradient(180deg, #fff, var(--soft));
+  border-style: dashed;
+}
+.card.locked a { font-weight: 700; }
 .hero { padding: 8px 4px 4px; }
 .developer p { color: var(--ink); }
 .dev-kicker {
@@ -374,4 +379,20 @@ a.btn { text-decoration: none; }
   .spectrum { font-size: 11px; }
   .bar-row { grid-template-columns: 1fr 52px; }
   .track { border: 1px solid #cfc6b8; }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  body { background: #fff !important; }
+  .shell { max-width: none; padding: 0 !important; }
+  .nav { display: none !important; }
+  .actions, .btn { display: none !important; }
+  a { color: #000 !important; text-decoration: none !important; }
+  .card, .item { break-inside: avoid; page-break-inside: avoid; }
+  .banner.note { display: none !important; }
+  .footer { font-size: 10px; }
 }
