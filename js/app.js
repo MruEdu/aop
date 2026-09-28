@@ -1,5 +1,5 @@
-import { DOCS } from "./docs.js?v=20260918a";
-import { profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260918a";
+import { DOCS } from "./docs.js?v=20260928a";
+import { deepReport, profileLines, resultPreface, summaryInterpret } from "./interpret.js?v=20260928a";
 import {
   GENDERS,
   PUBLIC_CODE,
@@ -15,9 +15,9 @@ import {
   nowHint,
   trackLabel,
   tracksFor,
-} from "./items.js?v=20260918a";
-import { store, usingCloud } from "./storage.js?v=20260918a";
-import { scoreAnswers } from "./scoring.js?v=20260918a";
+} from "./items.js?v=20260928a";
+import { store, usingCloud } from "./storage.js?v=20260928a";
+import { scoreAnswers } from "./scoring.js?v=20260928a";
 
 const TOTAL_ITEMS = itemsFor("univ").length;
 const MAINTENANCE_MODE = false;
@@ -667,9 +667,8 @@ function resultHtml(session, opts = {}) {
   const lines = profileLines(session.scores, session.edition);
   const preface = resultPreface(session.edition);
   const summary = summaryInterpret(session.scores, session.edition, { audience: "user" });
-  const expertReport = (expertOk || adminOk)
-    ? summaryInterpret(session.scores, session.edition, { audience: "expert", reliability })
-    : null;
+  const deepAllowed = expertOk || adminOk;
+  const deep = deepAllowed ? deepReport(session, { reliability }) : null;
   const wdOverload = (session.scores?.wd ?? 0) >= 3.5;
   const overloadCard = wdOverload ? (() => {
     const scene = session.edition === "adult"
@@ -723,24 +722,34 @@ function resultHtml(session, opts = {}) {
       : `<p>${esc(p)}</p>`
   ).join("");
 
-  const expertCard = expertReport ? (() => {
-    const secHtml = (expertReport.sections || []).map((s) => `
+  const renderSectionBody = (body) => body.map((p) =>
+    String(p).startsWith("- ")
+      ? `<p class="tip">${esc(String(p).slice(2))}</p>`
+      : `<p>${esc(p)}</p>`
+  ).join("");
+
+  const deepCard = deepAllowed ? (() => {
+    const secHtml = (deep.sections || []).map((s) => `
       <section style="margin-top:14px">
         <h3 style="margin:0 0 6px;font-size:15px">${esc(s.heading)}</h3>
-        ${s.body.map((p) => `<p>${esc(p)}</p>`).join("")}
+        ${renderSectionBody(s.body || [])}
       </section>
     `).join("");
-    const metaLine = `IE ${session.scores.ie.toFixed(2)} / SA ${session.scores.sa.toFixed(2)} / WD ${session.scores.wd.toFixed(2)} / IO ${session.scores.io.toFixed(2)}`;
-    const trustLine = `reliable=${String(reliability.reliable)} · attention_ok=${String(reliability.attentionOk)} · lie_ok=${String(reliability.lieOk)}`;
     return `
       <details class="card" style="margin-top:12px">
-        <summary style="cursor:pointer"><b>전문가용 상세 보고서</b> <span class="progress">(펼치기)</span></summary>
-        <p class="progress" style="margin-top:10px">${esc(metaLine)}</p>
-        <p class="progress">${esc(trustLine)}</p>
+        <summary style="cursor:pointer"><b>전문 심층 리포트</b> <span class="progress">(펼치기)</span></summary>
         ${secHtml}
       </details>
     `;
-  })() : "";
+  })() : `
+    <div class="card locked" style="margin-top:12px">
+      <h2 style="margin-top:0">전문 심층 리포트</h2>
+      <p class="progress">전문 심층 리포트는 <b>상담·지도용</b>입니다. 필요하시면 전문가와 함께 보며 정리할 수 있어요.</p>
+      <p class="progress">원하시면 <b>결과번호</b>를 문자로 보내 주세요. 확인 후 PDF로 안내해 드립니다. (이름·학교 등은 생략 가능)</p>
+      <p class="progress"><b>문자</b> 010-3105-6999 · <b>메일</b> hyc6999@gmail.com</p>
+      <p class="progress">전문가 코드(EXP-)가 있으면 <a href="#/expert">전문가</a> 메뉴에서 코드 확인 후 열 수 있습니다.</p>
+    </div>
+  `;
 
   return `
     ${trust}
@@ -759,7 +768,7 @@ function resultHtml(session, opts = {}) {
       <p class="progress">${esc(summary.snap)}</p>
       ${summaryBody}
     </div>
-    ${expertCard}
+    ${deepCard}
     ${overloadCard}
     <div class="card">
       <p>문의·재열람용 결과번호</p>
