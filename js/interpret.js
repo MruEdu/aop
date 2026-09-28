@@ -1,5 +1,5 @@
-import { itemsFor, SCALE_ORDER, SCALES } from "./items.js?v=20260928a";
-import { band, bandLabel } from "./scoring.js?v=20260928a";
+import { itemsFor, SCALE_ORDER, SCALES } from "./items.js?v=20260928b";
+import { band, bandLabel } from "./scoring.js?v=20260928b";
 
 function scene(edition) {
   if (edition === "adult") {
@@ -268,13 +268,6 @@ function sd(xs) {
   return Math.sqrt(v);
 }
 
-function formatItemLine(it, v) {
-  const n = Number(v);
-  const score = Number.isFinite(n) ? `${n}점` : "—";
-  const txt = String(it?.text || "").trim();
-  return `#${it.id} (${score}) ${txt}`;
-}
-
 function axisKeyFromUpper(axisUpper) {
   if (axisUpper === "IE") return "ie";
   if (axisUpper === "SA") return "sa";
@@ -283,7 +276,72 @@ function axisKeyFromUpper(axisUpper) {
   return null;
 }
 
-function axisDeepSection(axisUpper, session, opts = {}) {
+function pickUnique(lines, limit = 3) {
+  const seen = new Set();
+  const out = [];
+  for (const s of lines || []) {
+    const t = String(s || "").trim();
+    if (!t) continue;
+    const key = t.replace(/\s+/g, " ");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(t);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+function axisSignal(axisUpper, itemId, edition) {
+  const s = scene(edition);
+  const task = s.task;
+  const study = s.study;
+
+  // 문항 원문/번호를 직접 드러내지 않고, "관찰된 패턴"을 상담/지도 언어로 번역합니다.
+  const IE = {
+    1: { high: `계획을 길게 세우기보다 흐름을 타며 바로 ${task}에 들어가는 편입니다.`, low: `시작 전에 순서·계획이 잡혀 있으면 더 편안해질 수 있습니다.` },
+    2: { high: `시간이 촉박할수록 집중이 잘 붙는 편입니다.`, low: `마감 압박이 없을 때도 페이스를 유지하는 편일 수 있습니다.` },
+    3: { high: `순서를 완벽히 정하기보다 “일단 해보며” 배우는 리듬이 강점입니다.`, low: `부딪치기보다 절차를 따라가며 안정적으로 푸는 편일 수 있습니다.` },
+    4: { high: `흥미가 생기면 우선순위를 바꿔 먼저 시도해보는 경향이 있습니다.`, low: `하던 흐름을 유지하며 끝까지 마무리하는 편일 수 있습니다.` },
+    5: { high: `정해진 방식의 반복보다 변형·새 시도를 통해 ${study}의 재미를 찾을 수 있습니다.`, low: `정해진 방식/루틴을 따를 때 성과가 안정되는 편일 수 있습니다.` },
+    6: { high: `압박이 있을 때 각성이 올라가 능률이 좋아질 수 있습니다.`, low: `긴장감보다 안정감이 성과에 도움이 되는 편일 수 있습니다.` },
+    7: { high: `준비를 길게 하기보다 “일단 시작”이 부담을 줄여주는 편입니다.`, low: `충분히 준비된 뒤 시작할 때 성과가 안정되는 편일 수 있습니다.` },
+  };
+
+  const SA = {
+    8: { high: `시작 전에 할 일을 나누고 순서를 잡으면 흐름이 안정되는 편입니다.`, low: `순서를 먼저 고정하기보다 하면서 조절하는 편일 수 있습니다.` },
+    9: { high: `환경/정리 상태가 마음의 컨디션과 연결되는 편입니다.`, low: `환경이 완벽하지 않아도 ${study}를 시작할 수 있는 편입니다.` },
+    10: { high: `겉으로 외우기보다 “왜 그런지”를 따져보는 탐구가 강점입니다.`, low: `원리 탐구보다 당장 필요한 답/핵심을 빠르게 잡는 편일 수 있습니다.` },
+    11: { high: `분량을 나누고 루틴을 만들면 성과가 안정될 수 있습니다.`, low: `루틴보다 컨디션/상황에 맞춰 탄력적으로 조절하는 편일 수 있습니다.` },
+    12: { high: `지침/규칙을 읽고 기준을 파악하면 실수가 줄어드는 편입니다.`, low: `설명서를 다 읽기보다 먼저 해보며 감을 잡는 편일 수 있습니다.` },
+    13: { high: `계획이 어긋나면 마음이 불편해져 다시 맞추려는 경향이 있습니다.`, low: `계획이 바뀌어도 비교적 덜 흔들리고 전환이 가능한 편일 수 있습니다.` },
+    14: { high: `요약·도식화처럼 “한 장으로 정리”하는 방식이 잘 맞을 수 있습니다.`, low: `도식/정리보다 사례·흐름으로 이해하는 편일 수 있습니다.` },
+  };
+
+  const WD = {
+    15: { high: `${task}가 쌓이면 ‘어디서부터’가 막막해질 수 있습니다.`, low: `${task}가 많아도 우선순위를 잡고 붙는 편일 수 있습니다.` },
+    16: { high: `시험/발표/평가를 앞두면 걱정이 먼저 올라와 피하고 싶어질 수 있습니다.`, low: `평가가 있어도 비교적 버티며 해내는 편일 수 있습니다.` },
+    17: { high: `혼자 해결이 어려우면 손을 놓고 싶어질 수 있습니다.`, low: `어려워도 끝까지 붙잡는 편일 수 있습니다.` },
+    18: { high: `틀리거나 지적받을까 봐 불안/눈치가 올라올 수 있습니다.`, low: `실수/피드백을 비교적 덜 개인화하고 회복하는 편일 수 있습니다.` },
+    19: { high: `복잡해질수록 “누가 대신 정리해줬으면” 하는 유혹이 생길 수 있습니다.`, low: `복잡해도 스스로 정리하며 통제감을 유지하는 편일 수 있습니다.` },
+    20: { high: `간섭/다그침이 들어오면 기운이 빠지고 머리가 굳는 느낌이 올 수 있습니다.`, low: `주변 압박이 있어도 비교적 페이스를 유지하는 편일 수 있습니다.` },
+    21: { high: `실력 불안을 느끼면 새로운 도전을 피하고 싶어질 수 있습니다.`, low: `새로운 ${task}에도 비교적 덜 두려워하고 시도하는 편일 수 있습니다.` },
+  };
+
+  const IO = {
+    22: { high: `함께할 때 중심 역할(리드)을 맡는 것이 편할 수 있습니다.`, low: `앞에서 이끄는 역할보다 내 페이스로 하는 쪽이 편할 수 있습니다.` },
+    23: { high: `인정/피드백이 에너지로 작동하는 편일 수 있습니다.`, low: `인정/평가보다 내 기준으로 몰입하는 편일 수 있습니다.` },
+    24: { high: `의견이 갈릴 때 정리/중재하는 역할이 자연스러울 수 있습니다.`, low: `갈등/조율보다 과업 자체에 집중하는 편일 수 있습니다.` },
+    25: { high: `중요한 역할을 맡아 책임 있게 해내고 싶은 동기가 있을 수 있습니다.`, low: `무거운 역할보다 실무/탐구에 집중하는 편일 수 있습니다.` },
+    26: { high: `사람들 앞에서 말/표현을 비교적 덜 두려워하는 편일 수 있습니다.`, low: `발표/표현보다 준비된 결과로 보여주는 쪽이 편할 수 있습니다.` },
+    27: { high: `결정권이 없거나 통제감이 없으면 답답함이 올라올 수 있습니다.`, low: `시키는 대로만 해도 크게 불편하지 않을 수 있습니다.` },
+    28: { high: `도움이 필요한 사람을 도와주며 에너지가 붙을 수 있습니다.`, low: `가르치기/지원보다 내 과업 몰입이 우선일 수 있습니다.` },
+  };
+
+  const table = axisUpper === "IE" ? IE : axisUpper === "SA" ? SA : axisUpper === "WD" ? WD : IO;
+  return table[itemId] || null;
+}
+
+function axisNarrativeSection(axisUpper, session) {
   const key = axisKeyFromUpper(axisUpper);
   const edition = session.edition;
   const answers = session.answers || {};
@@ -307,7 +365,6 @@ function axisDeepSection(axisUpper, session, opts = {}) {
     };
   }
 
-  const m = mean(vals);
   const st = sd(vals);
   const min = Math.min(...vals);
   const max = Math.max(...vals);
@@ -323,8 +380,34 @@ function axisDeepSection(axisUpper, session, opts = {}) {
     return "보통";
   })();
 
-  const top = [...scored].sort((a, b) => (b.v - a.v) || (a.it.id - b.it.id)).slice(0, 3);
-  const bottom = [...scored].sort((a, b) => (a.v - b.v) || (a.it.id - b.it.id)).slice(0, 3);
+  const sortedHi = [...scored].sort((a, b) => (b.v - a.v) || (a.it.id - b.it.id));
+  const sortedLo = [...scored].sort((a, b) => (a.v - b.v) || (a.it.id - b.it.id));
+  const top = sortedHi.slice(0, 2);
+  const bottom = sortedLo.slice(0, 2);
+
+  const strengthLines = pickUnique(
+    top
+      .filter((x) => x.v >= 4)
+      .map((x) => axisSignal(axisUpper, x.it.id, edition)?.high)
+      .filter(Boolean),
+    3,
+  );
+
+  const lowAltLines = pickUnique(
+    bottom
+      .filter((x) => x.v <= 3)
+      .map((x) => axisSignal(axisUpper, x.it.id, edition)?.low)
+      .filter(Boolean),
+    3,
+  );
+
+  const weakCheckLines = pickUnique(
+    bottom
+      .filter((x) => x.v <= 3)
+      .map((x) => axisSignal(axisUpper, x.it.id, edition)?.high)
+      .filter(Boolean),
+    3,
+  );
 
   const prompts = (() => {
     if (axisUpper === "IE") {
@@ -382,21 +465,25 @@ function axisDeepSection(axisUpper, session, opts = {}) {
 
   const score = Number(session?.scores?.[key]);
   const scoreLine = Number.isFinite(score)
-    ? `축 점수: ${score.toFixed(2)} (${bandLabel(score)}) · 문항평균 ${m.toFixed(2)} · 표준편차 ${st.toFixed(2)} · 범위 ${min}–${max}`
-    : `문항평균 ${m.toFixed(2)} · 표준편차 ${st.toFixed(2)} · 범위 ${min}–${max}`;
+    ? `현재는 이 축이 ${bandLabel(score)} 영역입니다. (점수 ${score.toFixed(2)})`
+    : "현재 점수 정보가 없어 축 수준을 표시할 수 없습니다.";
+
+  const patternLine = `응답 패턴: ${consistency}${mixed ? " · 장면에 따라 모드가 바뀌는 형태일 수 있습니다." : ""}`;
 
   return {
     heading,
     body: [
       scoreLine,
-      `응답 패턴: ${consistency}${mixed ? " · 높음/낮음이 함께 나타나 ‘장면에 따라 모드가 바뀌는’ 형태일 수 있습니다." : ""}`,
-      "높게 동의한 문항(상위):",
-      ...top.map((x) => `- ${formatItemLine(x.it, x.v)}`),
-      "낮게 동의한 문항(하위):",
-      ...bottom.map((x) => `- ${formatItemLine(x.it, x.v)}`),
-      "지도/상담 질문:",
+      patternLine,
+      strengthLines.length ? "잘 될 때의 조건(관찰된 패턴):" : "잘 될 때의 조건:",
+      ...(strengthLines.length ? strengthLines : tips.slice(0, 1)).map((t) => `- ${t}`),
+      lowAltLines.length ? "흔들릴 수 있는 조건(주의 포인트):" : "흔들릴 수 있는 조건(주의 포인트):",
+      ...(lowAltLines.length ? lowAltLines : []).map((t) => `- ${t}`),
+      weakCheckLines.length ? "추가로 확인해볼 지점:" : "",
+      ...weakCheckLines.map((t) => `- ${t}`),
+      "지도/상담 질문(대화 시작용):",
       ...prompts.map((q) => `- ${q}`),
-      "운영 팁:",
+      "운영 제안(작게 적용):",
       ...tips.map((t) => `- ${t}`),
     ],
   };
@@ -428,16 +515,14 @@ function kuhnSection(session) {
     return "참고";
   };
   const topLine = top.length === 1
-    ? `현재는 “${stageName(top[0].it.id)}” 쪽에 가장 가깝게 체크되었습니다.`
+    ? `현재 분위기는 “${stageName(top[0].it.id)}” 쪽에 더 가깝게 느껴질 수 있습니다.`
     : `현재는 여러 항목이 비슷하게 높게 체크되었습니다. (동률: ${top.map((t) => stageName(t.it.id)).join(", ")})`;
 
   return {
     heading: "패러다임 상태(연구용 참고)",
     body: [
       "이 섹션은 연구/코칭 참고를 위한 별도 문항(29–33)이며, 네 축 채점·해석과는 분리되어 있습니다.",
-      "체크한 점수 자체가 ‘단계’를 확정하는 것이 아니라, 지금 시기에 느끼는 분위기를 빠르게 스케치하는 용도로 보시면 좋습니다.",
-      "응답 요약:",
-      ...rows.map((r) => `- ${stageName(r.it.id)}: ${formatItemLine(r.it, r.v)}`),
+      "여기서는 문항을 직접 노출하지 않고, ‘국면’을 서술형으로 정리합니다. (점수 자체가 단계를 확정하는 것은 아닙니다.)",
       topLine,
       "정리 질문:",
       "- 지금 방식이 ‘잘 되는 조건’은 무엇인가요? (시간/환경/도구/사람)",
@@ -476,20 +561,57 @@ export function deepReport(session, opts = {}) {
     ? `신뢰도: reliable=${String(reliability.reliable)}, attention_ok=${String(reliability.attentionOk)}, lie_ok=${String(reliability.lieOk)}`
     : "신뢰도: (표시 정보 없음)";
 
+  const ed = session.edition;
+  const s = scene(ed);
+  const overall = (() => {
+    const scores = session.scores || {};
+    const ieB = band(scores.ie);
+    const saB = band(scores.sa);
+    const wdB = band(scores.wd);
+    const ioB = band(scores.io);
+    const lines = [];
+
+    if (ieB === "high") lines.push(`시작은 빠르고, ${s.task}에 먼저 들어가며 방향을 잡는 편일 수 있습니다.`);
+    else if (ieB === "low") lines.push(`시작은 신중한 편이며, 절차/순서가 잡히면 안정적으로 이어갈 수 있습니다.`);
+    else lines.push("장면에 따라 빠른 착수와 계획을 오갈 수 있습니다.");
+
+    if (saB === "high") lines.push("정리·기준이 잡힐수록 통제감이 올라가고, “내 방식”을 만들어 가는 힘이 두드러질 수 있습니다.");
+    else if (saB === "low") lines.push(`규칙을 고정하기보다 맥락을 보며 유연하게 조절하는 편일 수 있습니다. 필요할 땐 ‘기준 1개’만 붙이는 방식이 유리합니다.`);
+    else lines.push("필요할 때 규칙을 세우고 풀 줄 아는 편이라, 상황에 맞춘 조절이 가능합니다.");
+
+    if (wdB === "high") lines.push("분량·마감·피드백이 겹칠 때 여유가 줄어들며 막막함/위축이 올라오는 장면이 있을 수 있습니다.");
+    else if (wdB === "low") lines.push("부담이 와도 비교적 버티며 다시 붙는 편일 수 있습니다. 다만 장기전에서는 회복 시간을 확보하면 더 안정적입니다.");
+    else lines.push("대체로는 괜찮지만 특정 장면(마감/피드백)에서는 여유가 줄어들 수 있습니다.");
+
+    if (ioB === "high") lines.push("함께할 때 에너지가 붙고, 의견을 모으거나 방향을 잡는 역할에서 보람을 느낄 수 있습니다.");
+    else if (ioB === "low") lines.push(`대인 조율보다 ${s.study}의 깊이·집중 쪽에서 힘이 나는 편일 수 있습니다.`);
+    else lines.push("상황에 따라 협력·조율·독립을 오갈 수 있습니다.");
+
+    return pickUnique(lines, 4);
+  })();
+
   const sections = [
     {
       heading: "0) 안내(상담·지도용)",
       body: [
-        "전문 심층 리포트는 상담·지도 장면에서 ‘왜 이런 점수가 나왔는지(문항 패턴)’를 함께 읽기 위한 자료입니다.",
+        "전문 심층 리포트는 상담·지도 장면에서 ‘지금 무엇이 잘 맞고 무엇이 어려운지’를 더 풍성하게 정리하기 위한 자료입니다.",
+        "문항 번호/원문 같은 내부 세부 로직은 가능한 노출하지 않고, 관찰된 패턴을 서술형으로 풀어 제공합니다.",
         "해석은 정답이 아니라, 지금 시기에 맞는 조정점을 찾기 위한 가설로 보시면 좋습니다.",
         snap,
         relLine,
       ],
     },
-    axisDeepSection("IE", session, opts),
-    axisDeepSection("SA", session, opts),
-    axisDeepSection("WD", session, opts),
-    axisDeepSection("IO", session, opts),
+    {
+      heading: "1) 전체 요약(한 장면으로 묶기)",
+      body: [
+        "아래 내용은 ‘고점/저점의 좋고 나쁨’이 아니라, 현재 장면에서 강점이 살아나는 조건과 흔들리는 조건을 찾기 위한 정리입니다.",
+        ...overall.map((t) => `- ${t}`),
+      ],
+    },
+    axisNarrativeSection("IE", session),
+    axisNarrativeSection("SA", session),
+    axisNarrativeSection("WD", session),
+    axisNarrativeSection("IO", session),
     kuhnSection(session),
   ];
 

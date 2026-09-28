@@ -1,4 +1,4 @@
-import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260928a";
+import { itemsFor, scoringManualLines, TEST_NAME } from "./items.js?v=20260928b";
 
 const SCORE = scoringManualLines();
 const TOTAL_ITEMS = itemsFor("univ").length;
@@ -51,6 +51,14 @@ export const DOCS = [
           "정리 방식: 맥락 감각/유연 ↔ 체계 분석/구조",
           "에너지 방향: 내면 몰입/탐구 ↔ 영향 주도/리드",
           "WD는 분량·마감·피드백 같은 장면에서 여유가 줄어들 때 어떤 반응이 먼저 올라오는지(막막함/위축/맡기고 싶음 등)를 보여줍니다.",
+        ],
+      },
+      {
+        heading: "전문 심층 리포트(상담·지도용)",
+        body: [
+          "결과 화면 아래에는 ‘전문 심층 리포트’가 있습니다. 이 리포트는 상담·지도 장면에서, 지금 시기의 강점/부담 조건을 더 풍성하게 정리하기 위한 자료입니다.",
+          "문항 번호/원문 등 내부 세부 로직은 가능한 노출하지 않고, 관찰된 패턴을 서술형으로 제공합니다.",
+          "전문 심층 리포트는 전문가/특별 제공 항목으로 운영될 수 있습니다. 필요하시면 결과번호(AOP-XXXX)로 문의해 주세요.",
         ],
       },
       {
