@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260915f";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260915f";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260918a";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260918a";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -64,8 +64,17 @@ function buildSession(input, code) {
     displayName: input.displayName.trim(),
     gender: input.gender,
     grade: input.grade,
+    schoolPerformance: input.schoolPerformance || "",
     major: input.major,
     region: input.region,
+    regionProvince: input.regionProvince || "",
+    schoolLevel: input.schoolLevel || "",
+    schoolYear: input.schoolYear || "",
+    highSchoolType: input.highSchoolType || "",
+    univLevel: input.univLevel || "",
+    univYear: input.univYear || "",
+    gradLevel: input.gradLevel || "",
+    adultRoleType: input.adultRoleType || "",
     answers: input.answers,
     scores: scored.scores,
     attentionOk: scored.attentionOk,
@@ -110,27 +119,43 @@ export const store = {
     const session = buildSession(input, code);
     const sb = await supabase();
     if (sb) {
-      const { error } = await sb.rpc("submit_aop_session", {
-        p: {
-          id: session.id,
-          access_code_id: session.accessCodeId,
-          result_no: session.resultNo,
-          edition: session.edition,
-          display_name: session.displayName,
-          gender: session.gender,
-          grade: session.grade,
-          major: session.major,
-          region: session.region,
-          answers: session.answers,
-          scores: session.scores,
-          attention_ok: session.attentionOk,
-          lie_ok: session.lieOk,
-          reliable: session.reliable,
-          consent_version: session.consentVersion,
-          created_at: session.createdAt,
-        },
-      });
-      if (error) throw error;
+      const payload = {
+        id: session.id,
+        access_code_id: session.accessCodeId,
+        result_no: session.resultNo,
+        edition: session.edition,
+        display_name: session.displayName,
+        gender: session.gender,
+        grade: session.grade,
+        major: session.major,
+        region: session.region,
+        school_performance: session.schoolPerformance || null,
+        region_province: session.regionProvince || null,
+        school_level: session.schoolLevel || null,
+        school_year: session.schoolYear || null,
+        high_school_type: session.highSchoolType || null,
+        univ_level: session.univLevel || null,
+        univ_year: session.univYear || null,
+        grad_level: session.gradLevel || null,
+        adult_role_type: session.adultRoleType || null,
+        answers: session.answers,
+        scores: session.scores,
+        attention_ok: session.attentionOk,
+        lie_ok: session.lieOk,
+        reliable: session.reliable,
+        consent_version: session.consentVersion,
+        created_at: session.createdAt,
+      };
+      const { error } = await sb.rpc("submit_aop_session", { p: payload });
+      if (error) {
+        const msg = String(error?.message || error || "");
+        if (msg.includes("sessions_edition_check")) {
+          throw new Error(
+            "서버 저장소(Supabase) 스키마 업데이트가 필요합니다. `supabase/patch-elementary.sql`(또는 `supabase/patch-edition.sql`)을 Supabase SQL Editor에서 실행한 뒤 다시 제출해 주세요.",
+          );
+        }
+        throw error;
+      }
       return session;
     }
     const rows = readSessions();
@@ -156,8 +181,17 @@ export const store = {
         displayName: data.display_name,
         gender: data.gender,
         grade: data.grade,
+        schoolPerformance: data.school_performance ?? "",
         major: data.major,
         region: data.region,
+        regionProvince: data.region_province ?? "",
+        schoolLevel: data.school_level ?? "",
+        schoolYear: data.school_year ?? "",
+        highSchoolType: data.high_school_type ?? "",
+        univLevel: data.univ_level ?? "",
+        univYear: data.univ_year ?? "",
+        gradLevel: data.grad_level ?? "",
+        adultRoleType: data.adult_role_type ?? "",
         answers: data.answers,
         scores: data.scores,
         attentionOk: data.attention_ok,
@@ -188,8 +222,17 @@ export const store = {
         displayName: row.display_name,
         gender: row.gender,
         grade: row.grade,
+        schoolPerformance: row.school_performance ?? "",
         major: row.major,
         region: row.region,
+        regionProvince: row.region_province ?? "",
+        schoolLevel: row.school_level ?? "",
+        schoolYear: row.school_year ?? "",
+        highSchoolType: row.high_school_type ?? "",
+        univLevel: row.univ_level ?? "",
+        univYear: row.univ_year ?? "",
+        gradLevel: row.grad_level ?? "",
+        adultRoleType: row.adult_role_type ?? "",
         answers: row.answers,
         scores: row.scores,
         attentionOk: row.attention_ok,
@@ -268,8 +311,32 @@ export const store = {
     if (error) throw error;
   },
 
+  async cloudSignOut() {
+    const sb = await supabase();
+    if (!sb) return;
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+  },
+
+  async cloudSession() {
+    const sb = await supabase();
+    if (!sb) return null;
+    const { data, error } = await sb.auth.getSession();
+    if (error) throw error;
+    return data?.session ?? null;
+  },
+
   sessionsToCsv(rows, includeName) {
-    const ids = Array.from({ length: 33 }, (_, i) => i + 1);
+    const maxId = rows.reduce((acc, s) => {
+      const a = s.answers || {};
+      for (const k of Object.keys(a)) {
+        const n = Number(k);
+        if (Number.isFinite(n) && n > acc) acc = n;
+      }
+      return acc;
+    }, 0);
+    const n = Math.max(33, maxId || 0);
+    const ids = Array.from({ length: n }, (_, i) => i + 1);
     const itemCols = ids.map((id) => `q${id}`);
     const header = [
       "result_no",
@@ -280,8 +347,17 @@ export const store = {
       ...(includeName ? ["display_name"] : []),
       "gender",
       "grade",
+      "school_performance",
       "major",
       "region",
+      "region_province",
+      "school_level",
+      "school_year",
+      "high_school_type",
+      "univ_level",
+      "univ_year",
+      "grad_level",
+      "adult_role_type",
       "attention_ok",
       "lie_ok",
       "reliable",
@@ -303,8 +379,17 @@ export const store = {
         ...(includeName ? [csvCell(s.displayName)] : []),
         csvCell(s.gender),
         csvCell(s.grade),
+        csvCell(s.schoolPerformance),
         csvCell(s.major),
         csvCell(s.region),
+        csvCell(s.regionProvince),
+        csvCell(s.schoolLevel),
+        csvCell(s.schoolYear),
+        csvCell(s.highSchoolType),
+        csvCell(s.univLevel),
+        csvCell(s.univYear),
+        csvCell(s.gradLevel),
+        csvCell(s.adultRoleType),
         String(s.attentionOk),
         String(s.lieOk),
         String(s.reliable),
