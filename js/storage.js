@@ -1,5 +1,5 @@
-import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20260928b";
-import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20260928b";
+import { CONSENT_VERSION, PUBLIC_CODE } from "./items.js?v=20261012a";
+import { makeExpertCode, makeResultNo, scoreAnswers, uid } from "./scoring.js?v=20261012a";
 
 const LS_CODES = "aop.codes.v1";
 const LS_SESSIONS = "aop.sessions.v1";
@@ -9,17 +9,57 @@ function cfg() {
 }
 
 export function usingCloud() {
+  const q = new URLSearchParams(location.search);
+  const force = (q.get("cloud") || "").toLowerCase();
+  if (force === "off") return false;
   const c = cfg();
   return Boolean(c.supabaseUrl && c.supabaseAnon);
 }
 
 let sbClient = null;
+
+async function fetchWithTimeout(url, ms = 8000) {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), ms);
+  try {
+    return await fetch(url, { signal: ac.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function cloudHintMessage(rawUrl) {
+  const u = String(rawUrl || "").trim();
+  return [
+    "클라우드(Supabase) 연결에 실패했습니다.",
+    u ? `- supabaseUrl: ${u}` : "- supabaseUrl이 비어 있습니다.",
+    "- Supabase Dashboard → Settings → API에서 Project URL / anon key를 확인해 config.js에 반영해 주세요.",
+    "- 임시로 로컬 모드로 사용하려면 주소에 ?cloud=off 를 붙여 접속할 수 있습니다.",
+  ].join("\n");
+}
+
 async function supabase() {
   if (!usingCloud()) return null;
   if (sbClient) return sbClient;
-  const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
-  sbClient = createClient(cfg().supabaseUrl, cfg().supabaseAnon);
-  return sbClient;
+  const c = cfg();
+  const url = String(c.supabaseUrl || "").trim();
+  const anon = String(c.supabaseAnon || "").trim();
+  if (!url || !anon) throw new Error(cloudHintMessage(url));
+  try {
+    await fetchWithTimeout(`${url.replace(/\\/+$/, "")}/auth/v1/health`, 8000);
+  } catch {
+    throw new Error(cloudHintMessage(url));
+  }
+  try {
+    const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
+    sbClient = createClient(url, anon);
+    return sbClient;
+  } catch {
+    throw new Error(
+      "Supabase 모듈을 불러오지 못했습니다. 네트워크 환경에서 외부 CDN이 차단되었을 수 있습니다.\n" +
+        cloudHintMessage(url),
+    );
+  }
 }
 
 function seedLocal() {
@@ -306,7 +346,7 @@ export const store = {
 
   async cloudSignIn(email, password) {
     const sb = await supabase();
-    if (!sb) throw new Error("클라우드가 연결되지 않았습니다.");
+    if (!sb) throw new Error("클라우드가 연결되지 않았습니다.\n?cloud=off 로 로컬 모드 접근이 가능합니다.");
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
   },
