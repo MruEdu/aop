@@ -1,0 +1,19 @@
+{
+  "name": "vibestatics-tenders",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "학술·정책 연구용역 공고 큐레이션 (나라장터 MVP)",
+  "scripts": {
+    "collect": "tsx src/collect.ts",
+    "collect:fixture": "tsx src/collect.ts --fixture",
+    "serve": "npx --yes serve public -p 5173",
+    "typecheck": "tsc --noEmit",
+    "test:filter": "tsx src/filter.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

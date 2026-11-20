@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>연구용역 공고 보드 · vibestatics</title>
+    <meta
+      name="description"
+      content="나라장터 등 공식 출처의 학술·정책·조사 연구용역 공고를 모아 요약과 원문 링크로 보여줍니다."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Fragment+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true"></div>
+    <header class="top">
+      <div class="brand">
+        <p class="brand-mark">vibestatics</p>
+        <h1>연구용역 공고 보드</h1>
+        <p class="lede">
+          학술·정책·조사·데이터·교육 관련 용역만 골라, 요약과 원문 링크로 보여줍니다.
+          민간 입찰 중개 사이트는 수집하지 않습니다.
+        </p>
+      </div>
+      <dl class="meta" id="meta">
+        <div><dt>갱신</dt><dd id="generatedAt">—</dd></div>
+        <div><dt>건수</dt><dd id="count">—</dd></div>
+        <div><dt>출처</dt><dd id="source">나라장터</dd></div>
+      </dl>
+    </header>
+
+    <section class="controls" aria-label="검색 및 필터">
+      <label class="search">
+        <span class="sr-only">검색</span>
+        <input
+          id="q"
+          type="search"
+          placeholder="제목·기관 검색"
+          autocomplete="off"
+        />
+      </label>
+      <div class="chips" id="topicChips" role="tablist" aria-label="주제"></div>
+      <div class="row">
+        <label>
+          정렬
+          <select id="sort">
+            <option value="deadline">마감 임박</option>
+            <option value="newest">최신 공고</option>
+            <option value="budget">예산 높은 순</option>
+          </select>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="openOnly" checked />
+          마감 전만
+        </label>
+      </div>
+    </section>
+
+    <main>
+      <p class="status" id="status">불러오는 중…</p>
+      <ul class="list" id="list"></ul>
+    </main>
+
+    <footer class="foot">
+      <p>
+        메타정보만 저장하며 원문 파일은 재배포하지 않습니다. 상세는 각 공고의
+        <strong>원문</strong> 링크에서 확인하세요. MVP 출처: 나라장터(용역) Open API.
+      </p>
+    </footer>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

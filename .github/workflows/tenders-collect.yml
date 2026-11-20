@@ -1,0 +1,47 @@
+name: Collect research tenders (G2B)
+
+on:
+  schedule:
+    # 매일 01:00 UTC = Asia/Seoul 10:00
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tenders
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tenders/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Collect from 나라장터
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+          COLLECT_LOOKBACK_DAYS: "6"
+        run: npm run collect
+
+      - name: Commit updated notices
+        run: |
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tenders/public/data/notices.json
+          if git diff --staged --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "chore(tenders): refresh G2B notices"
+          git push

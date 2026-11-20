@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-11-20T19:02:51.506Z",
+  "source": "fixture",
+  "lookbackDays": 6,
+  "count": 3,
+  "notices": [
+    {
+      "id": "g2b:SAMPLE-002:00",
+      "source": "g2b",
+      "externalId": "SAMPLE-002-00",
+      "title": "교육과정 개발 및 요구분석 연구용역",
+      "organization": "○○대학교 산학협력단",
+      "budget": 28000000,
+      "postedAt": "2026-03-17T10:00:00+09:00",
+      "deadlineAt": "2026-03-25T17:00:00+09:00",
+      "url": "https://www.g2b.go.kr/",
+      "topics": [
+        "education",
+        "needs"
+      ],
+      "relevanceScore": 10,
+      "snippet": "○○대학교 산학협력단 · 2,800만"
+    },
+    {
+      "id": "g2b:SAMPLE-001:00",
+      "source": "g2b",
+      "externalId": "SAMPLE-001-00",
+      "title": "지역 청년 고용 실태조사 및 정책연구 용역",
+      "organization": "○○지방자치단체",
+      "budget": 45000000,
+      "postedAt": "2026-03-18T09:00:00+09:00",
+      "deadlineAt": "2026-03-28T18:00:00+09:00",
+      "url": "https://www.g2b.go.kr/",
+      "topics": [
+        "needs",
+        "policy"
+      ],
+      "relevanceScore": 9,
+      "snippet": "○○지방자치단체 · 4,500만"
+    },
+    {
+      "id": "g2b:SAMPLE-003:00",
+      "source": "g2b",
+      "externalId": "SAMPLE-003-00",
+      "title": "공공갈등 관련 텍스트마이닝 기반 데이터 분석 용역",
+      "organization": "국책연구원(예시)",
+      "budget": 80000000,
+      "postedAt": "2026-03-16T11:00:00+09:00",
+      "deadlineAt": "2026-04-02T18:00:00+09:00",
+      "url": "https://www.g2b.go.kr/",
+      "topics": [
+        "data"
+      ],
+      "relevanceScore": 8,
+      "snippet": "국책연구원(예시) · 8,000만"
+    }
+  ]
+}
