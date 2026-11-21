@@ -2,7 +2,28 @@ import type { G2bServcItem, Notice } from "./types.js";
 import { enrichNotice } from "./filter.js";
 
 const DEFAULT_BASE = "https://apis.data.go.kr/1230000/ad/BidPublicInfoService";
+/** 구형 경로 (일부 키/문서에서 아직 사용) */
+const LEGACY_BASE = "https://apis.data.go.kr/1230000/BidPublicInfoService";
 const SERVIC_LIST_OP = "getBidPblancListInfoServc";
+
+/** Encoding 키를 붙여넣어도 Decoding으로 맞춤. 키 값은 로그에 남기지 말 것. */
+export function normalizeServiceKey(raw: string): string {
+  let key = raw.trim().replace(/^["']|["']$/g, "");
+  // BOM / 제로폭 문자 제거
+  key = key.replace(/^\uFEFF/, "").replace(/[\u200B-\u200D\uFEFF]/g, "");
+  if (/%[0-9A-Fa-f]{2}/.test(key)) {
+    try {
+      key = decodeURIComponent(key);
+    } catch {
+      /* keep original */
+    }
+  }
+  return key.trim();
+}
+
+export function describeKey(key: string): string {
+  return `len=${key.length} pct=${/%/.test(key)} endsEq=${/=+$/.test(key)}`;
+}
 
 export interface FetchWindow {
   begin: string; // yyyyMMddHHmm
@@ -121,19 +142,18 @@ function unwrapItems(body: G2bResponse["response"]): G2bServcItem[] {
   return Array.isArray(item) ? item : [item];
 }
 
-export async function fetchServcPage(opts: {
+async function fetchServcPageOnce(opts: {
   serviceKey: string;
-  baseUrl?: string;
+  baseUrl: string;
   begin: string;
   end: string;
   pageNo: number;
-  numOfRows?: number;
-}): Promise<{ items: G2bServcItem[]; totalCount: number }> {
-  const base = (opts.baseUrl || DEFAULT_BASE).replace(/\/$/, "");
-  const numOfRows = opts.numOfRows ?? 100;
+  numOfRows: number;
+}): Promise<{ items: G2bServcItem[]; totalCount: number; baseUrl: string }> {
+  const base = opts.baseUrl.replace(/\/$/, "");
   const params = new URLSearchParams({
     pageNo: String(opts.pageNo),
-    numOfRows: String(numOfRows),
+    numOfRows: String(opts.numOfRows),
     inqryDiv: "1",
     inqryBgnDt: opts.begin,
     inqryEndDt: opts.end,
@@ -146,28 +166,72 @@ export async function fetchServcPage(opts: {
     headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(45_000),
   });
+  const text = await res.text();
   if (!res.ok) {
-    throw new Error(`G2B HTTP ${res.status}: ${await res.text().then((t) => t.slice(0, 200))}`);
+    throw new Error(`G2B HTTP ${res.status} (${base}): ${text.slice(0, 240)}`);
   }
 
-  const text = await res.text();
   let data: G2bResponse;
   try {
     data = JSON.parse(text) as G2bResponse;
   } catch {
-    throw new Error(`G2B JSON 파싱 실패: ${text.slice(0, 180)}`);
+    // 게이트웨이가 XML/JSON 혼용으로 오류를 줄 때
+    if (/SERVICE_KEY_IS_NOT_REGISTERED|등록되지 않은 서비스키|returnReasonCode["\s:>]*30/.test(text)) {
+      throw new Error(
+        `G2B 인증 실패(코드 30, ${base}): 서비스키가 이 API에 등록되지 않았거나 Encoding 키/오타입니다. 공공데이터포털에서 '조달청_나라장터 입찰공고정보서비스' 승인 + Decoding 키를 확인하세요.`
+      );
+    }
+    throw new Error(`G2B JSON 파싱 실패 (${base}): ${text.slice(0, 180)}`);
   }
 
   const code = data.response?.header?.resultCode;
   const msg = data.response?.header?.resultMsg ?? "";
   // 00 / 0 / 03(데이터 없음) 허용
   if (code && code !== "00" && code !== "0" && code !== "03") {
-    throw new Error(`G2B API 오류 ${code}: ${msg}`);
+    throw new Error(`G2B API 오류 ${code} (${base}): ${msg}`);
   }
 
   const items = unwrapItems(data.response);
   const totalCount = Number(data.response?.body?.totalCount ?? items.length) || 0;
-  return { items, totalCount };
+  return { items, totalCount, baseUrl: base };
+}
+
+export async function fetchServcPage(opts: {
+  serviceKey: string;
+  baseUrl?: string;
+  begin: string;
+  end: string;
+  pageNo: number;
+  numOfRows?: number;
+}): Promise<{ items: G2bServcItem[]; totalCount: number }> {
+  const key = normalizeServiceKey(opts.serviceKey);
+  const numOfRows = opts.numOfRows ?? 100;
+  const bases = opts.baseUrl
+    ? [opts.baseUrl]
+    : [DEFAULT_BASE, LEGACY_BASE];
+
+  let lastErr: unknown;
+  for (const baseUrl of bases) {
+    try {
+      const result = await fetchServcPageOnce({
+        serviceKey: key,
+        baseUrl,
+        begin: opts.begin,
+        end: opts.end,
+        pageNo: opts.pageNo,
+        numOfRows,
+      });
+      return result;
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      // 키/인증 오류면 다른 base도 시도
+      if (!/403|등록되지 않은|SERVICE_KEY|코드 30|인증 실패/.test(msg)) {
+        throw err;
+      }
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 }
 
 export async function fetchAllServc(opts: {

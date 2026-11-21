@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { fetchAllServc, mapG2bItem } from "./g2b.js";
+import { describeKey, fetchAllServc, mapG2bItem, normalizeServiceKey } from "./g2b.js";
 import type { Notice, NoticesFile } from "./types.js";
 import { enrichNotice } from "./filter.js";
 
@@ -135,8 +135,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim();
-  if (!serviceKey) {
+  const rawKey = process.env.DATA_GO_KR_SERVICE_KEY;
+  if (!rawKey?.trim()) {
     console.warn(
       "DATA_GO_KR_SERVICE_KEY 없음 → fixture로 생성합니다. (실제 수집: 키 설정 후 npm run collect)"
     );
@@ -144,7 +144,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.log(`나라장터 용역 수집 시작 (lookback ${lookbackDays}일)`);
+  const serviceKey = normalizeServiceKey(rawKey);
+  console.log(`나라장터 용역 수집 시작 (lookback ${lookbackDays}일, key ${describeKey(serviceKey)})`);
   const items = await fetchAllServc({
     serviceKey,
     baseUrl: process.env.DATA_GO_KR_BASE_URL,
